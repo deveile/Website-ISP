@@ -34,7 +34,10 @@ $query = mysqli_query($koneksi, "SELECT * FROM tb_customer LEFT JOIN tb_paket ON
             <li><a href="index.php" class="active"><i class="bi bi-people"></i> Data Pelanggan</a></li>
             <li><a href="../transaksi/index.php"><i class="bi bi-credit-card"></i> Data Transaksi</a></li>
             <li><a href="../admin_user/index.php"><i class="bi bi-person-plus"></i> Tambah Admin</a></li>
-            <li><a href="../../auth/logout.php"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
+            <li><a href="../../auth/logout.php"
+            onclick="return confirm('Apakah Anda yakin ingin logout?')">
+                <i class="bi bi-box-arrow-right"></i> Logout
+            </a></li>
         </ul>
     </div>
 

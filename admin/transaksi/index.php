@@ -105,7 +105,8 @@ $query = mysqli_query(
                 </a>
             </li>
             <li>
-                <a href="../../auth/logout.php">
+                <a href="../../auth/logout.php"
+                onclick="return confirm('Apakah Anda yakin ingin logout?')">
                     <i class="bi bi-box-arrow-right"></i> Logout
                 </a>
             </li>

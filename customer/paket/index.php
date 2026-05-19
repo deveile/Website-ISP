@@ -29,7 +29,10 @@ $data = mysqli_query($koneksi, "SELECT * FROM tb_paket ORDER BY id_paket DESC");
         <ul>
             <li><a href="../index.php"><i class="bi bi-grid"></i> Dashboard</a></li>
             <li><a href="index.php" class="active"><i class="bi bi-wifi"></i> Paket Internet</a></li>
-            <li><a href="../../auth/logout.php"><i class="bi bi-box-arrow-right"></i> Keluar</a></li>
+            <li><a href="../../auth/logout.php"
+            onclick="return confirm('Apakah Anda yakin ingin logout?')">
+                <i class="bi bi-box-arrow-right"></i> Logout
+            </a></li>
         </ul>
     </div>
 

@@ -40,7 +40,10 @@ if(!$data){
             <li><a href="../index.php"><i class="bi bi-grid"></i> Dashboard</a></li>
             <li><a href="../paket/index.php"><i class="bi bi-wifi"></i> Kelola Paket</a></li>
             <li><a href="index.php" class="active"><i class="bi bi-people"></i> Data Pelanggan</a></li>
-            <li><a href="../../auth/logout.php"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
+            <li><a href="../../auth/logout.php"
+            onclick="return confirm('Apakah Anda yakin ingin logout?')">
+                <i class="bi bi-box-arrow-right"></i> Logout
+            </a></li>
         </ul>
     </div>
 
