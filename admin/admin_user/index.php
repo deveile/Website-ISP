@@ -1,6 +1,6 @@
 <?php
-include '../../auth/cek_login.php';
-include '../../koneksi.php';
+require_once __DIR__ . '/../../auth/cek_login.php';
+require_once __DIR__ . '/../../koneksi.php';
 
 if ($_SESSION['role'] != 'admin') {
     header("Location: ../../auth/login.php");
