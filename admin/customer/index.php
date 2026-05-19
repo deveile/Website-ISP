@@ -1,0 +1,106 @@
+<?php
+include '../../auth/cek_login.php';
+include '../../koneksi.php';
+
+if($_SESSION['role'] != 'admin'){
+    header("Location: ../../auth/login.php");
+    exit;
+}
+
+$query = mysqli_query($koneksi, "SELECT * FROM tb_customer LEFT JOIN tb_paket ON tb_customer.id_paket = tb_paket.id_paket ORDER BY id_customer DESC");
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Pelanggan</title>
+    <link rel="icon" type="image/png" href="../../assets/images/logo.png">
+    <link rel="stylesheet" href="../../assets/css/style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+</head>
+<body>
+<div class="dashboard-layout">
+    <!-- ================= SIDEBAR ================= -->
+    <div class="sidebar">
+        <div class="sidebar-logo">
+            <img src="../../assets/images/logo.png" alt="Logo">
+            <h2>Anuwani</h2>
+        </div>
+        <ul>
+            <li><a href="../index.php"><i class="bi bi-grid"></i> Dashboard</a></li>
+            <li><a href="../paket/index.php"><i class="bi bi-wifi"></i> Kelola Paket</a></li>
+            <li><a href="index.php" class="active"><i class="bi bi-people"></i> Data Pelanggan</a></li>
+            <li><a href="../transaksi/index.php"><i class="bi bi-credit-card"></i> Data Transaksi</a></li>
+            <li><a href="../admin_user/index.php"><i class="bi bi-person-plus"></i> Tambah Admin</a></li>
+            <li><a href="../../auth/logout.php"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
+        </ul>
+    </div>
+
+    <!-- ================= CONTENT ================= -->
+    <div class="dashboard-content">
+        <div class="topbar">
+            <div>
+                <h1>Data Pelanggan</h1>
+                <p>Kelola seluruh data customer Anuwani.net</p>
+            </div>
+        </div>
+
+        <!-- ================= TABLE CARD ================= -->
+        <div class="table-card">
+            <!-- HEADER TABLE -->
+            <div class="table-header">
+                <h3>Data Pelanggan</h3>
+                <a href="tambah.php" class="btn-orange">
+                    <i class="bi bi-plus-circle"></i> Tambah Pelanggan
+                </a>
+            </div>
+
+            <!-- TABLE -->
+            <table>
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Nama</th>
+                        <th>Email</th>
+                        <th>Telepon</th>
+                        <th>Paket</th>
+                        <th>Status</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php 
+                    $no = 1;
+                    while($data = mysqli_fetch_assoc($query)) : 
+                    ?>
+                    <tr>
+                        <td><?= $no++; ?></td>
+                        <td><?= $data['nama_customer']; ?></td>
+                        <td><?= $data['email_customer']; ?></td>
+                        <td><?= $data['telepon_customer']; ?></td>
+                        <td><?= $data['nama_paket'] ?? '-'; ?></td>
+                        <td>
+                            <?php if($data['status_paket'] == 'Aktif') : ?>
+                                <span class="status-active">Aktif</span>
+                            <?php else : ?>
+                                <span class="status-pending">Pending</span>
+                            <?php endif; ?>
+                        </td>
+                        <td>
+                            <div class="table-action">
+                                <a href="detail.php?id=<?= $data['id_customer']; ?>" class="btn-edit">Detail</a>
+                                <a href="hapus.php?id=<?= $data['id_customer']; ?>" class="btn-delete" onclick="return confirm('Hapus customer ini?')">Hapus</a>
+                            </div>
+                        </td>
+                    </tr>
+                    <?php endwhile; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
