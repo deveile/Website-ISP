@@ -2,7 +2,7 @@
 $host     = "localhost";
 $user     = "root";
 $password = "";
-$database = "isp_projek";
+$database = "data_isp";
 
 $koneksi = mysqli_connect(
     $host,
