@@ -14,7 +14,10 @@ $query = mysqli_query(
         tb_paket.kecepatan,
         tb_paket.deskripsi
      FROM tb_customer
-     LEFT JOIN tb_paket ON tb_customer.id_paket = tb_paket.id_paket
+     LEFT JOIN tb_langganan
+     ON tb_customer.id_customer = tb_langganan.id_customer
+     LEFT JOIN tb_paket
+     ON tb_langganan.id_paket = tb_paket.id_paket
      WHERE tb_customer.id_user = '$id_user'"
 );
 
