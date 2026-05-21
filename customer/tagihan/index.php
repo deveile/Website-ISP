@@ -4,46 +4,73 @@ require_once __DIR__ . '/../../koneksi.php';
 
 $id_user = $_SESSION['id_user'];
 
-/* ================= CUSTOMER ================= */
-$customer = mysqli_query(
+/* ================= AMBIL DATA CUSTOMER ================= */
+$query_customer = mysqli_query(
     $koneksi,
-    "SELECT * 
-     FROM tb_customer
-     WHERE id_user = '$id_user'"
+    "SELECT *
+    FROM tb_customer
+    WHERE id_user = '$id_user'
+    LIMIT 1"
 );
 
-$c = mysqli_fetch_assoc($customer);
+$customer = mysqli_fetch_assoc($query_customer);
+
+/* ================= CEK LANGGANAN ================= */
+$query_langganan = mysqli_query(
+    $koneksi,
+    "SELECT
+        tb_langganan.*,
+        tb_paket.nama_paket,
+        tb_paket.kecepatan,
+        tb_paket.harga
+    FROM tb_langganan
+    LEFT JOIN tb_paket
+        ON tb_langganan.id_paket = tb_paket.id_paket
+    WHERE tb_langganan.id_customer = '".$customer['id_customer']."'
+    LIMIT 1"
+);
+
+$langganan = mysqli_fetch_assoc($query_langganan);
 
 /* ================= FILTER ================= */
 $periode = $_GET['periode'] ?? '';
 $status  = $_GET['status'] ?? '';
 
-$where = "WHERE id_customer = '" . $c['id_customer'] . "'";
+/* ================= DEFAULT QUERY ================= */
+$where = "WHERE 1=0";
 
-if ($periode != '') {
-    $split = explode('-', $periode);
-    $tahun = $split[0];
-    $bulan = $split[1];
-
-    $where .= " 
-        AND bulan_tagihan = '$bulan'
-        AND tahun_tagihan = '$tahun'
+/* ================= JIKA ADA LANGGANAN ================= */
+if ($langganan) {
+    $where = "
+        WHERE id_langganan = '".$langganan['id_langganan']."'
     ";
+
+    if ($periode != '') {
+        $split = explode('-', $periode);
+
+        $tahun = $split[0];
+        $bulan = $split[1];
+
+        $where .= "
+            AND bulan_tagihan = '$bulan'
+            AND tahun_tagihan = '$tahun'
+        ";
+    }
+
+    if ($status != '') {
+        $where .= "
+            AND status_pembayaran = '$status'
+        ";
+    }
 }
 
-if ($status != '') {
-    $where .= " 
-        AND status_pembayaran = '$status'
-    ";
-}
-
-/* ================= TRANSAKSI ================= */
+/* ================= AMBIL TRANSAKSI ================= */
 $query = mysqli_query(
     $koneksi,
-    "SELECT * 
-     FROM tb_transaksi
-     $where
-     ORDER BY id_transaksi DESC"
+    "SELECT *
+    FROM tb_transaksi
+    $where
+    ORDER BY id_transaksi DESC"
 );
 ?>
 
@@ -52,12 +79,26 @@ $query = mysqli_query(
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
+
     <title>Tagihan Saya</title>
 
+    <!-- CSS -->
     <link rel="stylesheet" href="../../assets/css/style.css">
-    <link class="favicon" rel="icon" type="image/png" href="../../assets/images/logo.png">
+
+    <!-- LOGO -->
+    <link rel="icon" type="image/png" href="../../assets/images/logo.png">
+
+    <!-- ICON -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <!-- FLATPICKR -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/style.css">
+
+    <!-- JAVASCRIPT -->
+    <script src="../../assets/js/script.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/index.js"></script>
 </head>
 <body>
 
@@ -74,28 +115,39 @@ $query = mysqli_query(
         <ul>
             <li>
                 <a href="../index.php">
-                    <i class="bi bi-grid"></i> Dashboard
+                    <i class="bi bi-grid"></i>
+                    Dashboard
                 </a>
             </li>
+
             <li>
                 <a href="index.php" class="active">
-                    <i class="bi bi-receipt"></i> Tagihan Saya
+                    <i class="bi bi-receipt"></i>
+                    Tagihan Saya
                 </a>
             </li>
+
             <li>
                 <a href="../paket/index.php">
-                    <i class="bi bi-wifi"></i> Paket Internet
+                    <i class="bi bi-wifi"></i>
+                    Paket Internet
                 </a>
             </li>
+
             <li>
-                <a href="../index.php">
-                    <i class="bi bi-person"></i> Profile
+                <a href="../profile/index.php">
+                    <i class="bi bi-person"></i>
+                    Profile
                 </a>
             </li>
+
             <li>
-                <a href="../../auth/logout.php"
-                onclick="return confirm('Apakah Anda yakin ingin logout?')">
-                    <i class="bi bi-box-arrow-right"></i> Logout
+                <a 
+                    href="#"
+                    onclick="openLogoutModal()"
+                >
+                    <i class="bi bi-box-arrow-right"></i>
+                    Logout
                 </a>
             </li>
         </ul>
@@ -105,10 +157,11 @@ $query = mysqli_query(
     <!-- ================= CONTENT ================= -->
     <div class="dashboard-content">
 
+        <!-- ================= TOPBAR ================= -->
         <div class="topbar">
             <div>
                 <h1>Tagihan Saya</h1>
-                <p>Riwayat pembayaran dan tagihan internet</p>
+                <p>Riwayat pembayaran internet</p>
             </div>
         </div>
 
@@ -118,50 +171,45 @@ $query = mysqli_query(
             <div class="table-header">
                 <h3>Daftar Tagihan</h3>
 
+                <!-- FILTER -->
                 <form method="GET" class="filter-form">
-                    
-                    <input 
-                        type="month"
+                    <input
+                        type="text"
+                        id="periode"
                         name="periode"
                         value="<?= $periode; ?>"
+                        placeholder="Pilih Periode"
                     >
 
                     <select name="status">
-                        
-                        <option value="">
-                            Semua Status
-                        </option>
-
-                        <option 
+                        <option value="">Semua Status</option>
+                        <option
                             value="Belum Bayar"
                             <?= ($status == 'Belum Bayar') ? 'selected' : ''; ?>
                         >
                             Belum Bayar
                         </option>
-
-                        <option 
+                        <option
                             value="Menunggu Konfirmasi"
                             <?= ($status == 'Menunggu Konfirmasi') ? 'selected' : ''; ?>
                         >
                             Menunggu
                         </option>
-
-                        <option 
+                        <option
                             value="Lunas"
                             <?= ($status == 'Lunas') ? 'selected' : ''; ?>
                         >
                             Lunas
                         </option>
-
                     </select>
 
                     <button type="submit" class="btn-orange">
                         Filter
                     </button>
-
                 </form>
             </div>
 
+            <!-- TABLE -->
             <table>
                 <thead>
                     <tr>
@@ -173,61 +221,48 @@ $query = mysqli_query(
                         <th>Aksi</th>
                     </tr>
                 </thead>
-                
+
                 <tbody>
-                    <?php while ($t = mysqli_fetch_assoc($query)) : ?>
-                    <tr>
-                        <td>
-                            <?= $t['kode_invoice']; ?>
-                        </td>
-
-                        <td>
-                            <?= $t['bulan_tagihan']; ?>/<?= $t['tahun_tagihan']; ?>
-                        </td>
-
-                        <td>
-                            Rp<?= number_format($t['jumlah_bayar']); ?>
-                        </td>
-
-                        <td>
-                            <?php if ($t['status_pembayaran'] == 'Lunas') : ?>
-                                <span class="status-active">
-                                    Lunas
-                                </span>
-                            <?php elseif ($t['status_pembayaran'] == 'Menunggu Konfirmasi') : ?>
-                                <span class="status-pending">
-                                    Menunggu
-                                </span>
-                            <?php else : ?>
-                                <span class="status-belum">
-                                    Belum Bayar
-                                </span>
-                            <?php endif; ?>
-                        </td>
-
-                        <td>
-                            <?= $t['tanggal_transaksi']; ?>
-                        </td>
-
-                        <td>
-                            <?php if ($t['status_pembayaran'] == 'Belum Bayar') : ?>
-                                <a 
-                                    href="bayar.php?id=<?= $t['id_transaksi']; ?>"
-                                    class="btn-bayar"
-                                >
-                                    Bayar
-                                </a>
-                            <?php else : ?>
-                                <a 
-                                    href="detail.php?id=<?= $t['id_transaksi']; ?>"
-                                    class="btn-detail"
-                                >
-                                    Detail
-                                </a>
-                            <?php endif; ?>
-                        </td>
-                    </tr>
-                    <?php endwhile; ?>
+                    <?php if (mysqli_num_rows($query) > 0) : ?>
+                        <?php while ($t = mysqli_fetch_assoc($query)) : ?>
+                            <tr>
+                                <td><?= $t['kode_invoice']; ?></td>
+                                <td><?= $t['bulan_tagihan']; ?>/<?= $t['tahun_tagihan']; ?></td>
+                                <td>Rp<?= number_format($t['jumlah_bayar']); ?></td>
+                                <td>
+                                    <?php if ($t['status_pembayaran'] == 'Lunas') : ?>
+                                        <span class="status-active">Lunas</span>
+                                    <?php elseif ($t['status_pembayaran'] == 'Menunggu Konfirmasi') : ?>
+                                        <span class="status-pending">Menunggu</span>
+                                    <?php else : ?>
+                                        <span class="status-belum">Belum Bayar</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td><?= $t['tanggal_transaksi']; ?></td>
+                                <td>
+                                    <?php if ($t['status_pembayaran'] == 'Belum Bayar') : ?>
+                                        <a
+                                            href="bayar.php?id=<?= $t['id_transaksi']; ?>"
+                                            class="btn-bayar"
+                                        >
+                                            Bayar
+                                        </a>
+                                    <?php else : ?>
+                                        <a
+                                            href="detail.php?id=<?= $t['id_transaksi']; ?>"
+                                            class="btn-detail"
+                                        >
+                                            Detail
+                                        </a>
+                                    <?php endif; ?>
+                                </td>
+                            </tr>
+                        <?php endwhile; ?>
+                    <?php else : ?>
+                        <tr>
+                            <td colspan="6" style="text-align:center;">Belum ada tagihan</td>
+                        </tr>
+                    <?php endif; ?>
                 </tbody>
             </table>
 
@@ -236,6 +271,46 @@ $query = mysqli_query(
     </div>
 
 </div>
+
+<!-- ================= LOGOUT MODAL ================= -->
+<div class="logout-modal" id="logoutModal">
+    <div class="logout-modal-content">
+        <div class="logout-icon">
+            <i class="bi bi-box-arrow-right"></i>
+        </div>
+
+        <h2>Konfirmasi Logout</h2>
+        <p>Apakah Anda yakin ingin keluar?</p>
+
+        <div class="logout-modal-action">
+            <button
+                class="btn-cancel"
+                onclick="closeLogoutModal()"
+            >
+                Batal
+            </button>
+            <a
+                href="../../auth/logout.php"
+                class="btn-confirm"
+            >
+                Ya, Logout
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- ================= FLATPICKR ================= -->
+<script>
+flatpickr("#periode", {
+    plugins: [
+        new monthSelectPlugin({
+            shorthand: true,
+            dateFormat: "Y-m",
+            altFormat: "F Y"
+        })
+    ]
+});
+</script>
 
 </body>
 </html>

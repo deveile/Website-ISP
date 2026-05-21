@@ -9,59 +9,90 @@ $query = mysqli_query(
     $koneksi,
     "SELECT 
         tb_customer.*,
+        tb_langganan.id_langganan,
+        tb_langganan.status_langganan,
+        tb_langganan.tanggal_mulai,
         tb_paket.nama_paket,
-        tb_paket.harga AS harga_paket,
+        tb_paket.harga,
         tb_paket.kecepatan,
         tb_paket.deskripsi
-     FROM tb_customer
-     LEFT JOIN tb_langganan
-     ON tb_customer.id_customer = tb_langganan.id_customer
-     LEFT JOIN tb_paket
-     ON tb_langganan.id_paket = tb_paket.id_paket
-     WHERE tb_customer.id_user = '$id_user'"
+    FROM tb_customer
+    LEFT JOIN tb_langganan
+        ON tb_customer.id_customer = tb_langganan.id_customer
+    LEFT JOIN tb_paket
+        ON tb_langganan.id_paket = tb_paket.id_paket
+    WHERE tb_customer.id_user = '$id_user'
+    LIMIT 1"
 );
 
 $data = mysqli_fetch_assoc($query);
 
-/* ================= TAGIHAN BULAN INI ================= */
-$bulan = date('n');
-$tahun = date('Y');
+/* ================= VALIDASI CUSTOMER ================= */
+if (!$data) {
+    die("Data customer tidak ditemukan");
+}
 
-$tagihan = mysqli_query(
-    $koneksi,
-    "SELECT * 
-     FROM tb_transaksi
-     WHERE id_customer = '".$data['id_customer']."'
-     AND bulan_tagihan = '$bulan'
-     AND tahun_tagihan = '$tahun'
-     ORDER BY id_transaksi DESC
-     LIMIT 1"
-);
+/* ================= DEFAULT ================= */
+$t = null;
 
-$t = mysqli_fetch_assoc($tagihan);
-
-/* ================= RIWAYAT TAGIHAN ================= */
 $riwayat = mysqli_query(
     $koneksi,
-    "SELECT * 
-     FROM tb_transaksi
-     WHERE id_customer = '".$data['id_customer']."'
-     ORDER BY id_transaksi DESC
-     LIMIT 5"
+    "SELECT * FROM tb_transaksi WHERE 1=0"
 );
+
+/* ================= JIKA SUDAH BERLANGGANAN ================= */
+if (!empty($data['id_langganan'])) {
+
+    $bulan = date('n');
+    $tahun = date('Y');
+
+    /* ================= TAGIHAN BULAN INI ================= */
+    $tagihan = mysqli_query(
+        $koneksi,
+        "SELECT *
+        FROM tb_transaksi
+        WHERE id_langganan = '".$data['id_langganan']."'
+        AND bulan_tagihan = '$bulan'
+        AND tahun_tagihan = '$tahun'
+        LIMIT 1"
+    );
+
+    $t = mysqli_fetch_assoc($tagihan);
+
+    /* ================= RIWAYAT ================= */
+    $riwayat = mysqli_query(
+        $koneksi,
+        "SELECT *
+        FROM tb_transaksi
+        WHERE id_langganan = '".$data['id_langganan']."'
+        ORDER BY id_transaksi DESC
+        LIMIT 5"
+    );
+}
 ?>
 
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
+    <meta 
+        name="viewport" 
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0"
+    >
+
     <title>Dashboard Customer</title>
 
+    <!-- CSS -->
     <link rel="stylesheet" href="../assets/css/style.css">
+
+    <!-- ICON -->
     <link rel="icon" type="image/png" href="../assets/images/logo.png">
+
+    <!-- BOOTSTRAP ICON -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <!-- JS -->
+    <script src="../assets/js/script.js" defer></script>
 </head>
 <body>
 
@@ -78,28 +109,40 @@ $riwayat = mysqli_query(
         <ul>
             <li>
                 <a href="index.php" class="active">
-                    <i class="bi bi-grid"></i> Dashboard
+                    <i class="bi bi-grid"></i>
+                    Dashboard
                 </a>
             </li>
+
             <li>
                 <a href="tagihan/index.php">
-                    <i class="bi bi-receipt"></i> Tagihan Saya
+                    <i class="bi bi-receipt"></i>
+                    Tagihan Saya
                 </a>
             </li>
+
             <li>
                 <a href="paket/index.php">
-                    <i class="bi bi-wifi"></i> Paket Internet
+                    <i class="bi bi-wifi"></i>
+                    Paket Internet
                 </a>
             </li>
+
             <li>
                 <a href="profile/index.php">
-                    <i class="bi bi-person"></i> Profile    
+                    <i class="bi bi-person"></i>
+                    Profile
                 </a>
             </li>
+
+            <!-- LOGOUT POPUP -->
             <li>
-                <a href="../auth/logout.php"
-                onclick="return confirm('Apakah Anda yakin ingin logout?')">
-                    <i class="bi bi-box-arrow-right"></i> Logout
+                <a 
+                    href="#"
+                    onclick="openLogoutModal()"
+                >
+                    <i class="bi bi-box-arrow-right"></i>
+                    Logout
                 </a>
             </li>
         </ul>
@@ -115,25 +158,16 @@ $riwayat = mysqli_query(
             <p>Selamat datang kembali</p>
         </div>
 
-        <!-- ================= HERO CARD ================= -->
+        <!-- ================= HERO ================= -->
         <div class="customer-hero-card">
 
             <div class="hero-left">
-
-                <span class="hero-label">
-                    Paket Aktif
-                </span>
-
-                <h1>
-                    <?= $data['nama_paket']; ?>
-                </h1>
-
-                <p class="hero-speed">
-                    <?= $data['kecepatan']; ?>
-                </p>
+                <span class="hero-label">Paket Aktif</span>
+                <h1><?= $data['nama_paket'] ?? 'Belum Berlangganan'; ?></h1>
+                <p class="hero-speed"><?= $data['kecepatan'] ?? '-'; ?></p>
 
                 <div class="hero-info-wrapper">
-
+                    <!-- JATUH TEMPO -->
                     <div class="hero-info-box">
                         <i class="bi bi-calendar-event"></i>
                         <div>
@@ -142,35 +176,32 @@ $riwayat = mysqli_query(
                         </div>
                     </div>
 
+                    <!-- TAGIHAN -->
                     <div class="hero-info-box">
                         <i class="bi bi-wallet2"></i>
                         <div>
                             <span>Tagihan Bulan Ini</span>
-                            <h3>
-                                Rp<?= number_format($t['jumlah_bayar'] ?? 0); ?>
-                            </h3>
+                            <h3>Rp<?= number_format($t['jumlah_bayar'] ?? 0); ?></h3>
                         </div>
                     </div>
-
                 </div>
-
             </div>
 
+            <!-- RIGHT -->
             <div class="hero-right">
-
                 <i class="bi bi-wifi hero-wifi-icon"></i>
 
                 <?php if ($t) : ?>
-                    <?php if ($t['status_pembayaran'] != 'Lunas') : ?>
+                    <?php if ($t['status_pembayaran'] != 'lunas') : ?>
                         <a 
-                            href="tagihan/bayar.php?id=<?= $t['id_transaksi']; ?>" 
+                            href="tagihan/bayar.php?id=<?= $t['id_transaksi']; ?>"
                             class="hero-button"
                         >
                             Bayar Tagihan
                         </a>
                     <?php else : ?>
                         <a 
-                            href="tagihan/index.php" 
+                            href="tagihan/index.php"
                             class="hero-button"
                         >
                             Lihat Tagihan
@@ -181,7 +212,6 @@ $riwayat = mysqli_query(
                         Belum Ada Tagihan
                     </button>
                 <?php endif; ?>
-
             </div>
 
         </div>
@@ -190,11 +220,9 @@ $riwayat = mysqli_query(
         <div class="table-card">
 
             <div class="table-header">
-                <h3>
-                    Riwayat Tagihan Terakhir
-                </h3>
+                <h3>Riwayat Tagihan Terakhir</h3>
                 <a 
-                    href="tagihan/index.php" 
+                    href="tagihan/index.php"
                     class="btn-orange-outline"
                 >
                     Lihat Semua
@@ -212,70 +240,49 @@ $riwayat = mysqli_query(
                         <th>Aksi</th>
                     </tr>
                 </thead>
+
                 <tbody>
-                    <?php while ($r = mysqli_fetch_assoc($riwayat)) : ?>
-                        <tr>
-                            <td>
-                                <?= $r['kode_invoice']; ?>
-                            </td>
-
-                            <td>
-                                <?= date(
-                                    'F Y',
-                                    strtotime($r['tahun_tagihan'] . '-' . $r['bulan_tagihan'] . '-01')
-                                ); ?>
-                            </td>
-
-                            <td>
-                                Rp<?= number_format($r['jumlah_bayar']); ?>
-                            </td>
-
-                            <td>
-                                <?php if ($r['status_pembayaran'] == 'Lunas') : ?>
-                                    <span class="status-active">
-                                        Lunas
-                                    </span>
-                                <?php elseif ($r['status_pembayaran'] == 'Menunggu Konfirmasi') : ?>
-                                    <span class="status-pending">
-                                        Menunggu
-                                    </span>
-                                <?php else : ?>
-                                    <span class="status-belum">
-                                        Belum Bayar
-                                    </span>
-                                <?php endif; ?>
-                            </td>
-
-                            <td>
-                                <?= $r['tanggal_transaksi']; ?>
-                            </td>
-
-                            <td>
-                                <?php if ($r['status_pembayaran'] == 'Lunas') : ?>
+                    <?php if (mysqli_num_rows($riwayat) > 0) : ?>
+                        <?php while ($r = mysqli_fetch_assoc($riwayat)) : ?>
+                            <tr>
+                                <td><?= $r['kode_invoice']; ?></td>
+                                <td>
+                                    <?= date(
+                                        'F Y',
+                                        strtotime(
+                                            $r['tahun_tagihan']
+                                            . '-'
+                                            . $r['bulan_tagihan']
+                                            . '-01'
+                                        )
+                                    ); ?>
+                                </td>
+                                <td>Rp<?= number_format($r['jumlah_bayar']); ?></td>
+                                <td>
+                                    <?php if ($r['status_pembayaran'] == 'lunas') : ?>
+                                        <span class="status-active">Lunas</span>
+                                    <?php elseif ($r['status_pembayaran'] == 'menunggu') : ?>
+                                        <span class="status-pending">Menunggu</span>
+                                    <?php else : ?>
+                                        <span class="status-belum">Belum Bayar</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td><?= $r['tanggal_bayar']; ?></td>
+                                <td>
                                     <a 
-                                        href="tagihan/detail.php?id=<?= $r['id_transaksi']; ?>" 
+                                        href="tagihan/detail.php?id=<?= $r['id_transaksi']; ?>"
                                         class="btn-detail"
                                     >
                                         Detail
                                     </a>
-                                <?php elseif ($r['status_pembayaran'] == 'Menunggu Konfirmasi') : ?>
-                                    <a 
-                                        href="tagihan/detail.php?id=<?= $r['id_transaksi']; ?>" 
-                                        class="btn-upload"
-                                    >
-                                        Menunggu
-                                    </a>
-                                <?php else : ?>
-                                    <a 
-                                        href="tagihan/bayar.php?id=<?= $r['id_transaksi']; ?>" 
-                                        class="btn-bayar"
-                                    >
-                                        Bayar
-                                    </a>
-                                <?php endif; ?>
-                            </td>
+                                </td>
+                            </tr>
+                        <?php endwhile; ?>
+                    <?php else : ?>
+                        <tr>
+                            <td colspan="6" style="text-align:center;">Belum ada tagihan</td>
                         </tr>
-                    <?php endwhile; ?>
+                    <?php endif; ?>
                 </tbody>
             </table>
 
@@ -283,6 +290,33 @@ $riwayat = mysqli_query(
 
     </div>
 
+</div>
+
+<!-- ================= LOGOUT MODAL ================= -->
+<div class="logout-modal" id="logoutModal">
+    <div class="logout-modal-content">
+        <div class="logout-icon">
+            <i class="bi bi-box-arrow-right"></i>
+        </div>
+
+        <h2>Konfirmasi Logout</h2>
+        <p>Apakah Anda yakin ingin keluar?</p>
+
+        <div class="logout-modal-action">
+            <button 
+                class="btn-cancel"
+                onclick="closeLogoutModal()"
+            >
+                Batal
+            </button>
+            <a 
+                href="../auth/logout.php"
+                class="btn-confirm"
+            >
+                Ya, Logout
+            </a>
+        </div>
+    </div>
 </div>
 
 </body>

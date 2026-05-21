@@ -1695,3 +1695,91 @@ table th{
   width: 100%;
   margin-top: 10px;
 }
+
+.logout-modal{
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: 0.3s;
+    z-index: 9999;
+}
+
+.logout-modal.show{
+    opacity: 1;
+    visibility: visible;
+}
+
+.logout-modal-content{
+    width: 400px;
+    background: white;
+    border-radius: 25px;
+    padding: 35px;
+    text-align: center;
+    animation: popup 0.2s ease;
+}
+
+.logout-icon{
+    width: 70px;
+    height: 70px;
+    background: #fff3e8;
+    color: #ff7a00;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: auto;
+    font-size: 32px;
+}
+
+.logout-modal-content h2{
+    margin-top: 20px;
+    font-size: 26px;
+}
+
+.logout-modal-content p{
+    color: #666;
+    margin-top: 10px;
+}
+
+.logout-modal-action{
+    display: flex;
+    gap: 15px;
+    margin-top: 30px;
+}
+
+.btn-cancel,
+.btn-confirm{
+    flex: 1;
+    padding: 14px;
+    border-radius: 14px;
+    text-decoration: none;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+}
+
+.btn-cancel{
+    background: #eee;
+    color: #333;
+}
+
+.btn-confirm{
+    background: #ff7a00;
+    color: white;
+}
+
+@keyframes popup{
+    from{
+        transform: scale(0.8);
+        opacity: 0;
+    }
+    to{
+        transform: scale(1);
+        opacity: 1;
+    }
+}

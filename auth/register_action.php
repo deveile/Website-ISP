@@ -35,7 +35,29 @@ $id_user = mysqli_insert_id($koneksi);
 $sumber_customer = "Online";
 
 /* ================= INSERT CUSTOMER ================= */
-mysqli_query($koneksi, "INSERT INTO tb_customer(id_user, nama_customer, email_customer, telepon_customer, alamat_customer, id_paket, status_paket, sumber_customer) VALUES('$id_user', '$nama', '$email', '$telepon', '$alamat', NULL, 'Pending', '$sumber_customer')");
+mysqli_query(
+            $koneksi,
+            "INSERT INTO tb_customer
+            (
+            id_user,
+            nama_customer,
+            alamat_customer,
+            telepon_customer,
+            email_customer,
+            sumber_customer,
+            status_customer
+            )
+            VALUES
+            (
+            '$id_user',
+            '$nama',
+            '$alamat',
+            '$telepon',
+            '$email',
+            'website',
+            'pending'
+            )"
+            );
 
 /* ================= SUCCESS ================= */
 echo "

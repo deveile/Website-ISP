@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 21, 2026 at 02:37 PM
+-- Generation Time: May 21, 2026 at 03:22 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -47,7 +47,7 @@ CREATE TABLE `tb_customer` (
   `alamat_customer` text NOT NULL,
   `telepon_customer` varchar(20) DEFAULT NULL,
   `email_customer` varchar(100) DEFAULT NULL,
-  `sumber_customer` enum('website','instagram','whatsapp','referensi') DEFAULT NULL,
+  `sumber_customer` enum('online','offline') DEFAULT NULL,
   `status_customer` enum('aktif','pending','nonaktif') DEFAULT 'pending',
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -113,9 +113,9 @@ CREATE TABLE `tb_transaksi` (
   `bulan_tagihan` int(11) DEFAULT NULL,
   `tahun_tagihan` int(11) DEFAULT NULL,
   `jumlah_bayar` int(11) NOT NULL,
-  `metode_pembayaran` enum('transfer','ewallet','cash') DEFAULT NULL,
+  `metode_pembayaran` enum('transfer','qris','cash') DEFAULT NULL,
   `bukti_pembayaran` varchar(255) DEFAULT NULL,
-  `status_pembayaran` enum('belum_bayar','menunggu','lunas') DEFAULT 'belum_bayar',
+  `status_pembayaran` enum('belum_bayar','menunggu_verifikasi','lunas') DEFAULT 'belum_bayar',
   `tanggal_bayar` date DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -133,6 +133,13 @@ CREATE TABLE `tb_user` (
   `role` enum('admin','customer') NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `tb_user`
+--
+
+INSERT INTO `tb_user` (`id_user`, `username`, `password`, `role`, `created_at`) VALUES
+(1, 'gena', '$2y$10$eZCdGr2zkJFec.A/Z7o2XuSJuxWfP2VMvMQgj85tCtsSRGztPbSWu', 'customer', '2026-05-21 13:15:07');
 
 --
 -- Indexes for dumped tables
@@ -233,7 +240,7 @@ ALTER TABLE `tb_transaksi`
 -- AUTO_INCREMENT for table `tb_user`
 --
 ALTER TABLE `tb_user`
-  MODIFY `id_user` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id_user` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- Constraints for dumped tables
