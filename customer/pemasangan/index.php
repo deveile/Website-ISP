@@ -67,10 +67,65 @@ if (isset($_POST['submit'])) {
         die("Gagal menyimpan data pengajuan pemasangan: " . mysqli_error($koneksi));
     }
 
-    $id_pemasangan = mysqli_insert_id($koneksi);
+  /* ================= BUAT LANGGANAN  ================= */
+mysqli_query(
+    $koneksi,
+    "INSERT INTO tb_langganan
+    (
+        id_customer,
+        id_paket,
+        tanggal_mulai,
+        tanggal_selesai,
+        status_langganan
+    )
+    VALUES
+    (
+        '" . $customer['id_customer'] . "',
+        '$id_paket',
+        CURDATE(),
+        DATE_ADD(CURDATE(), INTERVAL 30 DAY),
+        'Pending'
+    )"
+);
 
-    header("Location: pembayaran.php?id=$id_pemasangan");
-    exit;
+$id_langganan = mysqli_insert_id($koneksi);
+
+/* ================= BUAT TRANSAKSI ================= */
+$bulan = date('n');
+$tahun = date('Y');
+
+$kode_invoice = 'INV-' . date('Ym') . '-' . rand(100, 999);
+
+mysqli_query(
+    $koneksi,
+    "INSERT INTO tb_transaksi
+    (
+        id_langganan,
+        kode_invoice,
+        bulan_tagihan,
+        tahun_tagihan,
+        jumlah_bayar,
+        status_pembayaran,
+        created_at
+    )
+    VALUES
+    (
+        '$id_langganan',
+        '$kode_invoice',
+        '$bulan',
+        '$tahun',
+        '" . $paket['harga'] . "',
+        'Belum',
+        NOW()
+    )"
+);
+
+$id_transaksi = mysqli_insert_id($koneksi);
+
+/* ================= REDIRECT KE BAYAR ================= */
+
+header("Location: ../tagihan/bayar.php?id=$id_transaksi");
+exit;
 }
 ?>
 
@@ -140,7 +195,7 @@ if (isset($_POST['submit'])) {
                     <label>Catatan Tambahan</label>
                     <textarea 
                         name="catatan"
-                        placeholder="Contoh: Pasang siang hari, warna kabel hitam, dll."
+                        placeholder="Contoh: Pasang siang hari, dll."
                     ></textarea>
                 </div>
 

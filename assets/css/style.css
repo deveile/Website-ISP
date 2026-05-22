@@ -1,1034 +1,895 @@
-/* ================= GLOBAL ================= */
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:Arial, Helvetica, sans-serif;
+/* ==========================================================================
+   1. GLOBAL RESET & BASE STYLES
+   ========================================================================== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, Helvetica, sans-serif;
 }
 
-body{
-    color:#222;
-    background:
-        linear-gradient(
-            135deg,
-            #fff7f2 0%,
-            #ffffff 40%,
-            #fff3eb 100%
-        );
-    overflow-x:hidden;
+body {
+    color: #222;
+    background: linear-gradient(135deg, #fff7f2 0%, #ffffff 40%, #fff3eb 100%);
+    overflow-x: hidden;
 }
 
-/* ================= NAVBAR ================= */
-.navbar-custom{
-    width:100%;
-    padding:20px 0;
-    position:fixed;
-    top:0;
-    z-index:999;
-    background:
-        rgba(255,255,255,.85);
-    border-bottom:
-        1px solid #eee;
-    backdrop-filter:blur(10px);
-    box-shadow:
-        0 2px 15px rgba(0,0,0,.03);
+/* ==========================================================================
+   2. NAVBAR & NAVIGATION
+   ========================================================================== */
+.navbar-custom {
+    width: 100%;
+    padding: 20px 0;
+    position: fixed;
+    top: 0;
+    z-index: 999;
+    background: rgba(255, 255, 255, .85);
+    border-bottom: 1px solid #eee;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 2px 15px rgba(0, 0, 0, .03);
 }
 
-.navbar-wrapper{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
+.navbar-wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
-.logo-area{
-    display:flex;
-    align-items:center;
-    gap:12px;
+.logo-area {
+    display: flex;
+    align-items: center;
+    gap: 12px;
 }
 
-.main-logo{
-    width:55px;
-    height:55px;
-    object-fit:contain;
+.main-logo {
+    width: 55px;
+    height: 55px;
+    object-fit: contain;
 }
 
-.logo-area h2{
-    font-size:24px;
-    font-weight:800;
+.logo-area h2 {
+    font-size: 24px;
+    font-weight: 800;
 }
 
-nav ul{
-    display:flex;
-    gap:40px;
-    list-style:none;
-    margin:0;
+nav ul {
+    display: flex;
+    gap: 40px;
+    list-style: none;
+    margin: 0;
 }
 
-nav ul li a{
-    text-decoration:none;
-    color:#666;
-    font-weight:600;
-    transition:.3s;
+nav ul li a {
+    text-decoration: none;
+    color: #666;
+    font-weight: 600;
+    transition: .3s;
 }
 
 nav ul li a:hover,
-nav ul li a.active{
-    color:#ff5e00;
+nav ul li a.active {
+    color: #ff5e00;
 }
 
-/* ================= HERO ================= */
-.hero-section{
-    min-height:100vh;
-    display:flex;
-    align-items:center;
-    padding-top:100px;
+/* ==========================================================================
+   3. HERO SECTION (LANDING)
+   ========================================================================== */
+.hero-section {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    padding-top: 100px;
 }
 
-.hero-text h1{
-    font-size:72px;
-    font-weight:800;
-    line-height:1.1;
-    margin-bottom:25px;
+.hero-text h1 {
+    font-size: 72px;
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 25px;
 }
 
-.hero-text p{
-    font-size:22px;
-    color:#666;
-    margin-bottom:40px;
+.hero-text p {
+    font-size: 22px;
+    color: #666;
+    margin-bottom: 40px;
 }
 
-.hero-image-area{
-    position:relative;
-    display:flex;
-    justify-content:center;
-    align-items:center;
+.hero-image-area {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
-.hero-bg{
-    width:520px;
-    height:520px;
-    position:absolute;
-    border-radius:50%;
-    background:
-        radial-gradient(
-            circle,
-            rgba(255,140,0,.18) 0%,
-            rgba(255,94,0,.10) 45%,
-            rgba(255,255,255,0) 75%
-        );
-    filter:blur(5px);
+.hero-bg {
+    width: 520px;
+    height: 520px;
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 140, 0, .18) 0%, rgba(255, 94, 0, .10) 45%, rgba(255, 255, 255, 0) 75%);
+    filter: blur(5px);
 }
 
-.hero-image{
-    width:55%;
-    position:relative;
-    z-index:2;
+.hero-image {
+    width: 55%;
+    position: relative;
+    z-index: 2;
 }
 
-/* ================= BUTTON ================= */
-.btn-orange{
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    gap:10px;
-    padding:16px 35px;
-    border:none;
-    border-radius:14px;
-    background:
-        linear-gradient(
-            135deg,
-            #ff5e00,
-            #ff8c00
-        );
-    color:#fff;
-    text-decoration:none;
-    font-weight:700;
-    transition:.3s;
-    cursor:pointer;
+/* ==========================================================================
+   4. UTILITY BUTTONS & ACTIONS
+   ========================================================================== */
+.action-flex {
+    display: flex;
+    justify-content: flex-end; 
+    width: 100%;
+    margin-top: 25px;
+    gap: 15px;
 }
 
-.btn-orange:hover{
-    transform:translateY(-4px);
-    color:#fff;
+.btn-back-gray {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    background: linear-gradient(135deg, #ff5e00, #ff8c00); 
+    color: #ffffff; /* Warna teks diubah ke putih agar kontras */
+    border-radius: 12px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 15px;
+    transition: all 0.3s ease;
+    border: none; /* Menghilangkan border abu-abu lama */
 }
 
-.btn-paket{
-    display:inline-block;
-    margin-top:20px;
-    padding:12px 25px;
-    border-radius:12px;
-    background:#ff5e00;
-    color:#fff;
-    text-decoration:none;
-    font-weight:600;
-    transition:.3s;
+.btn-back-gray:hover {
+    /* EFEK HOVER ORANGE */
+    background: linear-gradient(135deg, #e65100, #ff7b00); 
+    color: #ffffff; /* Memastikan teks tetap putih saat di-hover */
+    transform: translateY(-2px); 
+    box-shadow: 0 8px 20px rgba(255, 94, 0, .25); /* Efek bayangan orange modern */
 }
 
-.btn-paket:hover{
-    background:#ff7b2e;
-    color:#fff;
+.btn-orange {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 16px 35px;
+    border: none;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #ff5e00, #ff8c00);
+    color: #fff;
+    text-decoration: none;
+    font-weight: 700;
+    transition: .3s;
+    cursor: pointer;
 }
 
-.btn-edit{
-    background:#0ea5e9;
-
-    color:#fff;
-    padding:10px 16px;
-    border-radius:10px;
-    text-decoration:none;
+.btn-orange:hover {
+    transform: translateY(-4px);
+    color: #fff;
 }
 
-.btn-delete{
-    background:#ef4444;
-    color:#fff;
-    padding:10px 16px;
-    border-radius:10px;
-    text-decoration:none;
+.btn-paket {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 12px 25px;
+    border-radius: 12px;
+    background: #ff5e00;
+    color: #fff;
+    text-decoration: none;
+    font-weight: 600;
+    transition: .3s;
 }
 
-/* ================= SECTION ================= */ 
-.section-space{
-    padding:120px 0;
+.btn-paket:hover {
+    background: #ff7b2e;
+    color: #fff;
 }
 
-.section-title{
-    text-align:center;
-    margin-bottom:60px;
+.btn-edit, .btn-delete, .btn-detail, .btn-upload, .btn-bayar {
+    color: #fff;
+    padding: 10px 16px;
+    border-radius: 10px;
+    text-decoration: none;
+    display: inline-block;
+    transition: .3s;
 }
 
-.section-title h2{
-    font-size:48px;
-    font-weight:800;
-    margin-bottom:15px;
+.btn-edit { background: #0ea5e9; }
+.btn-delete { background: #ef4444; }
+.btn-detail { background: #2563eb; }
+.btn-upload { background: #f59e0b; }
+.btn-bayar { background: #16a34a; }
+
+.btn-orange-outline {
+    padding: 12px 18px;
+    border: 2px solid #ff5e00;
+    color: #ff5e00;
+    border-radius: 12px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: .3s;
 }
 
-.section-title p{
-    color:#666;
+.btn-orange-outline:hover {
+    background: #ff5e00;
+    color: #fff;
 }
 
-/* ================= PAKET LANDING ================= */
-.paket-card{
-    background:#fff;
-    padding:40px;
-    border-radius:30px;
-    text-align:center;
-    transition:.3s;
-    height:100%;
-    box-shadow:
-        0 10px 30px rgba(0,0,0,.05);
+.disabled-btn {
+    opacity: .7;
+    cursor: not-allowed;
+    border: none;
 }
 
-.paket-card:hover{
-    transform:translateY(-10px);
+.aksi-button {
+    display: flex;
+    gap: 10px;
 }
 
-.paket-card h1{
-    color:#ff5e00;
-    margin:20px 0;
+/* ==========================================================================
+   5. SECTIONS & GRIDS (LANDING & CUSTOMER)
+   ========================================================================== */
+.section-space {
+    padding: 120px 0;
 }
 
-.paket-card span{
-    color:#666;
-    display:block;
-    margin-top:10px;
+.section-title {
+    text-align: center;
+    margin-bottom: 60px;
 }
 
-/* ================= EMPTY PAKET ================= */
-.empty-paket{
-    background:#fff;
-    padding:60px 30px;
-    border-radius:30px;
-    text-align:center;
-    box-shadow:
-        0 10px 30px rgba(0,0,0,.05);
+.section-title h2 {
+    font-size: 48px;
+    font-weight: 800;
+    margin-bottom: 15px;
 }
 
-.empty-paket i{
-    font-size:70px;
-    color:#ff5e00;
-    margin-bottom:20px;
+.section-title p {
+    color: #666;
 }
 
-/* ================= MENGAPA KITA ================= */
-.why-wrapper{
-    display:flex;
-    justify-content:center;
-    gap:14px;
-    flex-wrap:nowrap;
-    overflow:hidden;
+.paket-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 25px;
 }
 
-.why-wrapper::-webkit-scrollbar{
-    display:none;
+.paket-card {
+    background: #fff;
+    padding: 40px;
+    border-radius: 30px;
+    text-align: center;
+    transition: .3s;
+    height: 100%;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, .05);
 }
 
-.why-card{
-    width:170px;
-    background:#fff;
-    padding:20px 14px;
-    border-radius:18px;
-    text-align:center;
-    flex-shrink:0;
-    transition:.3s;
-    box-shadow:
-        0 8px 20px rgba(0,0,0,.05);
+.paket-card:hover {
+    transform: translateY(-10px);
 }
 
-.why-card:hover{
-    transform:translateY(-10px);
+.paket-card h1 {
+    color: #ff5e00;
+    margin: 20px 0;
 }
 
-.why-icon{
-    width:45px;
-    height:45px;
-    margin:auto;
-    margin-bottom:18px;
-    border-radius:14px;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    background:
-        linear-gradient(
-            135deg,
-            #ff5e00,
-            #ff9a3c
-        );
-    color:#fff;
-    font-size:18px;
+.paket-card span {
+    color: #666;
+    display: block;
+    margin-top: 10px;
 }
 
-.why-card h3{
-    font-size:15px;
-    font-weight:700;
-    margin-bottom:8px;
+.empty-paket {
+    background: #fff;
+    padding: 60px 30px;
+    border-radius: 30px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, .05);
 }
 
-.why-card p{
-    font-size:13px;
-    color:#666;
-    margin:0;
+.empty-paket i {
+    font-size: 70px;
+    color: #ff5e00;
+    margin-bottom: 20px;
 }
 
-/* ================= CONTACT ================= */
-.contact-wrapper{
-    display:flex;
-    justify-content:center;
-    gap:25px;
-    flex-wrap:wrap;
+/* ==========================================================================
+   6. MENGAPA KITA & CONTACT (LANDING)
+   ========================================================================== */
+.why-wrapper {
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+    flex-wrap: nowrap;
+    overflow: hidden;
 }
 
-.contact-card{
-    width:320px;
-    background:#fff;
-    padding:35px 25px;
-    border-radius:25px;
-    text-align:center;
-    transition:.3s;
-    box-shadow:
-        0 10px 30px rgba(0,0,0,.05);
+.why-wrapper::-webkit-scrollbar {
+    display: none;
 }
 
-.contact-card:hover{
-    transform:translateY(-10px);
+.why-card {
+    width: 170px;
+    background: #fff;
+    padding: 20px 14px;
+    border-radius: 18px;
+    text-align: center;
+    flex-shrink: 0;
+    transition: .3s;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, .05);
 }
 
-.contact-icon{
-    width:65px;
-    height:65px;
-    margin:auto;
-    margin-bottom:20px;
-    border-radius:20px;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    background:
-        linear-gradient(
-            135deg,
-            #ff5e00,
-            #ff9a3c
-        );
-    color:#fff;
-    font-size:26px;
+.why-card:hover {
+    transform: translateY(-10px);
 }
 
-/* ================= FOOTER ================= */
-.footer-custom{
-    background:#111;
-    color:#fff;
-    text-align:center;
-    padding:30px 0;
+.why-icon {
+    width: 45px;
+    height: 45px;
+    margin: auto;
+    margin-bottom: 18px;
+    border-radius: 14px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(135deg, #ff5e00, #ff9a3c);
+    color: #fff;
+    font-size: 18px;
 }
 
-/* ================= AUTH ================= */
-.auth-container{
-    width:100%;
-    min-height:100vh;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    padding:80px 20px;
-    background:
-        linear-gradient(
-            135deg,
-            #fff5ee,
-            #ffe0cc
-        );
+.why-card h3 {
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 8px;
 }
 
-.auth-card{
-    width:400px;
-    background:#fff;
-    padding:45px;
-    border-radius:25px;
-    box-shadow:
-        0 10px 30px rgba(0,0,0,.08);
+.why-card p {
+    font-size: 13px;
+    color: #666;
+    margin: 0;
 }
 
-.auth-card h2{
-    font-size:32px;
-    font-weight:800;
-    margin-bottom:10px;
+.contact-wrapper {
+    display: flex;
+    justify-content: center;
+    gap: 25px;
+    flex-wrap: wrap;
 }
 
-.auth-card p{
-    color:#666;
-    margin-bottom:30px;
+.contact-card {
+    width: 320px;
+    background: #fff;
+    padding: 35px 25px;
+    border-radius: 25px;
+    text-align: center;
+    transition: .3s;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, .05);
+}
+
+.contact-card:hover {
+    transform: translateY(-10px);
+}
+
+.contact-icon {
+    width: 65px;
+    height: 65px;
+    margin: auto;
+    margin-bottom: 20px;
+    border-radius: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(135deg, #ff5e00, #ff9a3c);
+    color: #fff;
+    font-size: 26px;
+}
+
+.footer-custom {
+    background: #111;
+    color: #fff;
+    text-align: center;
+    padding: 30px 0;
+}
+
+/* ==========================================================================
+   7. AUTHENTICATION PAGES
+   ========================================================================== */
+.auth-container {
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 80px 20px;
+    background: linear-gradient(135deg, #fff5ee, #ffe0cc);
+}
+
+.auth-card {
+    width: 400px;
+    background: #fff;
+    padding: 45px;
+    border-radius: 25px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, .08);
+}
+
+.auth-card h2 {
+    font-size: 32px;
+    font-weight: 800;
+    margin-bottom: 10px;
+}
+
+.auth-card p {
+    color: #666;
+    margin-bottom: 30px;
 }
 
 .auth-card input,
-.auth-card textarea{
-    width:100%;
-    padding:15px;
-    margin-bottom:20px;
-    border-radius:12px;
-    border:1px solid #ddd;
-    outline:none;
+.auth-card textarea {
+    width: 100%;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 12px;
+    border: 1px solid #ddd;
+    outline: none;
 }
 
-.auth-card button{
-    width:100%;
-    padding:15px;
-    border:none;
-    border-radius:14px;
-    background:
-        linear-gradient(
-            135deg,
-            #ff5e00,
-            #ff8c00
-        );
-    color:#fff;
-    font-size:16px;
-    font-weight:700;
-    cursor:pointer;
-    transition:.3s;
+.auth-card button {
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #ff5e00, #ff8c00);
+    color: #fff;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: .3s;
 }
 
-.auth-card button:hover{
-    transform:translateY(-3px);
+.auth-card button:hover {
+    transform: translateY(-3px);
 }
 
-.auth-link{
-    margin-top:22px;
-    text-align:center;
-    font-size:15px;
+.auth-link {
+    margin-top: 22px;
+    text-align: center;
+    font-size: 15px;
 }
 
-.auth-link a{
-    color:#ff5e00;
-    text-decoration:none;
-    font-weight:700;
+.auth-link a {
+    color: #ff5e00;
+    text-decoration: none;
+    font-weight: 700;
 }
 
-/* ================= DASHBOARD ================= */
-.dashboard-layout{
-    display:flex;
-    min-height:100vh;
+/* ==========================================================================
+   8. CORE DASHBOARD LAYOUT & SIDEBAR
+   ========================================================================== */
+.dashboard-layout {
+    display: flex;
+    min-height: 100vh;
 }
 
-.sidebar{
-    width:270px;
-    background:
-        rgba(255,255,255,.8);
-    padding:30px 20px;
-    backdrop-filter:blur(10px);
-    box-shadow:
-        0 0 20px rgba(0,0,0,.05);
+.sidebar {
+    width: 270px;
+    background: rgba(255, 255, 255, .8);
+    padding: 30px 20px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 0 20px rgba(0, 0, 0, .05);
 }
 
-.sidebar-logo{
-    display:flex;
-    align-items:center;
-    gap:12px;
-    margin-bottom:40px;
+.sidebar-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 40px;
 }
 
-.sidebar-logo img{
-    width:50px;
+.sidebar-logo img {
+    width: 50px;
 }
 
-.sidebar-logo h2{
-    font-size:24px;
-    font-weight:800;
+.sidebar-logo h2 {
+    font-size: 24px;
+    font-weight: 800;
 }
 
-.sidebar ul{
-    list-style:none;
-    padding:0;
+.sidebar ul {
+    list-style: none;
+    padding: 0;
 }
 
-.sidebar ul li{
-    margin-bottom:15px;
+.sidebar ul li {
+    margin-bottom: 15px;
 }
 
-.sidebar ul li a{
-    display:flex;
-    align-items:center;
-    gap:12px;
-    padding:14px 18px;
-    border-radius:14px;
-    text-decoration:none;
-    color:#333;
-    transition:.3s;
+.sidebar ul li a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 18px;
+    border-radius: 14px;
+    text-decoration: none;
+    color: #333;
+    transition: .3s;
 }
 
 .sidebar ul li a:hover,
-.sidebar ul li a.active{
-    background:#ff5e00;
-    color:#fff;
+.sidebar ul li a.active {
+    background: #ff5e00;
+    color: #fff;
 }
 
-.dashboard-content{
-    flex:1;
-    padding:40px;
+.dashboard-content {
+    flex: 1;
+    padding: 40px;
+    overflow-x: hidden;
 }
 
-.topbar{
-    margin-bottom:30px;
+.topbar {
+    margin-bottom: 30px;
 }
 
-.topbar h1{
-    font-size:34px;
-    font-weight:800;
+.topbar h1 {
+    font-size: 34px;
+    font-weight: 800;
 }
 
-.topbar p{
-    color:#666;
+.topbar p {
+    color: #666;
 }
 
-/* ================= INCOME CARD ================= */
-.income-card{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    background:
-        linear-gradient(
-            135deg,
-            #ff7b00,
-            #ff5100
-        );
-    color:#fff;
-    padding:35px;
-    border-radius:30px;
-    margin-bottom:30px;
-    box-shadow:
-        0 15px 40px rgba(255,94,0,.25);
+/* ==========================================================================
+   9. ADMIN COMPONENTS & MANAGEMENT (FIXED FORM VALUE & LAYOUT)
+   ========================================================================== */
+.income-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(135deg, #ff7b00, #ff5100);
+    color: #fff;
+    padding: 35px;
+    border-radius: 30px;
+    margin-bottom: 30px;
+    box-shadow: 0 15px 40px rgba(255, 94, 0, .25);
 }
 
-.income-card h1{
-    font-size:50px;
+.income-card h1 {
+    font-size: 50px;
 }
 
-/* ================= ADMIN CARD ================= */
-.admin-card-grid{
-    display:grid;
-    grid-template-columns:
-        repeat(2,1fr);
-    gap:25px;
+.admin-card-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 25px;
 }
 
-.admin-card{
-    background:#fff;
-    padding:30px;
-    border-radius:25px;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    box-shadow:
-        0 10px 30px rgba(0,0,0,.05);
+.admin-card {
+    background: #fff;
+    padding: 30px;
+    border-radius: 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, .05);
 }
 
-.admin-card h2{
-    font-size:38px;
+.admin-card h2 {
+    font-size: 38px;
 }
 
-.admin-card i{
-    font-size:45px;
-    color:#ff5e00;
+.admin-card i {
+    font-size: 45px;
+    color: #ff5e00;
 }
 
-/* ================= PAKET ADMIN ================= */
-.paket-admin-layout{
-    display:grid;
-    grid-template-columns:1fr 380px;
-    gap:30px;
-    align-items:start;
+.paket-admin-layout {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 30px;
+    align-items: start;
 }
 
-.paket-grid{
-    display:grid;
-    grid-template-columns:repeat(3,1fr);
-    gap:25px;
+.paket-admin-card {
+    background: #fff;
+    padding: 28px;
+    border-radius: 25px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, .05);
+    transition: .3s;
 }
 
-.paket-admin-card{
-    background:#fff;
-    padding:28px;
-    border-radius:25px;
-    box-shadow:0 10px 30px rgba(0,0,0,.05);
-    transition:.3s;
+.paket-admin-card:hover {
+    transform: translateY(-5px);
 }
 
-.paket-admin-card:hover{
-    transform:translateY(-5px);
+.paket-action {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
 }
 
-.paket-action{
-    display:flex;
-    gap:10px;
-    margin-top:20px;
+/* FIX: Mengurangi padding raksasa agar form punya ruang melebar luas */
+.form-paket-card {
+    background: #fff;
+    padding: 30px; /* Diubah dari 150px ke 30px agar seimbang */
+    border-radius: 28px;
+    box-shadow: 0 10px 35px rgba(0, 0, 0, .06);
+    position: sticky;
+    top: 30px;
+    width: 100%;
 }
 
-/* ================= FORM PAKET ================= */
-.form-paket-card{
-    background:#fff;
-    padding:35px;
-    border-radius:28px;
-    box-shadow:0 10px 35px rgba(0,0,0,.06);
-    position:sticky;
-    top:30px;
+/* FIX: Memastikan susunan komponen form di admin tersusun rapi vertikal ke bawah */
+.form-paket-card h3 {
+    font-size: 24px;
+    font-weight: 800;
+    margin-bottom: 25px;
+    color: #222;
 }
 
-.form-group{
-    margin-bottom:20px;
+.form-paket-card .form-group {
+    margin-bottom: 18px;
+    display: block;
+    width: 100%;
 }
 
-.form-group label{
-    display:block;
-    margin-bottom:10px;
-    font-weight:600;
+.form-paket-card label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #333;
+    font-size: 14px;
 }
 
-.form-group input,
-.form-group textarea{
-    width:100%;
-    padding:14px 16px;
-    border-radius:14px;
-    border:1px solid #ddd;
-    outline:none;
+.form-paket-card input,
+.form-paket-card textarea,
+.form-paket-card select {
+    width: 100%;
+    padding: 12px 15px;
+    border-radius: 12px;
+    border: 1px solid #ddd;
+    outline: none;
+    font-size: 14px;
+    background-color: #fff;
+    box-sizing: border-box; /* Mencegah padding merusak ukuran lebar element */
+    transition: .3s;
 }
 
-/* ================= TABLE ================= */
-.table-card{
-    background:#fff;
-    padding:30px;
-    border-radius:25px;
-    overflow-x:auto;
-    box-shadow:0 10px 30px rgba(0,0,0,.05);
+.form-paket-card input:focus,
+.form-paket-card textarea:focus {
+    border-color: #ff5e00;
+    box-shadow: 0 0 0 3px rgba(255, 94, 0, 0.1);
 }
 
-table{
-    width:100%;
-    border-collapse:collapse;
+.form-paket-card textarea {
+    min-height: 90px;
+    resize: vertical;
 }
 
-table thead{
-    background:#ffefe5;
+.form-paket-card button {
+    width: 100%;
+    padding: 14px;
+    margin-top: 10px;
+}
+
+.form-wrapper-admin {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.form-admin-card {
+    width: 100%;
+    max-width: 650px;
+    background: #fff;
+    padding: 40px;
+    border-radius: 30px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, .05);
+}
+
+.form-admin-card h2 {
+    font-size: 30px;
+    font-weight: 800;
+    margin-bottom: 30px;
+}
+
+.form-admin-card .form-group {
+    margin-bottom: 22px;
+}
+
+.form-admin-card label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: 600;
+    color: #333;
+}
+
+.form-admin-card input {
+    width: 100%;
+    padding: 15px;
+    border-radius: 14px;
+    border: 1px solid #ddd;
+    outline: none;
+    transition: .3s;
+}
+
+.form-admin-card input:focus {
+    border-color: #ff5e00;
+}
+
+.form-admin-card button {
+    width: 100%;
+    margin-top: 10px;
+}
+
+/* ==========================================================================
+   10. DATA TABLES SYSTEM (TRANSAKSI / PELANGGAN)
+   ========================================================================== */
+.table-card {
+    background: #fff;
+    padding: 30px;
+    border-radius: 25px;
+    overflow-x: auto;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, .05);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+table thead {
+    background: #ffefe5;
 }
 
 table th,
-table td{
-    padding:18px;
-    text-align:left;
+table td {
+    padding: 18px;
+    text-align: left;
 }
 
-table th{
-    color:#ff5e00;
+table th {
+    color: #ff5e00;
 }
 
-/* ================= RESPONSIVE ================= */
-@media(max-width:992px){
-    .hero-text h1{
-        font-size:50px;
-    }
-    .paket-grid{
-        grid-template-columns:
-            repeat(2,1fr);
-    }
-    .paket-admin-layout{
-        grid-template-columns:1fr;
-    }
-
+.table-header {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
 }
 
-@media(max-width:768px){
-    .navbar-wrapper{
-        flex-direction:column;
-        gap:20px;
-    }
-    nav ul{
-        gap:20px;
-        flex-wrap:wrap;
-        justify-content:center;
-    }
-    .hero-text{
-        text-align:center;
-        margin-bottom:50px;
-    }
-    .hero-text h1{
-        font-size:42px;
-    }
-    .admin-card-grid{
-        grid-template-columns:1fr;
-    }
-    .paket-grid{
-        grid-template-columns:1fr;
-    }
-    .dashboard-layout{
-        flex-direction:column;
-    }
-    .sidebar{
-        width:100%;
-    }
+.table-header h3 {
+    margin: 0;
+    font-size: 28px;
+    font-weight: 800;
+    color: #222;
 }
 
-/* ================= CUSTOMER PAKET ================= */
-.paket-grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fit, minmax(280px,1fr));
-    gap:25px;
+.table-header .btn-orange {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 22px;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 700;
+    text-decoration: none;
 }
 
-.customer-paket-card{
-    background:#fff;
-    padding:35px;
-    border-radius:25px;
-    box-shadow:0 10px 30px rgba(0,0,0,.05);
-    transition:.3s;
+.filter-form {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
 }
 
-.customer-paket-card:hover{
-    transform:translateY(-8px);
+/* ==========================================================================
+   11. DATA INPUT FORMS (PELANGGAN & PEMASANGAN)
+   ========================================================================== */
+.form-card {
+    width: 100%;
+    max-width: 650px;
+    background: #fff;
+    padding: 45px;
+    border-radius: 30px;
+    box-shadow: 0 10px 35px rgba(0, 0, 0, .08);
 }
 
-.customer-paket-card h3{
-    font-size:24px;
-    font-weight:700;
-    margin-bottom:15px;
+.form-card h2 {
+    font-size: 32px;
+    font-weight: 800;
+    margin-bottom: 10px;
 }
 
-.customer-paket-card h1{
-    font-size:42px;
-    color:#ff5e00;
-    font-weight:800;
-    margin-bottom:20px;
-}
-
-.customer-paket-card p{
-    color:#666;
-    margin-bottom:25px;
-    min-height:60px;
-}
-
-.customer-paket-card h2{
-    margin-bottom:25px;
-    font-size:28px;
-    font-weight:800;
-}
-
-/* ================= CUSTOMER DASHBOARD ================= */
-.profile-list{
-    margin-top:20px;
-}
-
-.profile-list p{
-    margin-bottom:14px;
-    font-size:16px;
-    color:#555;
-}
-
-.profile-list strong{
-    color:#222;
-}
-
-/* ================= FORM CARD ================= */
-.form-card{
-    width:100%;
-    max-width:650px;
-    background:#fff;
-    padding:45px;
-    border-radius:30px;
-    box-shadow:
-        0 10px 35px rgba(0,0,0,.08);
-}
-
-.form-card h2{
-    font-size:32px;
-    font-weight:800;
-    margin-bottom:10px;
-}
-
-.form-card p{
-    margin-bottom:25px;
-    color:#666;
+.form-card p {
+    margin-bottom: 25px;
+    color: #666;
 }
 
 .form-card input,
-.form-card textarea{
-    width:100%;
-    padding:15px;
-    margin-bottom:20px;
-    border-radius:14px;
-    border:1px solid #ddd;
-    outline:none;
+.form-card textarea {
+    width: 100%;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 14px;
+    border: 1px solid #ddd;
+    outline: none;
 }
 
-.form-card textarea{
-    resize:none;
-    height:120px;
+.form-card textarea {
+    resize: none;
+    height: 120px;
 }
 
-.form-card button{
-    width:100%;
-    padding:15px;
-    border:none;
-    border-radius:14px;
-    background:#ff5e00;
-    color:#fff;
-    font-weight:700;
-    cursor:pointer;
-    transition:.3s;
+.form-card button {
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 14px;
+    background: #ff5e00;
+    color: #fff;
+    font-weight: 700;
+    cursor: pointer;
+    transition: .3s;
 }
 
-.form-card button:hover{
-    background:#e65100;
+.form-card button:hover {
+    background: #e65100;
 }
 
-/* ================= PEMASANGAN ================= */
-.pemasangan-wrapper{
-    width:100%;
-    display:flex;
-    justify-content:center;
+.pemasangan-wrapper {
+    width: 100%;
+    display: flex;
+    justify-content: center;
 }
 
-/* ================= RINGKASAN ================= */
-.ringkasan-card{
-    background:#fff;
-    padding:35px;
-    border-radius:30px;
-    height:fit-content;
-    box-shadow:0 10px 30px rgba(0,0,0,.08);
+/* ==========================================================================
+   12. CUSTOMER COMPONENTS & DASHBOARD BANNER
+   ========================================================================== */
+.customer-paket-card {
+    background: #fff;
+    padding: 35px;
+    border-radius: 25px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, .05);
+    transition: .3s;
 }
 
-.ringkasan-card h3{
-    font-size:28px;
-    font-weight:800;
-    margin-bottom:30px;
+.customer-paket-card:hover {
+    transform: translateY(-8px);
 }
 
-.ringkasan-item{
-    display:flex;
-    justify-content:space-between;
-    margin-bottom:25px;
-    padding-bottom:15px;
-    border-bottom:1px solid #eee;
+.customer-paket-card h3 {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 15px;
 }
 
-.ringkasan-item span{
-    color:#666;
+.customer-paket-card h1 {
+    font-size: 42px;
+    color: #ff5e00;
+    font-weight: 800;
+    margin-bottom: 20px;
 }
 
-.ringkasan-item strong{
-    color:#222;
+.customer-paket-card p {
+    color: #666;
+    margin-bottom: 25px;
+    min-height: 60px;
 }
 
-.status-pending{
-    color:#ff5e00;
+.customer-paket-card h2 {
+    margin-bottom: 25px;
+    font-size: 28px;
+    font-weight: 800;
 }
 
-/* ================= STATUS CUSTOMER ================= */
-.status-active{
-    background:#dcfce7;
-    color:#166534;
-    padding:8px 14px;
-    border-radius:10px;
-    font-size:14px;
-    font-weight:700;
-}
-
-.status-pending{
-    background:#ffedd5;
-    color:#ea580c;
-    padding:8px 14px;
-    border-radius:10px;
-    font-size:14px;
-    font-weight:700;
-}
-
-/* ================= TAMBAH PELANGGAN ================= */
-.table-header{
-    width:100%;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    margin-bottom:25px;
-}
-
-.table-header h3{
-    margin:0;
-    font-size:28px;
-    font-weight:800;
-    color:#222;
-}
-
-.table-header .btn-orange{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    padding:12px 22px;
-    border-radius:12px;
-    font-size:15px;
-    font-weight:700;
-    text-decoration:none;
-}
-
-/* ================= FORM TAMBAH PELANGGAN ================= */
-.form-group select{
-    width:100%;
-    padding:14px 16px;
-    border-radius:14px;
-    border:1px solid #ddd;
-    outline:none;
-    background:#fff;
-}
-
-/* ================= DETAIL CUSTOMER ================= */
-.detail-customer-card{
-    background:#fff;
-    padding:40px;
-    border-radius:30px;
-    box-shadow:0 10px 35px rgba(0,0,0,.05);
-}
-
-.detail-header{
-    display:flex;
-    align-items:center;
-    gap:25px;
-    margin-bottom:40px;
-}
-
-.detail-avatar{
-    width:90px;
-    height:90px;
-    border-radius:25px;
-    background:linear-gradient(135deg, #ff5e00, #ff9a3c);
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    color:#fff;
-    font-size:38px;
-}
-
-.detail-header h2{
-    font-size:34px;
-    font-weight:800;
-    margin-bottom:5px;
-}
-
-.detail-header p{
-    color:#666;
-}
-
-.detail-grid{
-    display:grid;
-    grid-template-columns:repeat(2,1fr);
-    gap:25px;
-}
-
-.detail-item{
-    background:#fafafa;
-    padding:25px;
-    border-radius:20px;
-}
-
-.detail-item span{
-    display:block;
-    color:#888;
-    margin-bottom:10px;
-}
-
-.detail-item strong{
-    font-size:18px;
-    color:#222;
-}
-
-.detail-item.full{
-    grid-column:1/3;
-}
-
-.detail-action{
-    margin-top:35px;
-    display:flex;
-    gap:15px;
-}
-
-@media(max-width:768px){
-    .detail-grid{
-        grid-template-columns:1fr;
-    }
-    .detail-item.full{
-        grid-column:auto;
-    }
-    .detail-header{
-        flex-direction:column;
-        text-align:center;
-    }
-}
-
-/* ================= STATUS TRANSAKSI ================= */
-.status-belum{
-    background:#fee2e2;
-    color:#dc2626;
-    padding:8px 14px;
-    border-radius:10px;
-    font-size:14px;
-    font-weight:700;
-}
-
-/* ================= AKSI BUTTON ================= */
-.aksi-button{
-    display:flex;
-    gap:10px;
-}
-
-/* ================= FILTER TRANSAKSI ================= */
-.filter-form{
-    display:flex;
-    gap:15px;
-    align-items:center;
-    margin-bottom:25px;
-    flex-wrap:wrap;
-}
-
-.filter-form select{
-    padding:14px 16px;
-    border-radius:14px;
-    border:1px solid #ddd;
-    outline:none;
-    min-width:220px;
-    background:#fff;
-}
-
-/* ================= CUSTOMER DASHBOARD ================= */
 .customer-hero-card {
     background: linear-gradient(135deg, #ff5e00, #ff8c00);
     border-radius: 35px;
@@ -1127,90 +988,26 @@ table th{
     color: #ff5e00;
 }
 
-/* ================= BUTTON TAMBAHAN ================= */
-.btn-detail {
-    background: #2563eb;
-    color: #fff;
-    padding: 10px 16px;
-    border-radius: 10px;
-    text-decoration: none;
+/* ==========================================================================
+   13. PROFILE & DETAILED CUSTOMER VIEW
+   ========================================================================== */
+.profile-list, .profile-detail-list {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
 }
 
-.btn-upload {
-    background: #f59e0b;
-    color: #fff;
-    padding: 10px 16px;
-    border-radius: 10px;
-    text-decoration: none;
+.profile-list p {
+    margin-bottom: 14px;
+    font-size: 16px;
+    color: #555;
 }
 
-.btn-bayar {
-    background: #16a34a;
-    color: #fff;
-    padding: 10px 16px;
-    border-radius: 10px;
-    text-decoration: none;
+.profile-list strong {
+    color: #222;
 }
 
-.btn-orange-outline {
-    padding: 12px 18px;
-    border: 2px solid #ff5e00;
-    color: #ff5e00;
-    border-radius: 12px;
-    font-weight: 700;
-    text-decoration: none;
-    transition: .3s;
-}
-
-.btn-orange-outline:hover {
-    background: #ff5e00;
-    color: #fff;
-}
-
-/* ================= RESPONSIVE ================= */
-@media (max-width: 1100px) {
-
-    .customer-mini-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-
-}
-
-@media (max-width: 768px) {
-
-    .customer-hero-card {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 30px;
-    }
-
-    .hero-left {
-        width: 100%;
-    }
-
-    .hero-right {
-        width: 100%;
-        align-items: flex-start;
-    }
-
-    .customer-mini-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .customer-hero-card h1 {
-        font-size: 42px;
-    }
-
-}
-
-.disabled-btn{
-    opacity:.7;
-    cursor:not-allowed;
-    border:none;
-}   
-
-/* ================= PROFILE CUSTOMER ================= */
-.profile-customer-card {
+.profile-customer-card, .detail-customer-card {
     width: 100%;
     background: #fff;
     border-radius: 30px;
@@ -1218,8 +1015,7 @@ table th{
     box-shadow: 0 10px 35px rgba(0, 0, 0, .06);
 }
 
-/* HEADER */
-.profile-customer-header {
+.profile-customer-header, .detail-header {
     display: flex;
     align-items: center;
     gap: 25px;
@@ -1228,7 +1024,7 @@ table th{
     border-bottom: 1px solid #f1f1f1;
 }
 
-.profile-avatar {
+.profile-avatar, .detail-avatar {
     width: 95px;
     height: 95px;
     border-radius: 28px;
@@ -1241,51 +1037,77 @@ table th{
     box-shadow: 0 10px 25px rgba(255, 94, 0, .25);
 }
 
-.profile-customer-header h2 {
+.detail-avatar {
+    width: 90px;
+    height: 90px;
+    font-size: 38px;
+}
+
+.profile-customer-header h2, .detail-header h2 {
     font-size: 32px;
     font-weight: 800;
     margin-bottom: 6px;
     color: #222;
 }
 
-.profile-customer-header p {
+.detail-header h2 {
+    font-size: 34px;
+    margin-bottom: 5px;
+}
+
+.profile-customer-header p, .detail-header p {
     color: #888;
     font-size: 16px;
 }
 
-/* INFO GRID */
-.profile-info-grid {
+.profile-info-grid, .detail-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 20px;
     margin-bottom: 35px;
 }
 
-.profile-info-item {
+.detail-grid {
+    gap: 25px;
+}
+
+.profile-info-item, .detail-item {
     background: #fafafa;
     border: 1px solid #f1f1f1;
     border-radius: 22px;
     padding: 24px;
 }
 
-.profile-info-item span {
+.detail-item {
+    background: #fafafa;
+    padding: 25px;
+    border-radius: 20px;
+    border: none;
+}
+
+.profile-info-item span, .detail-item span {
     display: block;
     color: #888;
     font-size: 14px;
     margin-bottom: 12px;
 }
 
-.profile-info-item strong {
+.detail-item span {
+    margin-bottom: 10px;
+}
+
+.profile-info-item strong, .detail-item strong {
     font-size: 22px;
     font-weight: 800;
     color: #222;
 }
 
-/* DETAIL */
-.profile-detail-list {
-    display: flex;
-    flex-direction: column;
-    gap: 18px;
+.detail-item strong {
+    font-size: 18px;
+}
+
+.detail-item.full {
+    grid-column: 1/3;
 }
 
 .profile-detail-item {
@@ -1309,23 +1131,13 @@ table th{
     line-height: 1.6;
 }
 
-/* BUTTON */
-.profile-action {
+.profile-action, .form-action, .detail-action {
     margin-top: 35px;
     display: flex;
     justify-content: flex-end;
-}
-
-/* FORM ACTION */
-.form-action {
-    width: 100%;
-    display: flex;
-    justify-content: flex-end;
     gap: 15px;
-    margin-top: 20px;
 }
 
-/* BUTTON CANCEL */
 .btn-cancel {
     padding: 14px 26px;
     border-radius: 14px;
@@ -1341,362 +1153,230 @@ table th{
     color: #111;
 }
 
-/* RESPONSIVE */
-@media (max-width: 768px) {
-    .profile-customer-header {
-        flex-direction: column;
-        text-align: center;
-    }
-
-    .profile-info-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .profile-action {
-        justify-content: center;
-    }
-
-    .form-action {
-        flex-direction: column;
-    }
-
-    .btn-cancel,
-    .form-action .btn-orange {
-        width: 100%;
-        justify-content: center;
-    }
+/* ==========================================================================
+   14. BOX RINGKASAN PESANAN & STATUS BADGES
+   ========================================================================== */
+.ringkasan-card {
+    background: #fff;
+    padding: 35px;
+    border-radius: 30px;
+    height: fit-content;
+    box-shadow: 0 10px 30px rgba(0,0,0,.08);
 }
 
-/* ================= PAYMENT ================= */
-
-.payment-page{
-    width:100%;
-    min-height:100vh;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    padding:50px 20px;
+.ringkasan-card h3 {
+    font-size: 28px;
+    font-weight: 800;
+    margin-bottom: 30px;
 }
 
-.payment-card{
-    width:100%;
-    max-width:1100px;
-    background:#fff;
-    border-radius:30px;
-    overflow:hidden;
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    box-shadow:0 10px 35px rgba(0,0,0,.08);
+.ringkasan-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
 }
 
-.payment-detail{
-    padding:45px;
-    border-right:1px solid #eee;
+.ringkasan-item span { color: #666; }
+.ringkasan-item strong { color: #222; }
+
+.status-active { background: #dcfce7; color: #166534; padding: 8px 14px; border-radius: 10px; font-size: 14px; font-weight: 700; }
+.status-pending { background: #ffedd5; color: #ea580c; padding: 8px 14px; border-radius: 10px; font-size: 14px; font-weight: 700; }
+.status-belum { background: #fee2e2; color: #dc2626; padding: 8px 14px; border-radius: 10px; font-size: 14px; font-weight: 700; }
+
+.badge-status { display: inline-block; padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; text-align: center; }
+.badge-lunas { background: #dcfce7; color: #15803d; }
+.badge-pending { background: #fef3c7; color: #b45309; }
+
+/* ==========================================================================
+   15. WHITE FORM VIEW (PAYMENT-MERGE-CARD) & LEGACY PAYMENT
+   ========================================================================== */
+.payment-page {
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 50px 20px;
 }
 
-.payment-form{
-    padding:45px;
+.payment-card {
+    width: 100%;
+    max-width: 1100px;
+    background: #fff;
+    border-radius: 30px;
+    overflow: hidden;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    box-shadow: 0 10px 35px rgba(0,0,0,.08);
 }
 
-.payment-detail h2,
-.payment-form h2{
-    font-size:30px;
-    margin-bottom:30px;
-}
+.payment-detail, .payment-form { padding: 45px; }
+.payment-detail { border-right: 1px solid #eee; }
+.payment-detail h2, .payment-form h2 { font-size: 30px; margin-bottom: 30px; }
+.payment-item { margin-bottom: 25px; }
+.payment-item span { display: block; color: #666; margin-bottom: 8px; }
+.payment-item strong { font-size: 20px; }
+.payment-info { background: #fff7f2; padding: 20px; border-radius: 18px; margin-bottom: 25px; }
+.payment-info h4 { margin-bottom: 15px; }
+.payment-info p { margin-bottom: 10px; }
 
-.payment-item{
-    margin-bottom:25px;
-}
-
-.payment-item span{
-    display:block;
-    color:#666;
-    margin-bottom:8px;
-}
-
-.payment-item strong{
-    font-size:20px;
-}
-
-.payment-info{
-    background:#fff7f2;
-    padding:20px;
-    border-radius:18px;
-    margin-bottom:25px;
-}
-
-.payment-info h4{
-    margin-bottom:15px;
-}
-
-.payment-info p{
-    margin-bottom:10px;
-}
-
-.qris-image{
-    width:220px;
-    margin-top:10px;
-}
-
-/* ================= SUCCESS ================= */
-
-.success-page{
-    width:100%;
-    min-height:100vh;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    padding:20px;
-}
-
-.success-card{
-    width:100%;
-    max-width:550px;
-    background:#fff;
-    padding:50px;
-    border-radius:30px;
-    text-align:center;
-    box-shadow:0 10px 35px rgba(0,0,0,.08);
-}
-
-.success-icon{
-    font-size:80px;
-    color:#22c55e;
-    margin-bottom:25px;
-}
-
-.success-card h1{
-    margin-bottom:20px;
-}
-
-.success-card p{
-    color:#666;
-    margin-bottom:30px;
-}
-
-@media(max-width:768px){
-
-    .payment-card{
-        grid-template-columns:1fr;
-    }
-
-    .payment-detail{
-        border-right:none;
-        border-bottom:1px solid #eee;
-    }
-
-}
-
-/* ================= PAYMENT MERGE ================= */
 .payment-merge-card {
-  width: 100%;
-  max-width: 1100px;
-  background: #fff;
-  border-radius: 35px;
-  display: grid;
-  grid-template-columns: 380px 1fr;
-  overflow: hidden;
-  box-shadow: 0 15px 40px rgba(0, 0, 0, .08);
+    width: 100%;
+    max-width: 1100px;
+    background: #fff;
+    border-radius: 35px;
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    overflow: hidden;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, .08);
 }
 
-/* LEFT */
 .payment-left {
-  padding: 45px 35px;
-  border-right: 2px solid #111;
-  background: #fffaf7;
+    padding: 45px 35px;
+    border-right: 2px solid #ff5e00;
+    background: #fffaf7;
 }
 
-.payment-left h2 {
-  font-size: 30px;
-  font-weight: 800;
-  margin-bottom: 35px;
-}
-
-.payment-summary-list {
-  display: flex;
-  flex-direction: column;
-  gap: 25px;
-}
-
-.payment-summary-item {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.payment-summary-item span {
-  color: #777;
-  font-size: 15px;
-}
-
-.payment-summary-item strong {
-  font-size: 20px;
-  color: #222;
-}
+.payment-left h2 { font-size: 30px; font-weight: 800; margin-bottom: 35px; }
+.payment-summary-list { display: flex; flex-direction: column; gap: 25px; }
+.payment-summary-item { display: flex; flex-direction: column; gap: 8px; }
+.payment-summary-item span { color: #777; font-size: 15px; }
+.payment-summary-item strong { font-size: 20px; color: #222; }
 
 .payment-price {
-  color: #ff5e00 !important;
-  font-size: 34px !important;
-  font-weight: 800;
+    color: #ff5e00 !important;
+    font-size: 34px !important;
+    font-weight: 800;
+    word-break: break-word;
 }
 
-/* RIGHT */
-.payment-right {
-  padding: 45px;
-}
+.payment-right { padding: 45px; }
+.payment-right h2 { font-size: 34px; font-weight: 800; margin-bottom: 10px; }
+.payment-right p { color: #666; margin-bottom: 30px; }
 
-.payment-right h2 {
-  font-size: 34px;
-  font-weight: 800;
-  margin-bottom: 10px;
-}
-
-.payment-right p {
-  color: #666;
-  margin-bottom: 30px;
-}
-
-/* PAYMENT BOX */
 .payment-box {
-  display: none;
-  background: #fafafa;
-  border: 1px solid #eee;
-  border-radius: 18px;
-  padding: 25px;
-  margin-bottom: 25px;
+    display: none;
+    background: #fafafa;
+    border: 1px solid #eee;
+    border-radius: 18px;
+    padding: 25px;
+    margin-bottom: 25px;
 }
 
-.payment-box h4 {
-  font-size: 20px;
-  margin-bottom: 15px;
-}
-
-.payment-box p {
-  margin-bottom: 10px;
-  color: #444;
-}
+.payment-box h4 { font-size: 20px; margin-bottom: 15px; }
+.payment-box p { margin-bottom: 10px; color: #444; }
 
 .qris-image {
-  width: 220px;
-  margin-top: 10px;
+    width: 100%;
+    max-width: 220px;
+    height: auto;
+    margin-top: 10px;
 }
 
-/* ================= BUTTON PAYMENT ================= */
-
-.btn-payment{
-    width:100%;
-    border:none;
-    padding:18px;
-    border-radius:18px;
-
-    background:
-        linear-gradient(
-            135deg,
-            #ff5e00,
-            #ff8c00
-        );
-
-    color:#fff;
-    font-size:17px;
-    font-weight:700;
-
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    gap:12px;
-
-    cursor:pointer;
-    transition:.3s;
-
-    box-shadow:
-        0 10px 25px rgba(255,94,0,.25);
+.btn-payment {
+    width: 100%;
+    border: none;
+    padding: 18px;
+    border-radius: 18px;
+    background: linear-gradient(135deg, #ff5e00, #ff8c00);
+    color: #fff;
+    font-size: 17px;
+    font-weight: 700;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: .3s;
+    box-shadow: 0 10px 25px rgba(255, 94, 0, .25);
 }
 
-.btn-payment:hover{
-    transform:translateY(-4px);
-
-    box-shadow:
-        0 18px 35px rgba(255,94,0,.35);
+.btn-payment:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 18px 35px rgba(255, 94, 0, .35);
 }
 
-.btn-payment i{
-    font-size:18px;
+.img-bukti {
+    width: 100%;
+    max-width: 450px;
+    border-radius: 20px;
+    margin-top: 15px;
+    border: 1px solid #eee;
 }
 
-/* RESPONSIVE */
-@media (max-width: 900px) {
-  .payment-merge-card {
-    grid-template-columns: 1fr;
-  }
-
-  .payment-left {
-    border-right: none;
-    border-bottom: 2px solid #111;
-  }
-
+/* ==========================================================================
+   16. HALAMAN DETAIL TRANSAKSI (FORM VIEW STYLE)
+   ========================================================================== */
+.detail-form-container {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    margin-top: 20px;
 }
 
-.img-bukti{
-    width:100%;
-    max-width:450px;
-    border-radius:20px;
-    margin-top:15px;
-    border:1px solid #eee;
+.detail-section-title {
+    font-size: 1.2rem;
+    color: #333;
+    margin-bottom: 20px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #f0f0f0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
-/* ================= FORM TAMBAH ADMIN ================= */
-.form-wrapper-admin {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
+.form-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 30px;
 }
 
-.form-admin-card {
-  width: 100%;
-  max-width: 650px;
-  background: #fff;
-  padding: 40px;
-  border-radius: 30px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, .05);
+.form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 
-.form-admin-card h2 {
-  font-size: 30px;
-  font-weight: 800;
-  margin-bottom: 30px;
+.form-field label {
+    font-weight: 600;
+    color: #666;
+    font-size: 0.9rem;
 }
 
-.form-admin-card .form-group {
-  margin-bottom: 22px;
+.form-field .value-box {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    padding: 12px 15px;
+    border-radius: 8px;
+    color: #333;
+    font-weight: 500;
+    font-size: 1rem;
 }
 
-.form-admin-card label {
-  display: block;
-  margin-bottom: 10px;
-  font-weight: 600;
-  color: #333;
+.bukti-container {
+    text-align: center;
+    background: #f8f9fa;
+    border: 2px dashed #dee2e6;
+    padding: 20px;
+    border-radius: 10px;
+    margin-top: 10px;
 }
 
-.form-admin-card input {
-  width: 100%;
-  padding: 15px;
-  border-radius: 14px;
-  border: 1px solid #ddd;
-  outline: none;
-  transition: .3s;
+.img-bukti-view {
+    max-width: 100%;
+    max-height: 400px;
+    border-radius: 6px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
-.form-admin-card input:focus {
-  border-color: #ff5e00;
-}
-
-.form-admin-card button {
-  width: 100%;
-  margin-top: 10px;
-}
-
-.logout-modal{
+/* ==========================================================================
+   17. MODAL POPUP SYSTEM (LOGOUT & ERROR OVERLAY)
+   ========================================================================== */
+.logout-modal {
     position: fixed;
     inset: 0;
     background: rgba(0,0,0,0.5);
@@ -1709,12 +1389,12 @@ table th{
     z-index: 9999;
 }
 
-.logout-modal.show{
+.logout-modal.show {
     opacity: 1;
     visibility: visible;
 }
 
-.logout-modal-content{
+.logout-modal-content {
     width: 400px;
     background: white;
     border-radius: 25px;
@@ -1723,7 +1403,7 @@ table th{
     animation: popup 0.2s ease;
 }
 
-.logout-icon{
+.logout-icon {
     width: 70px;
     height: 70px;
     background: #fff3e8;
@@ -1736,24 +1416,23 @@ table th{
     font-size: 32px;
 }
 
-.logout-modal-content h2{
+.logout-modal-content h2 {
     margin-top: 20px;
     font-size: 26px;
 }
 
-.logout-modal-content p{
+.logout-modal-content p {
     color: #666;
     margin-top: 10px;
 }
 
-.logout-modal-action{
+.logout-modal-action {
     display: flex;
     gap: 15px;
     margin-top: 30px;
 }
 
-.btn-cancel,
-.btn-confirm{
+.btn-confirm {
     flex: 1;
     padding: 14px;
     border-radius: 14px;
@@ -1761,30 +1440,10 @@ table th{
     font-weight: 600;
     cursor: pointer;
     border: none;
-}
-
-.btn-cancel{
-    background: #eee;
-    color: #333;
-}
-
-.btn-confirm{
     background: #ff7a00;
     color: white;
 }
 
-@keyframes popup{
-    from{
-        transform: scale(0.8);
-        opacity: 0;
-    }
-    to{
-        transform: scale(1);
-        opacity: 1;
-    }
-}
-
-/* ================= ERROR MODAL POPUP (DATA TIDAK DITEMUKAN) ================= */
 .error-overlay {
     position: fixed;
     top: 0;
@@ -1797,7 +1456,6 @@ table th{
     align-items: center;
     z-index: 9999;
     backdrop-filter: blur(5px);
-    -webkit-backdrop-filter: blur(5px);
 }
 
 .error-modal-box {
@@ -1848,4 +1506,163 @@ table th{
 @keyframes popupScale {
     0% { transform: scale(0.7); opacity: 0; }
     100% { transform: scale(1); opacity: 1; }
+}
+
+/* ==========================================================================
+   18. SUCCESS PAGES SYSTEM
+   ========================================================================== */
+.success-page {
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.success-card {
+    width: 100%;
+    max-width: 550px;
+    background: #fff;
+    padding: 50px;
+    border-radius: 30px;
+    text-align: center;
+    box-shadow: 0 10px 35px rgba(0, 0, 0, .08);
+}
+
+.success-icon {
+    font-size: 80px;
+    color: #22c55e;
+    margin-bottom: 25px;
+}
+
+.success-card h1 { margin-bottom: 20px; }
+.success-card p { color: #666; margin-bottom: 30px; }
+
+
+/* ==========================================================================
+   19. MEDIA QUERIES RESPONSIVE (MOBILE & TABLET SYSTEM)
+   ========================================================================== */
+@media (max-width: 1100px) {
+    .customer-mini-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media(max-width: 992px) {
+    .hero-text h1 {
+        font-size: 50px;
+    }
+    .paket-admin-layout {
+        grid-template-columns: 1fr;
+    }
+    .form-paket-card {
+        position: static;
+    }
+}
+
+@media (max-width: 900px) {
+    .payment-card, .payment-merge-card {
+        grid-template-columns: 1fr;
+    }
+    .payment-detail {
+        border-right: none;
+        border-bottom: 1px solid #eee;
+    }
+    .payment-left {
+        border-right: none;
+        border-bottom: 2px solid #eee;
+        padding: 35px 25px;
+    }
+    .payment-right {
+        padding: 35px 25px;
+    }
+    .payment-left h2, .payment-right h2 {
+        font-size: 26px;
+    }
+    .payment-price {
+        font-size: 28px !important;
+    }
+}
+
+@media(max-width: 768px) {
+    .navbar-wrapper {
+        flex-direction: column;
+        gap: 20px;
+    }
+    nav ul {
+        gap: 20px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    .hero-text {
+        text-align: center;
+        margin-bottom: 50px;
+    }
+    .hero-text h1 {
+        font-size: 42px;
+    }
+    .admin-card-grid {
+        grid-template-columns: 1fr;
+    }
+    .dashboard-layout {
+        flex-direction: column;
+    }
+    .sidebar {
+        width: 100%;
+    }
+    .income-card {
+        flex-direction: column;
+        text-align: center;
+        gap: 15px;
+    }
+    .income-card h1 {
+        font-size: 36px;
+    }
+    .profile-customer-header, .detail-header {
+        flex-direction: column;
+        text-align: center;
+    }
+    .profile-info-grid, .detail-grid, .form-grid-2 {
+        grid-template-columns: 1fr;
+    }
+    .detail-item.full {
+        grid-column: auto;
+    }
+    .profile-action, .form-action, .logout-modal-action {
+        flex-direction: column;
+    }
+    .btn-cancel, .form-action .btn-orange {
+        width: 100%;
+        justify-content: center;
+    }
+    .customer-hero-card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 30px;
+        padding: 35px 20px;
+    }
+    .hero-left, .hero-right {
+        width: 100%;
+    }
+    .hero-right {
+        align-items: flex-start;
+    }
+    .customer-hero-card h1 {
+        font-size: 42px;
+    }
+    .table-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+}
+
+@media (max-width: 480px) {
+    .payment-left, .payment-right {
+        padding: 25px 20px;
+    }
+    .payment-left h2, .payment-right h2 {
+        font-size: 22px;
+    }
 }

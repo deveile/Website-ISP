@@ -23,7 +23,7 @@ $pendapatan = mysqli_fetch_assoc(mysqli_query($koneksi, $query_income));
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 
 <head>
   <meta charset="UTF-8">

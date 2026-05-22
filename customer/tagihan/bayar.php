@@ -2,50 +2,88 @@
 require_once __DIR__ . '/../../auth/cek_login.php';
 require_once __DIR__ . '/../../koneksi.php';
 
-$id = $_GET['id'];
+// Ambil ID Transaksi dari parameter URL (Menggantikan id_pemasangan)
+$id_transaksi = $_GET['id'] ?? '';
 
-/* ================= AMBIL TRANSAKSI ================= */
+// 1. Ambil data gabungan melalui tb_langganan untuk ringkasan pesanan di sebelah kiri
 $query = mysqli_query(
     $koneksi,
     "SELECT 
         tb_transaksi.*,
-        tb_customer.nama_customer
+        tb_paket.nama_paket,
+        tb_paket.kecepatan,
+        tb_paket.harga
      FROM tb_transaksi
-     LEFT JOIN tb_customer ON tb_transaksi.id_customer = tb_customer.id_customer
-     WHERE tb_transaksi.id_transaksi = '$id'"
+     LEFT JOIN tb_langganan ON tb_transaksi.id_langganan = tb_langganan.id_langganan
+     LEFT JOIN tb_paket ON tb_langganan.id_paket = tb_paket.id_paket
+     WHERE tb_transaksi.id_transaksi = '$id_transaksi'"
 );
 
 $data = mysqli_fetch_assoc($query);
 
-/* ================= UPLOAD ================= */
-if (isset($_POST['upload'])) {
-    $nama_file = $_FILES['bukti_pembayaran']['name'];
-    $tmp       = $_FILES['bukti_pembayaran']['tmp_name'];
+// Validasi jika data tagihan tidak ditemukan
+if (!$data) {
+    echo "<script>alert('Data tagihan tidak ditemukan!'); window.location='index.php';</script>";
+    exit;
+}
 
-    $random = rand(1000, 9999);
-    $file_baru = $random . '-' . $nama_file;
+/* ================= SUBMIT PEMBAYARAN ================= */
+if (isset($_POST['submit'])) {
 
+    $metode = $_POST['metode_pembayaran'];
+    $total_bayar = $data['harga']; // Mengambil nominal harga paket
+
+    /* ================= UPLOAD FOTO ================= */
+    $bukti = $_FILES['bukti_pembayaran']['name'];
+    $tmp   = $_FILES['bukti_pembayaran']['tmp_name'];
+
+    // Membuat nama file unik berdasarkan kode invoice agar rapi dan tidak saling tertimpa
+    $ekstensi_file = pathinfo($bukti, PATHINFO_EXTENSION);
+    $nama_bukti = "BUKTI-" . $data['kode_invoice'] . "-" . time() . "." . $ekstensi_file;
+
+    // Proses pemindahan file ke folder tujuan
     move_uploaded_file(
         $tmp,
-        "../../assets/uploads/" . $file_baru
+        '../../assets/uploads/bukti/' . $nama_bukti
     );
 
-    mysqli_query(
-        $koneksi,
-        "UPDATE tb_transaksi 
-         SET
-            bukti_pembayaran = '$file_baru',
-            status_pembayaran = 'Menunggu Konfirmasi',
-            tanggal_transaksi = NOW()
-         WHERE id_transaksi = '$id'"
-    );
+    /* ================= UPDATE DATA TAGIHAN ================= */
+    
+    // Mulai transaksi database agar proses aman
+    mysqli_begin_transaction($koneksi);
 
-    echo "
-    <script>
-        alert('Bukti pembayaran berhasil dikirim');
-        window.location='index.php';
-    </script>
-    ";
+    try {
+        // QUERY FIX: Melakukan UPDATE pada record transaksi yang sudah ada, bukan INSERT BARU
+        mysqli_query(
+            $koneksi,
+            "UPDATE tb_transaksi SET 
+                metode_pembayaran = '$metode', 
+                bukti_pembayaran = '$nama_bukti', 
+                jumlah_bayar = '$total_bayar', 
+                status_pembayaran = 'Menunggu Konfirmasi',
+                tanggal_transaksi = NOW()
+             WHERE id_transaksi = '$id_transaksi'"
+        );
+
+        // Komit perubahan jika tidak ada error SQL
+        mysqli_commit($koneksi);
+
+        echo "
+        <script>
+            alert('Pembayaran berhasil dikirim! Menunggu konfirmasi admin.');
+            window.location='index.php';
+        </script>
+        ";
+
+    } catch (mysqli_sql_exception $e) {
+        // Batalkan perubahan jika query mengalami kegagalan sistem
+        mysqli_rollback($koneksi);
+        
+        echo "<div style='color: red; padding: 20px; background: #ffdddd; border: 1px solid red; margin: 20px auto; max-width: 600px; border-radius: 8px;'>";
+        echo "<strong>Gagal menyimpan pembayaran!</strong><br>";
+        echo "Pesan Error: " . $e->getMessage();
+        echo "</div>";
+    }
 }
 ?>
 
@@ -55,7 +93,7 @@ if (isset($_POST['upload'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <title>Upload Pembayaran</title>
+    <title>Pembayaran - Anuwani Network</title>
 
     <link rel="stylesheet" href="../../assets/css/style.css">
     <link rel="icon" type="image/png" href="../../assets/images/logo.png">
@@ -63,111 +101,79 @@ if (isset($_POST['upload'])) {
 </head>
 <body>
 
-<div class="dashboard-layout">
+<div class="auth-container">
+    <div class="payment-merge-card">
 
-    <!-- ================= SIDEBAR ================= -->
-    <div class="sidebar">
+        <div class="payment-left">
+            <h2>Ringkasan Pesanan</h2>
 
-        <div class="sidebar-logo">
-            <img src="../../assets/images/logo.png">
-            <h2>Anuwani</h2>
-        </div>
+            <div class="payment-summary-list">
+                <div class="payment-summary-item">
+                    <span>Invoice</span>
+                    <strong><?= $data['kode_invoice']; ?></strong>
+                </div>
 
-        <ul>
-            <li>
-                <a href="../index.php">
-                    <i class="bi bi-grid"></i> Dashboard
-                </a>
-            </li>
-            <li>
-                <a href="index.php" class="active">
-                    <i class="bi bi-receipt"></i> Tagihan Saya
-                </a>
-            </li>
-            <li>
-                <a href="../paket/index.php">
-                    <i class="bi bi-wifi"></i> Paket Internet
-                </a>
-            </li>
-            <li>
-                <a href="../profil.php">
-                    <i class="bi bi-person"></i> Profil
-                </a>
-            </li>
-            <li>
-                <a href="../../auth/logout.php"
-                onclick="return confirm('Apakah Anda yakin ingin logout?')">
-                    <i class="bi bi-box-arrow-right"></i> Logout
-                </a>
-            </li>
-        </ul>
+                <div class="payment-summary-item">
+                    <span>Paket</span>
+                    <strong><?= $data['nama_paket']; ?></strong>
+                </div>
 
-    </div>
+                <div class="payment-summary-item">
+                    <span>Kecepatan</span>
+                    <strong><?= $data['kecepatan']; ?></strong>
+                </div>
 
-    <!-- ================= CONTENT ================= -->
-    <div class="dashboard-content">
+                <div class="payment-summary-item">
+                    <span>Total Pembayaran</span>
+                    <strong class="payment-price">
+                        Rp <?= number_format($data['harga'], 0, ',', '.'); ?>
+                    </strong>
+                </div>
 
-        <div class="topbar">
-            <div>
-                <h1>Upload Pembayaran</h1>
-                <p>Kirim bukti transfer pembayaran</p>
+                <div class="payment-summary-item">
+                    <span>Status</span>
+                    <strong class="status-belum" style="color: #c5221f; background: #fce8e6; padding: 4px 10px; border-radius: 12px; font-size: 0.85rem;">
+                        <?php 
+                            // Jika status_pembayaran di DB ada isinya, tampilkan. Jika kosong, tampilkan 'Belum Bayar'
+                            echo !empty($data['status_pembayaran']) ? $data['status_pembayaran'] : 'Belum Bayar'; 
+                        ?>
+                    </strong>
+                </div>
             </div>
         </div>
 
-        <!-- ================= CARD ================= -->
-        <div class="form-card">
+        <div class="payment-right">
+            <h2>Pembayaran</h2>
+            <p>Upload bukti pembayaran untuk melanjutkan konfirmasi layanan internet Anda.</p>
 
-            <h2>
-                <?= $data['kode_invoice']; ?>
-            </h2>
-
-            <p>
-                Total pembayaran:
-                <strong>
-                    Rp<?= number_format($data['jumlah_bayar']); ?>
-                </strong>
-            </p>
-
-            <!-- ================= INFO BANK ================= -->
-            <div
-                style="
-                    background: #fff7ed;
-                    border: 1px solid #fed7aa;
-                    padding: 20px;
-                    border-radius: 20px;
-                    margin-bottom: 25px;
-                "
-            >
-                <h3
-                    style="
-                        margin-bottom: 15px;
-                        color: #ea580c;
-                    "
-                >
-                    Transfer Pembayaran
-                </h3>
-
-                <p style="margin-bottom: 8px;">
-                    Bank BCA - 1234567890
-                </p>
-
-                <p style="margin-bottom: 8px;">
-                    A/N Anuwani.net
-                </p>
-
-                <p style="color: #666;">
-                    Upload bukti transfer setelah pembayaran berhasil dilakukan.
-                </p>
-            </div>
-
-            <!-- ================= FORM ================= -->
             <form method="POST" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label>Metode Pembayaran</label>
+                    <select 
+                        name="metode_pembayaran"
+                        id="metodePembayaran"
+                        required
+                    >
+                        <option value="">-- Pilih Metode --</option>
+                        <option value="Transfer Bank">Transfer Bank</option>
+                        <option value="QRIS">QRIS</option>
+                    </select>
+                </div>
+
+                <div class="payment-box" id="bankBox" style="display: none;">
+                    <h4>Transfer Bank</h4>
+                    <p><strong>BCA :</strong> 1234567890</p>
+                    <p><strong>Mandiri :</strong> 9876543210</p>
+                    <p><strong>A/N :</strong> PT Anuwani Network</p>
+                </div>
+
+                <div class="payment-box" id="qrisBox" style="display: none; text-align: center;">
+                    <h4>QRIS Payment</h4>
+                    <img src="../../assets/images/qris.png" class="qris-image" style="max-width: 180px; margin-top: 10px; border: 1px solid #ddd; padding: 5px; background: #fff;">
+                </div>
 
                 <div class="form-group">
-                    <label>
-                        Upload Bukti Pembayaran
-                    </label>
-
+                    <label>Upload Bukti Pembayaran</label>
                     <input 
                         type="file"
                         name="bukti_pembayaran"
@@ -176,20 +182,44 @@ if (isset($_POST['upload'])) {
                     >
                 </div>
 
-                <button 
-                    type="submit"
-                    name="upload"
-                >
-                    Kirim Pembayaran
-                </button>
-
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <a href="index.php" style="background: #6c757d; color: #fff; text-decoration: none; padding: 12px 20px; border-radius: 8px; font-weight: 600; text-align: center; flex: 1;">
+                        Batal
+                    </a>
+                    <button 
+                        type="submit"
+                        name="submit"
+                        class="btn-payment"
+                        style="flex: 2; margin-top: 0;"
+                    >
+                        <i class="bi bi-check-circle-fill"></i>
+                        Kirim Pembayaran
+                    </button>
+                </div>
             </form>
-
         </div>
 
     </div>
-
 </div>
+
+<script>
+const metode = document.getElementById('metodePembayaran');
+const bankBox = document.getElementById('bankBox');
+const qrisBox = document.getElementById('qrisBox');
+
+metode.addEventListener('change', function(){
+    if (this.value == 'Transfer Bank') {
+        bankBox.style.display = 'block';
+        qrisBox.style.display = 'none';
+    } else if (this.value == 'QRIS') {
+        bankBox.style.display = 'none';
+        qrisBox.style.display = 'block';
+    } else {
+        bankBox.style.display = 'none';
+        qrisBox.style.display = 'none';
+    }
+});
+</script>
 
 </body>
 </html>

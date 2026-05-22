@@ -23,13 +23,8 @@ $data = mysqli_query(
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Paket Internet</title>
 
-    <!-- ICON -->
     <link rel="icon" type="image/png" href="../../assets/images/logo.png">
-
-    <!-- CSS -->
     <link rel="stylesheet" href="../../assets/css/style.css">
-
-    <!-- BOOTSTRAP ICON -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
     <!-- JS -->
@@ -134,9 +129,7 @@ $data = mysqli_query(
         <p>Apakah Anda yakin ingin keluar?</p>
 
         <div class="logout-modal-action">
-            <!-- BATAL -->
             <button class="btn-cancel" onclick="closeLogoutModal()">Batal</button>
-            <!-- LOGOUT -->
             <a href="../../auth/logout.php" class="btn-confirm">Ya, Logout</a>
         </div>
     </div>

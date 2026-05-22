@@ -162,7 +162,17 @@ function tgl_indo($tanggal) {
             <div class="hero-right">
                 <i class="bi bi-wifi hero-wifi-icon"></i>
                 
-                <?php if ($t && strtolower($t['status_pembayaran']) == 'belum') : ?>
+                <?php 
+                    $status_tagihan = strtolower($t['status_pembayaran'] ?? '');
+                    if (
+                        $t &&
+                        (
+                            $status_tagihan == 'belum' ||
+                            $status_tagihan == 'belum bayar' ||
+                            empty($status_tagihan)
+                        )
+                    ) : 
+                    ?>
                     <a href="tagihan/bayar.php?id=<?= $t['id_transaksi']; ?>" class="hero-button">
                         Bayar Tagihan
                     </a>
@@ -199,9 +209,27 @@ function tgl_indo($tanggal) {
                                 <td><?= date('F Y', strtotime($r['tahun_tagihan'] . '-' . $r['bulan_tagihan'] . '-01')); ?></td>
                                 <td>Rp<?= number_format($r['jumlah_bayar']); ?></td>
                                 <td>
-                                    <span class="status-<?= (strtolower($r['status_pembayaran']) == 'lunas') ? 'active' : ((strtolower($r['status_pembayaran']) == 'menunggu') ? 'pending' : 'belum'); ?>">
-                                        <?= ucfirst($r['status_pembayaran']); ?>
-                                    </span>
+                                    <?php
+                                    $status_pay = strtolower($r['status_pembayaran']);
+                                        if (
+                                            $status_pay == 'lunas'
+                                        ) {
+                                            $status_text = 'Lunas';
+                                            $status_class = 'active';
+                                        } elseif (
+                                            $status_pay == 'menunggu konfirmasi' ||
+                                            $status_pay == 'menunggu'
+                                        ) {
+                                            $status_text = 'Menunggu Verifikasi';
+                                            $status_class = 'pending';
+                                        } else {
+                                            $status_text = 'Pending';
+                                            $status_class = 'belum';
+                                        }
+                                        ?>
+                                        <span class="status-<?= $status_class; ?>">
+                                            <?= $status_text; ?>
+                                        </span>
                                 </td>
                                 <td><?= !empty($r['tanggal_bayar']) ? tgl_indo($r['tanggal_bayar']) : '-'; ?></td>
                                 <td><a href="tagihan/detail.php?id=<?= $r['id_transaksi']; ?>" class="btn-detail">Detail</a></td>

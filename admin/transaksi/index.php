@@ -34,9 +34,6 @@ if(isset($_GET['status']) && $_GET['status'] != ''){
     ";
 }
 
-/* ================= QUERY PERBAIKAN (3-WAY JOIN) ================= */
-// Kita hubungkan tb_transaksi ke tb_langganan terlebih dahulu, 
-// baru kemudian ditarik ke tb_customer untuk mengambil nama pelanggan.
 $query = mysqli_query(
     $koneksi, 
     "SELECT
@@ -65,6 +62,7 @@ $query = mysqli_query(
     
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/index.js"></script>
+    <script src="../../assets/js/script.js" defer></script>
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
@@ -105,8 +103,7 @@ $query = mysqli_query(
                 </a>
             </li>
             <li>
-                <a href="../../auth/logout.php"
-                onclick="return confirm('Apakah Anda yakin ingin logout?')">
+                <a href="#" onclick="openLogoutModal()">
                     <i class="bi bi-box-arrow-right"></i> Logout
                 </a>
             </li>
@@ -217,5 +214,20 @@ flatpickr("#periode", {
 });
 </script>
 
+<!-- ================= LOGOUT MODAL ================= -->
+<div class="logout-modal" id="logoutModal">
+    <div class="logout-modal-content">
+        <div class="logout-icon">
+            <i class="bi bi-box-arrow-right"></i>
+        </div>
+        <h2>Konfirmasi Logout</h2>
+        <p>Apakah Anda yakin ingin keluar?</p>
+
+        <div class="logout-modal-action">
+            <button class="btn-cancel" onclick="closeLogoutModal()">Batal</button>
+            <a href="../../auth/logout.php" class="btn-confirm">Ya, Logout</a>
+        </div>
+    </div>
+</div>
 </body>
 </html>
