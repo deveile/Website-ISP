@@ -99,8 +99,8 @@ $paket = mysqli_query(
                         <div class="col-lg-4">
                             <div class="paket-card">
                                 <h3><?php echo $data['nama_paket']; ?></h3>
-                                <p><?php echo $data['kecepatan']; ?></p>
-                                <h1>Rp <?php echo number_format($data['harga']); ?></h1>
+                                <h1><?php echo $data['kecepatan']; ?></h1>
+                                <h2>Rp <?php echo number_format($data['harga']); ?></h2>
                                 <span><?php echo nl2br($data['deskripsi']); ?></span>
                                 <br>
                                 <a href="auth/login.php" class="btn-paket">Pesan Sekarang</a>
@@ -120,9 +120,7 @@ $paket = mysqli_query(
         </div>
     </section>
 
-    <!-- =========================================================
-    TENTANG
-    ========================================================= -->
+
     <section id="tentang" class="section-space">
         <div class="container">
             <div class="section-title">
@@ -164,9 +162,7 @@ $paket = mysqli_query(
         </div>
     </section>
 
-    <!-- =========================================================
-    KONTAK
-    ========================================================= -->
+
     <section id="kontak" class="section-space">
         <div class="container">
             <div class="section-title">
@@ -196,9 +192,7 @@ $paket = mysqli_query(
         </div>
     </section>
 
-    <!-- =========================================================
-    FOOTER
-    ========================================================= -->
+
     <footer class="footer-custom">
         <div class="container">
             <p>© 2026 Anuwani Network</p>

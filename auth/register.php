@@ -7,6 +7,7 @@
     <title>Register | Anuwani.net</title>
     <link rel="icon" type="image/png" href="../assets/images/logo.png"> 
     <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
 <body>
     <div class="auth-container">
@@ -45,18 +46,21 @@
             >
 
             <textarea 
-                type="text"
                 name="alamat_customer" 
                 placeholder="Alamat" 
                 required
             ></textarea>
 
-            <input 
-                type="password" 
-                name="password" 
-                placeholder="Password" 
-                required
-            >
+            <div class="password-wrapper" style="margin-bottom: 20px !important;">
+                <input 
+                    type="password" 
+                    name="password" 
+                    id="passInput"
+                    placeholder="Password" 
+                    required
+                >
+                <i class="bi bi-eye toggle-pass" id="togglePass"></i>
+            </div>
 
             <button type="submit">
                 Register
@@ -70,6 +74,19 @@
         </form>
 
     </div>
+
+    <script>
+        document.getElementById('togglePass').addEventListener('click', function () {
+            const inp = document.getElementById('passInput');
+            if (inp.type === 'password') {
+                inp.type = 'text';
+                this.className = 'bi bi-eye-slash toggle-pass';
+            } else {
+                inp.type = 'password';
+                this.className = 'bi bi-eye toggle-pass';
+            }
+        });
+    </script>
 
 </body>
 </html>

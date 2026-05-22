@@ -1503,6 +1503,96 @@ table th {
     background: #e06c00;
 }
 
+/* ==========================================================================
+   POPUP MODAL: PAKET BERHASIL DIUPDATE
+   ========================================================================== */
+.update-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    z-index: 99999;
+    backdrop-filter: blur(5px);
+}
+
+.update-modal.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.update-modal-content {
+    width: 90%;
+    max-width: 420px;
+    background: #ffffff;
+    border-radius: 28px;
+    padding: 40px 35px;
+    text-align: center;
+    box-shadow: 0 15px 45px rgba(0, 0, 0, 0.15);
+    transform: scale(0.8);
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.update-modal.show .update-modal-content {
+    transform: scale(1);
+}
+
+.update-success-icon {
+    width: 80px;
+    height: 80px;
+    background: #e8fcf0; /* Hijau lembut untuk sukses */
+    color: #22c55e; /* Warna ikon hijau sukses */
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 25px auto;
+    font-size: 45px;
+    box-shadow: 0 8px 20px rgba(34, 197, 94, 0.2);
+}
+
+.update-modal-content h2 {
+    font-size: 26px;
+    font-weight: 800;
+    color: #222;
+    margin-bottom: 12px;
+}
+
+.update-modal-content p {
+    color: #666;
+    font-size: 15px;
+    line-height: 1.6;
+    margin-bottom: 30px;
+}
+
+.update-modal-action {
+    display: flex;
+    width: 100%;
+}
+
+.btn-confirm-modal {
+    flex: 1;
+    padding: 14px;
+    border-radius: 14px;
+    font-weight: 700;
+    font-size: 16px;
+    cursor: pointer;
+    border: none;
+    background: linear-gradient(135deg, #ff5e00, #ff8c00); /* Warna orange khas webmu */
+    color: white;
+    transition: .3s;
+    box-shadow: 0 6px 18px rgba(255, 94, 0, 0.2);
+}
+
+.btn-confirm-modal:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 25px rgba(255, 94, 0, 0.35);
+}
+
 @keyframes popupScale {
     0% { transform: scale(0.7); opacity: 0; }
     100% { transform: scale(1); opacity: 1; }
@@ -1665,4 +1755,69 @@ table th {
     .payment-left h2, .payment-right h2 {
         font-size: 22px;
     }
+}
+
+/* ==========================================================================
+   STYLE TAMBAHAN: ALERT BOX & PASSWORD RESPONSIVE WRAPPER
+   ========================================================================== */
+
+/* Komponen Kotak Alert (Gagal / Sukses) */
+.alert-box {
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    font-size: 14px;
+    font-weight: 500;
+}
+.alert-error { 
+    background: #fff0f0; 
+    border: 1px solid #f5c6cb; 
+    color: #c0392b; 
+}
+.alert-success { 
+    background: #f0fff4; 
+    border: 1px solid #b2dfdb; 
+    color: #1b5e20; 
+}
+
+/* ==========================================================================
+   KUNCI MATA DI UJUNG KANAN DALAM INPUT PW
+   ========================================================================== */
+.password-wrapper {
+    position: relative !important;
+    display: block !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    margin-bottom: 5px !important;
+}
+
+.password-wrapper input {
+    width: 100% !important;
+    display: block !important;
+    padding-right: 45px !important; 
+    box-sizing: border-box !important;
+    margin-bottom: 0 !important;
+}
+
+.toggle-pass {
+    position: absolute !important;
+    right: 16px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important; 
+    cursor: pointer !important;
+    color: #a0aec0 !important; 
+    font-size: 18px !important;
+    z-index: 999 !important; 
+    display: inline-block !important;
+}
+
+.toggle-pass:hover {
+    color: #ff5e00 !important;
+}
+
+.password-hint {
+    font-size: 12px !important;
+    color: #888 !important;
+    margin-top: 6px !important;
+    display: block !important;
 }

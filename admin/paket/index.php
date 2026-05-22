@@ -15,7 +15,6 @@ $data = mysqli_query($koneksi, "SELECT * FROM tb_paket ORDER BY id_paket DESC");
     <link rel="stylesheet" href="../../assets/css/style.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
-    <script src="../../assets/js/script.js" defer></script>
 </head>
 
 <body>
@@ -80,6 +79,7 @@ $data = mysqli_query($koneksi, "SELECT * FROM tb_paket ORDER BY id_paket DESC");
                     <?php while ($paket = mysqli_fetch_assoc($data)) : ?>
                         <div class="paket-admin-card">
                             <h3><?= $paket['nama_paket']; ?></h3>
+                            <h1><?= $paket['kecepatan']; ?></h1>
                             <h2>Rp <?= number_format($paket['harga']); ?></h2>
                             <p><?= nl2br($paket['deskripsi']); ?></p>
 
@@ -126,6 +126,7 @@ $data = mysqli_query($koneksi, "SELECT * FROM tb_paket ORDER BY id_paket DESC");
             </div>
         </div>
     </div>
+
         <div class="logout-modal" id="logoutModal">
         <div class="logout-modal-content">
             <div class="logout-icon">
