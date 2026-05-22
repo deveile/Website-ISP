@@ -73,7 +73,36 @@ if(isset($_POST['simpan'])){
     // Mengambil ID terakhir yang digenerate oleh tb_customer
     $id_customer = mysqli_insert_id($koneksi);
 
-    /* ================= 3. INSERT KE TABEL LANGGANAN ================= */
+    /* ================= 3. INSERT KE TABEL PEMASANGAN (FIX) ================= */
+    $tanggal_sekarang = date('Y-m-d');
+    $status_pemasangan = ($status == 'aktif') ? 'Selesai' : 'Pending';
+    $catatan_pemasangan = "Pendaftaran offline langsung diinput oleh Admin.";
+
+    $insert_pemasangan = mysqli_query($koneksi, "
+        INSERT INTO tb_pemasangan (
+            id_customer,
+            id_paket,
+            tanggal_pengajuan,
+            tanggal_pasang,
+            alamat_pasang,
+            status_pemasangan,
+            catatan
+        ) VALUES (
+            '$id_customer',
+            '$id_paket',
+            '$tanggal_sekarang',
+            '$tanggal_sekarang',
+            '$alamat',
+            '$status_pemasangan',
+            '$catatan_pemasangan'
+        )
+    ");
+
+    if(!$insert_pemasangan) {
+        die("Gagal menyimpan riwayat data pemasangan: " . mysqli_error($koneksi));
+    }
+
+    /* ================= 4. INSERT KE TABEL LANGGANAN ================= */
     $tanggal_mulai    = date('Y-m-d'); // Tanggal hari ini
     
     // LOGIKA OTOMATIS: Hitung tanggal selesai 30 hari ke depan dari tanggal mulai
@@ -103,7 +132,7 @@ if(isset($_POST['simpan'])){
     /* ================= BERHASIL ================= */
     echo "
     <script>
-        alert('Pelanggan offline & paket langganan berhasil ditambahkan!');
+        alert('Pelanggan offline, riwayat pemasangan, & paket langganan berhasil ditambahkan!');
         window.location='index.php';
     </script>
     ";

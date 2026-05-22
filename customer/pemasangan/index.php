@@ -32,47 +32,45 @@ $customer = mysqli_fetch_assoc($data_customer);
 /* ================= SUBMIT ================= */
 if (isset($_POST['submit'])) {
 
-    $nama    = htmlspecialchars($_POST['nama']);
-    $telepon = htmlspecialchars($_POST['telepon']);
-    $email   = htmlspecialchars($_POST['email']);
     $alamat  = htmlspecialchars($_POST['alamat']);
     $catatan = htmlspecialchars($_POST['catatan']);
 
-    mysqli_query(
+    // Query diperbaiki: Menghapus kolom nama_customer, telepon_customer, email_customer, dan status_pembayaran
+    // Nilai default status_pemasangan diset 'Pending' (Menunggu konfirmasi/pembayaran awal)
+    $query_insert = mysqli_query(
         $koneksi,
         "INSERT INTO tb_pemasangan
         (
             id_customer,
             id_paket,
-            nama_customer,
-            telepon_customer,
-            email_customer,
-            alamat_pasang,
-            catatan,
-            status_pemasangan,
-            status_pembayaran,
+            tanggal_pengajuan,
             tanggal_pasang,
+            alamat_pasang,
+            status_pemasangan,
+            catatan,
             created_at
         )
         VALUES
         (
-            '$customer[id_customer]',
+            '".$customer['id_customer']."',
             '$id_paket',
-            '$nama',
-            '$telepon',
-            '$email',
-            '$alamat',
-            '$catatan',
-            'Pending',
-            'Belum Bayar',
             CURDATE(),
+            NULL, 
+            '$alamat',
+            'Pending',
+            '$catatan',
             NOW()
         )"
     );
 
+    if (!$query_insert) {
+        die("Gagal menyimpan data pengajuan pemasangan: " . mysqli_error($koneksi));
+    }
+
     $id_pemasangan = mysqli_insert_id($koneksi);
 
     header("Location: pembayaran.php?id=$id_pemasangan");
+    exit;
 }
 ?>
 
@@ -94,7 +92,6 @@ if (isset($_POST['submit'])) {
 
     <div class="pemasangan-layout">
 
-        <!-- FORM -->
         <div class="form-card">
             <h2>Informasi Pemasangan</h2>
             <p>Lengkapi data berikut untuk proses pemasangan internet.</p>
@@ -106,8 +103,9 @@ if (isset($_POST['submit'])) {
                         type="text"
                         name="nama"
                         value="<?= $customer['nama_customer']; ?>"
-                        required
+                        disabled
                     >
+                    <small style="color: #666;">* Data profil utama Anda</small>
                 </div>
 
                 <div class="form-group">
@@ -116,7 +114,7 @@ if (isset($_POST['submit'])) {
                         type="text"
                         name="telepon"
                         value="<?= $customer['telepon_customer']; ?>"
-                        required
+                        disabled
                     >
                 </div>
 
@@ -126,7 +124,7 @@ if (isset($_POST['submit'])) {
                         type="email"
                         name="email"
                         value="<?= $customer['email_customer']; ?>"
-                        required
+                        disabled
                     >
                 </div>
 
@@ -135,40 +133,40 @@ if (isset($_POST['submit'])) {
                     <textarea 
                         name="alamat"
                         required
-                    ></textarea>
+                    ><?= $customer['alamat_customer']; ?></textarea>
                 </div>
 
                 <div class="form-group">
                     <label>Catatan Tambahan</label>
                     <textarea 
                         name="catatan"
+                        placeholder="Contoh: Pasang siang hari, warna kabel hitam, dll."
                     ></textarea>
                 </div>
 
-                   <!-- RINGKASAN -->
-        <div class="ringkasan-card">
-            <h3>Ringkasan Pesanan</h3>
+                <div class="ringkasan-card">
+                    <h3>Ringkasan Pesanan</h3>
 
-            <div class="ringkasan-item">
-                <span>Paket</span>
-                <strong><?= $paket['nama_paket']; ?></strong>
-            </div>
+                    <div class="ringkasan-item">
+                        <span>Paket</span>
+                        <strong><?= $paket['nama_paket']; ?></strong>
+                    </div>
 
-            <div class="ringkasan-item">
-                <span>Kecepatan</span>
-                <strong><?= $paket['kecepatan']; ?></strong>
-            </div>
+                    <div class="ringkasan-item">
+                        <span>Kecepatan</span>
+                        <strong><?= $paket['kecepatan']; ?></strong>
+                    </div>
 
-            <div class="ringkasan-item">
-                <span>Harga</span>
-                <strong>Rp <?= number_format($paket['harga']); ?></strong>
-            </div>
+                    <div class="ringkasan-item">
+                        <span>Harga</span>
+                        <strong>Rp <?= number_format($paket['harga']); ?></strong>
+                    </div>
 
-            <div class="ringkasan-item">
-                <span>Status</span>
-                <strong class="status-belum">Belum Bayar</strong>
-            </div>
-        </div>
+                    <div class="ringkasan-item">
+                        <span>Status</span>
+                        <strong class="status-belum">Belum Bayar</strong>
+                    </div>
+                </div>
 
                 <button type="submit" name="submit">
                     Lanjut Pembayaran

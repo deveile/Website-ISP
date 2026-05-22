@@ -9,3 +9,4 @@ function closeLogoutModal() {
         .getElementById('logoutModal')
         .classList.remove('show');
 }
+

@@ -19,8 +19,8 @@ if(isset($_GET['periode']) && $_GET['periode'] != ''){
     $bulan = $explode[1];
 
     $where .= "
-        AND bulan_tagihan='$bulan'
-        AND tahun_tagihan='$tahun'
+        AND tb_transaksi.bulan_tagihan='$bulan'
+        AND tb_transaksi.tahun_tagihan='$tahun'
     ";
 }
 
@@ -30,25 +30,28 @@ if(isset($_GET['status']) && $_GET['status'] != ''){
     $status = $_GET['status'];
 
     $where .= "
-        AND status_pembayaran='$status'
+        AND tb_transaksi.status_pembayaran='$status'
     ";
 }
 
-/* ================= QUERY ================= */
+/* ================= QUERY PERBAIKAN (3-WAY JOIN) ================= */
+// Kita hubungkan tb_transaksi ke tb_langganan terlebih dahulu, 
+// baru kemudian ditarik ke tb_customer untuk mengambil nama pelanggan.
 $query = mysqli_query(
     $koneksi, 
     "SELECT
         tb_transaksi.*,
         tb_customer.nama_customer
      FROM tb_transaksi
-     JOIN tb_customer ON tb_transaksi.id_customer = tb_customer.id_customer
+     INNER JOIN tb_langganan ON tb_transaksi.id_langganan = tb_langganan.id_langganan
+     INNER JOIN tb_customer ON tb_langganan.id_customer = tb_customer.id_customer
      $where
-     ORDER BY id_transaksi DESC"
+     ORDER BY tb_transaksi.id_transaksi DESC"
 );
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -57,21 +60,18 @@ $query = mysqli_query(
     <link rel="icon" type="image/png" href="../../assets/images/logo.png">
     <link rel="stylesheet" href="../../assets/css/style.css">
 
-    <!-- FLATPICKR -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/style.css">
     
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/index.js"></script>
 
-    <!-- ICON -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
 <body>
 
 <div class="dashboard-layout">
 
-    <!-- SIDEBAR -->
     <div class="sidebar">
         <div class="sidebar-logo">
             <img src="../../assets/images/logo.png">
@@ -113,7 +113,6 @@ $query = mysqli_query(
         </ul>
     </div>
 
-    <!-- CONTENT -->
     <div class="dashboard-content">
 
         <div class="topbar">
@@ -124,10 +123,8 @@ $query = mysqli_query(
         </div>
 
         <div class="table-card">
-        <!-- TABLE HEADER -->
             <div class="table-header">
                 <h3>Daftar Transaksi</h3>
-                <!-- FILTER -->
                 <form method="GET" class="filter-form">
                     <input
                         type="text"
@@ -138,18 +135,10 @@ $query = mysqli_query(
                     >
 
                     <select name="status">
-                        <option value="">
-                            Semua Status
-                        </option>
-                        <option value="Belum Bayar">
-                            Belum Bayar
-                        </option>
-                        <option value="Menunggu Konfirmasi">
-                            Menunggu Konfirmasi
-                        </option>
-                        <option value="Lunas">
-                            Lunas
-                        </option>
+                        <option value="">Semua Status</option>
+                        <option value="belum" <?= (isset($_GET['status']) && $_GET['status'] == 'belum') ? 'selected' : ''; ?>>Belum Bayar</option>
+                        <option value="menunggu" <?= (isset($_GET['status']) && $_GET['status'] == 'menunggu') ? 'selected' : ''; ?>>Menunggu Konfirmasi</option>
+                        <option value="lunas" <?= (isset($_GET['status']) && $_GET['status'] == 'lunas') ? 'selected' : ''; ?>>Lunas</option>
                     </select>
 
                     <button type="submit" class="btn-orange">
@@ -158,7 +147,6 @@ $query = mysqli_query(
                 </form>
             </div>
 
-            <!-- TABLE -->
             <table>
                 <thead>
                     <tr>
@@ -175,53 +163,39 @@ $query = mysqli_query(
                 <tbody>
                     <?php
                     $no = 1;
-                    while($data = mysqli_fetch_assoc($query)) :
+                    if(mysqli_num_rows($query) > 0) :
+                        while($data = mysqli_fetch_assoc($query)) :
                     ?>
                     <tr>
+                        <td><?= $no++; ?></td>
+                        <td><strong><?= $data['kode_invoice']; ?></strong></td>
+                        <td><?= $data['nama_customer']; ?></td>
                         <td>
-                            <?= $no++; ?>
+                            <?= date('F Y', strtotime($data['tahun_tagihan'].'-'.$data['bulan_tagihan'].'-01')); ?>
                         </td>
-                        
+                        <td>Rp <?= number_format($data['jumlah_bayar']); ?></td>
                         <td>
-                            <?= $data['kode_invoice']; ?>
-                        </td>
-                        
-                        <td>
-                            <?= $data['nama_customer']; ?>
-                        </td>
-                        
-                        <td>
-                            <?= date(
-                                'F Y',
-                                strtotime($data['tahun_tagihan'].'-'.$data['bulan_tagihan'].'-01')
-                            ); ?>
-                        </td>
-                        
-                        <td>
-                            Rp <?= number_format($data['jumlah_bayar']); ?>
-                        </td>
-                        
-                        <td>
-                            <?php if($data['status_pembayaran'] == 'Lunas') : ?>
-                                <span class="status-active">
-                                    Lunas
-                                </span>
-                            <?php elseif($data['status_pembayaran'] == 'Menunggu Konfirmasi') : ?>
-                                <span class="status-pending">
-                                    Menunggu
-                                </span>
+                            <?php 
+                            $status = strtolower($data['status_pembayaran']);
+                            if($status == 'lunas') : 
+                            ?>
+                                <span class="status-active">Lunas</span>
+                            <?php elseif($status == 'menunggu') : ?>
+                                <span class="status-pending">Menunggu</span>
                             <?php else : ?>
-                                <span class="status-belum">
-                                    Belum Bayar
-                                </span>
+                                <span class="status-belum" style="background: #f8d7da; color: #721c24; padding: 4px 10px; border-radius: 4px; font-size: 0.85rem;">Belum Bayar</span>
                             <?php endif; ?>
                         </td>
-                        
-                        <td>
-                            <?= $data['tanggal_transaksi']; ?>
-                        </td>
+                        <td><?= !empty($data['tanggal_bayar']) ? $data['tanggal_bayar'] : '-'; ?></td>
                     </tr>
-                    <?php endwhile; ?>
+                    <?php 
+                        endwhile; 
+                    else : 
+                    ?>
+                        <tr>
+                            <td colspan="7" style="text-align: center; color: #888;">Tidak ada data transaksi ditemukan.</td>
+                        </tr>
+                    <?php endif; ?>
                 </tbody>
             </table>
 
@@ -231,7 +205,6 @@ $query = mysqli_query(
 
 </div>
 
-<!-- FLATPICKR INITIALIZATION -->
 <script>
 flatpickr("#periode", {
     plugins: [

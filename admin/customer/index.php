@@ -7,19 +7,32 @@ if ($_SESSION['role'] != 'admin') {
     exit;
 }
 
+/* ================= AMBIL DATA KUSTOMER + TANGGAL SELESAI MASA AKTIF ================= */
 $query = mysqli_query($koneksi, "
     SELECT 
         tb_customer.*, 
         tb_langganan.status_langganan, 
+        tb_langganan.tanggal_selesai, 
         tb_paket.nama_paket 
     FROM tb_customer 
     LEFT JOIN tb_langganan ON tb_customer.id_customer = tb_langganan.id_customer 
     LEFT JOIN tb_paket ON tb_langganan.id_paket = tb_paket.id_paket 
     ORDER BY tb_customer.id_customer DESC
 ");
+
+/* ================= HELPER FORMAT TANGGAL INDONESIA ================= */
+function tgl_indo($tanggal) {
+    if (empty($tanggal) || $tanggal == '0000-00-00') return '-';
+    $bulan_array = [
+        1 => 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+        'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+    ];
+    $split = explode('-', $tanggal);
+    return $split[2] . ' ' . $bulan_array[(int)$split[1]] . ' ' . $split[0];
+}
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -44,14 +57,7 @@ $query = mysqli_query($koneksi, "
             <li><a href="index.php" class="active"><i class="bi bi-people"></i> Data Pelanggan</a></li>
             <li><a href="../transaksi/index.php"><i class="bi bi-credit-card"></i> Data Transaksi</a></li>
             <li><a href="../admin_user/index.php"><i class="bi bi-person-plus"></i> Tambah Admin</a></li>
-            <li>
-                 <a 
-                    href="#"
-                    onclick="openLogoutModal()">
-                    <i class="bi bi-box-arrow-right"></i>
-                    Logout
-                    </a>
-            </li>
+            <li><a href="#" onclick="openLogoutModal()"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
         </ul>
     </div>
 
@@ -79,7 +85,7 @@ $query = mysqli_query($koneksi, "
                         <th>Email</th>
                         <th>Telepon</th>
                         <th>Paket</th>
-                        <th>Status</th>
+                        <th>Aktif Sampai</th> <th>Status</th>
                         <th>Aksi</th>
                     </tr>
                 </thead>
@@ -94,6 +100,13 @@ $query = mysqli_query($koneksi, "
                         <td><?= $data['email_customer']; ?></td>
                         <td><?= $data['telepon_customer']; ?></td>
                         <td><?= $data['nama_paket'] ?? '-'; ?></td>
+                        
+                        <td>
+                            <span style="font-weight: 500; color: #333;">
+                                <?= tgl_indo($data['tanggal_selesai']); ?>
+                            </span>
+                        </td>
+                        
                         <td>
                             <?php if (isset($data['status_langganan']) && strtolower($data['status_langganan']) == 'aktif') : ?>
                                 <span class="status-active">Aktif</span>
@@ -116,29 +129,19 @@ $query = mysqli_query($koneksi, "
 </div>
 
 <div class="logout-modal" id="logoutModal">
-        <div class="logout-modal-content">
-            <div class="logout-icon">
-                <i class="bi bi-box-arrow-right"></i>
-            </div>
+    <div class="logout-modal-content">
+        <div class="logout-icon">
+            <i class="bi bi-box-arrow-right"></i>
+        </div>
 
-            <h2>Konfirmasi Logout</h2>
-            <p>Apakah Anda yakin ingin keluar?</p>
+        <h2>Konfirmasi Logout</h2>
+        <p>Apakah Anda yakin ingin keluar?</p>
 
-            <div class="logout-modal-action">
-                <button 
-                    class="btn-cancel"
-                    onclick="closeLogoutModal()"
-                >
-                    Batal
-                </button>
-                <a 
-                    href="../../auth/logout.php"
-                    class="btn-confirm"
-                >
-                    Ya, Logout
-                </a>
-            </div>
+        <div class="logout-modal-action">
+            <button class="btn-cancel" onclick="closeLogoutModal()">Batal</button>
+            <a href="../../auth/logout.php" class="btn-confirm">Ya, Logout</a>
         </div>
     </div>
+</div>
 </body>
 </html>

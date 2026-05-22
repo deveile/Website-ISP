@@ -9,10 +9,12 @@ if($_SESSION['role'] != 'admin'){
 
 $id = $_GET['id'];
 
+/* ================= QUERY UPDATE: MENAMBAHKAN TANGGAL SELESAI ================= */
 $query = mysqli_query($koneksi, "
     SELECT 
         tb_customer.*, 
         tb_langganan.status_langganan, 
+        tb_langganan.tanggal_selesai, 
         tb_paket.nama_paket 
     FROM tb_customer 
     LEFT JOIN tb_langganan ON tb_customer.id_customer = tb_langganan.id_customer 
@@ -25,6 +27,17 @@ $data = mysqli_fetch_assoc($query);
 if(!$data){
     header("Location: index.php");
     exit;
+}
+
+/* ================= HELPER FORMAT TANGGAL INDONESIA ================= */
+function tgl_indo($tanggal) {
+    if (empty($tanggal) || $tanggal == '0000-00-00') return '-';
+    $bulan_array = [
+        1 => 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+        'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+    ];
+    $split = explode('-', $tanggal);
+    return $split[2] . ' ' . $bulan_array[(int)$split[1]] . ' ' . $split[0];
 }
 ?>
 <!DOCTYPE html>
@@ -100,6 +113,13 @@ if(!$data){
                         <?php else : ?>
                             <span class="status-pending">Pending</span>
                         <?php endif; ?>
+                    </strong>
+                </div>
+
+                <div class="detail-item">
+                    <span>Aktif Sampai</span>
+                    <strong style="color: #333;">
+                        <?= tgl_indo($data['tanggal_selesai']); ?>
                     </strong>
                 </div>
 
