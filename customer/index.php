@@ -81,17 +81,10 @@ if (!empty($data['id_langganan'])) {
     >
 
     <title>Dashboard Customer</title>
-
-    <!-- CSS -->
     <link rel="stylesheet" href="../assets/css/style.css">
-
-    <!-- ICON -->
     <link rel="icon" type="image/png" href="../assets/images/logo.png">
-
-    <!-- BOOTSTRAP ICON -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
-    <!-- JS -->
     <script src="../assets/js/script.js" defer></script>
 </head>
 <body>

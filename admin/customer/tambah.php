@@ -7,9 +7,9 @@ if($_SESSION['role'] != 'admin'){
     exit;
 }
 
+// Mengambil data master paket untuk pilihan di dropdown select HTML
 $paket = mysqli_query($koneksi, "SELECT * FROM tb_paket ORDER BY id_paket DESC");
 
-/* ================= SIMPAN ================= */
 if(isset($_POST['simpan'])){
     $nama     = $_POST['nama_customer'];
     $username = $_POST['username'];
@@ -18,34 +18,92 @@ if(isset($_POST['simpan'])){
     $telepon  = $_POST['telepon_customer'];
     $alamat   = $_POST['alamat_customer'];
     $id_paket = $_POST['id_paket'];
-    $status   = $_POST['status_paket'];
-    $sumber   = "Offline";
+    $status   = strtolower($_POST['status_paket']); // 'aktif' atau 'berhenti' sesuai ENUM database
+    $sumber   = "offline"; // Menyesuaikan ENUM database ('online', 'offline')
 
-    /* ================= CEK USERNAME ================= */
+    /* ================= CEK USERNAME DOUBLE ================= */
     $cek = mysqli_query($koneksi, "SELECT * FROM tb_user WHERE username='$username'");
 
     if(mysqli_num_rows($cek) > 0){
         echo "
         <script>
-            alert('Username sudah digunakan');
+            alert('Username sudah digunakan! Silakan gunakan username lain.');
             window.location='tambah.php';
         </script>
         ";
         exit;
     }
 
-    /* ================= INSERT USER ================= */
-    mysqli_query($koneksi, "INSERT INTO tb_user(username, password, role) VALUES('$username', '$password', 'customer')");
+    /* ================= 1. INSERT KE TABEL USER ================= */
+    $insert_user = mysqli_query($koneksi, "INSERT INTO tb_user(username, password, role) VALUES('$username', '$password', 'customer')");
+    
+    if(!$insert_user) {
+        die("Gagal menyimpan data akun user: " . mysqli_error($koneksi));
+    }
 
-    /* ================= AMBIL ID USER ================= */
+    // Mengambil ID terakhir yang digenerate oleh tb_user
     $id_user = mysqli_insert_id($koneksi);
 
-    /* ================= INSERT CUSTOMER ================= */
-    mysqli_query($koneksi, "INSERT INTO tb_customer(id_user, nama_customer, email_customer, telepon_customer, alamat_customer, id_paket, status_paket, sumber_customer) VALUES('$id_user', '$nama', '$email', '$telepon', '$alamat', '$id_paket', '$status', '$sumber')");
+    /* ================= 2. INSERT KE TABEL CUSTOMER ================= */
+    $insert_customer = mysqli_query($koneksi, "
+        INSERT INTO tb_customer (
+            id_user, 
+            nama_customer, 
+            email_customer, 
+            telepon_customer, 
+            alamat_customer, 
+            sumber_customer,
+            status_customer
+        ) 
+        VALUES (
+            '$id_user', 
+            '$nama', 
+            '$email', 
+            '$telepon', 
+            '$alamat', 
+            '$sumber',
+            'aktif'
+        )
+    ");
 
+    if(!$insert_customer) {
+        die("Gagal menyimpan data profil customer: " . mysqli_error($koneksi));
+    }
+
+    // Mengambil ID terakhir yang digenerate oleh tb_customer
+    $id_customer = mysqli_insert_id($koneksi);
+
+    /* ================= 3. INSERT KE TABEL LANGGANAN ================= */
+    $tanggal_mulai    = date('Y-m-d'); // Tanggal hari ini
+    
+    // LOGIKA OTOMATIS: Hitung tanggal selesai 30 hari ke depan dari tanggal mulai
+    $tanggal_selesai  = date('Y-m-d', strtotime('+30 days', strtotime($tanggal_mulai)));
+
+    $insert_langganan = mysqli_query($koneksi, "
+        INSERT INTO tb_langganan (
+            id_customer, 
+            id_paket, 
+            tanggal_mulai, 
+            tanggal_selesai, 
+            status_langganan
+        ) 
+        VALUES (
+            '$id_customer', 
+            '$id_paket', 
+            '$tanggal_mulai', 
+            '$tanggal_selesai', 
+            '$status'
+        )
+    ");
+
+    if(!$insert_langganan) {
+        die("Gagal menyimpan data paket langganan: " . mysqli_error($koneksi));
+    }
+
+    /* ================= BERHASIL ================= */
     echo "
     <script>
-        alert('Pelanggan berhasil ditambahkan');
+        alert('Pelanggan offline & paket langganan berhasil ditambahkan!');
         window.location='index.php';
     </script>
     ";
@@ -53,7 +111,7 @@ if(isset($_POST['simpan'])){
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -64,10 +122,9 @@ if(isset($_POST['simpan'])){
 </head>
 <body>
 <div class="dashboard-layout">
-    <!-- SIDEBAR -->
     <div class="sidebar">
         <div class="sidebar-logo">
-            <img src="../../assets/images/logo.png">
+            <img src="../../assets/images/logo.png" alt="Logo">
             <h2>Anuwani</h2>
         </div>
         <ul>
@@ -77,11 +134,10 @@ if(isset($_POST['simpan'])){
         </ul>
     </div>
 
-    <!-- CONTENT -->
     <div class="dashboard-content">
         <div class="topbar">
             <h1>Tambah Pelanggan</h1>
-            <p>Tambah customer offline + buat akun login</p>
+            <p>Tambah customer offline + otomatis hitung masa aktif 30 hari</p>
         </div>
 
         <div class="form-card">
@@ -119,17 +175,18 @@ if(isset($_POST['simpan'])){
                 <div class="form-group">
                     <label>Pilih Paket</label>
                     <select name="id_paket" required>
+                        <option value="" disabled selected>-- Pilih Paket Internet --</option>
                         <?php while($p = mysqli_fetch_assoc($paket)) : ?>
-                            <option value="<?= $p['id_paket']; ?>"><?= $p['nama_paket']; ?></option>
+                            <option value="<?= $p['id_paket']; ?>"><?= $p['nama_paket']; ?> (<?= $p['kecepatan']; ?>)</option>
                         <?php endwhile; ?>
                     </select>
                 </div>
 
                 <div class="form-group">
                     <label>Status Paket</label>
-                    <select name="status_paket">
-                        <option value="Pending">Pending</option>
-                        <option value="Aktif">Aktif</option>
+                    <select name="status_paket" required>
+                        <option value="aktif" selected>Aktif (Langsung Jalan)</option>
+                        <option value="berhenti">Pending / Berhenti</option>
                     </select>
                 </div>
 

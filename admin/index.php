@@ -32,6 +32,8 @@ $pendapatan = mysqli_fetch_assoc(mysqli_query($koneksi, $query_income));
   <link rel="icon" type="image/png" href="../assets/images/logo.png">
   <link rel="stylesheet" href="../assets/css/style.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <script src="../assets/js/script.js" defer></script>
 </head>
 
 <body>
@@ -71,10 +73,12 @@ $pendapatan = mysqli_fetch_assoc(mysqli_query($koneksi, $query_income));
           </a>
         </li>
         <li>
-          <a href="../auth/logout.php"
-          onclick="return confirm('Apakah Anda yakin ingin logout?')">
-            <i class="bi bi-box-arrow-right"></i> Logout
-          </a>
+            <a 
+             href="#"
+                    onclick="openLogoutModal()">
+                    <i class="bi bi-box-arrow-right"></i>
+                    Logout
+            </a>
         </li>
       </ul>
     </div>
@@ -99,10 +103,8 @@ $pendapatan = mysqli_fetch_assoc(mysqli_query($koneksi, $query_income));
         <i class="bi bi-cash-stack"></i>
       </div>
 
-      <!-- GRID KARTU STATISTIK -->
       <div class="admin-card-grid">
 
-        <!-- Total Pelanggan -->
         <div class="admin-card">
           <div>
             <h5>Total Pelanggan</h5>
@@ -111,7 +113,6 @@ $pendapatan = mysqli_fetch_assoc(mysqli_query($koneksi, $query_income));
           <i class="bi bi-people-fill"></i>
         </div>
 
-        <!-- Transaksi Pending -->
         <div class="admin-card">
           <div>
             <h5>Transaksi Pending</h5>
@@ -120,7 +121,6 @@ $pendapatan = mysqli_fetch_assoc(mysqli_query($koneksi, $query_income));
           <i class="bi bi-hourglass-split"></i>
         </div>
 
-        <!-- Total Paket -->
         <div class="admin-card">
           <div>
             <h5>Total Paket</h5>
@@ -129,7 +129,6 @@ $pendapatan = mysqli_fetch_assoc(mysqli_query($koneksi, $query_income));
           <i class="bi bi-wifi"></i>
         </div>
 
-        <!-- Total Transaksi -->
         <div class="admin-card">
           <div>
             <h5>Total Transaksi</h5>
@@ -138,9 +137,34 @@ $pendapatan = mysqli_fetch_assoc(mysqli_query($koneksi, $query_income));
           <i class="bi bi-credit-card"></i>
         </div>
 
-      </div> <!-- End Card Grid -->
+      </div> 
 
-    </div> <!-- End Dashboard Content -->
-  </div> <!-- End Dashboard Layout -->
+    </div> 
+  </div> 
+      <div class="logout-modal" id="logoutModal">
+        <div class="logout-modal-content">
+            <div class="logout-icon">
+                <i class="bi bi-box-arrow-right"></i>
+            </div>
+
+            <h2>Konfirmasi Logout</h2>
+            <p>Apakah Anda yakin ingin keluar?</p>
+
+            <div class="logout-modal-action">
+                <button 
+                    class="btn-cancel"
+                    onclick="closeLogoutModal()"
+                >
+                    Batal
+                </button>
+                <a 
+                    href="../auth/logout.php"
+                    class="btn-confirm"
+                >
+                    Ya, Logout
+                </a>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

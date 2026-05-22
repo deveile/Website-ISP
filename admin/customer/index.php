@@ -2,14 +2,22 @@
 require_once __DIR__ . '/../../auth/cek_login.php';
 require_once __DIR__ . '/../../koneksi.php';
 
-if($_SESSION['role'] != 'admin'){
+if ($_SESSION['role'] != 'admin') {
     header("Location: ../../auth/login.php");
     exit;
 }
 
-$query = mysqli_query($koneksi, "SELECT * FROM tb_customer LEFT JOIN tb_paket ON tb_customer.id_paket = tb_paket.id_paket ORDER BY id_customer DESC");
+$query = mysqli_query($koneksi, "
+    SELECT 
+        tb_customer.*, 
+        tb_langganan.status_langganan, 
+        tb_paket.nama_paket 
+    FROM tb_customer 
+    LEFT JOIN tb_langganan ON tb_customer.id_customer = tb_langganan.id_customer 
+    LEFT JOIN tb_paket ON tb_langganan.id_paket = tb_paket.id_paket 
+    ORDER BY tb_customer.id_customer DESC
+");
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -19,10 +27,12 @@ $query = mysqli_query($koneksi, "SELECT * FROM tb_customer LEFT JOIN tb_paket ON
     <link rel="icon" type="image/png" href="../../assets/images/logo.png">
     <link rel="stylesheet" href="../../assets/css/style.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <script src="../../assets/js/script.js" defer></script>
 </head>
 <body>
+
 <div class="dashboard-layout">
-    <!-- ================= SIDEBAR ================= -->
     <div class="sidebar">
         <div class="sidebar-logo">
             <img src="../../assets/images/logo.png" alt="Logo">
@@ -34,14 +44,17 @@ $query = mysqli_query($koneksi, "SELECT * FROM tb_customer LEFT JOIN tb_paket ON
             <li><a href="index.php" class="active"><i class="bi bi-people"></i> Data Pelanggan</a></li>
             <li><a href="../transaksi/index.php"><i class="bi bi-credit-card"></i> Data Transaksi</a></li>
             <li><a href="../admin_user/index.php"><i class="bi bi-person-plus"></i> Tambah Admin</a></li>
-            <li><a href="../../auth/logout.php"
-            onclick="return confirm('Apakah Anda yakin ingin logout?')">
-                <i class="bi bi-box-arrow-right"></i> Logout
-            </a></li>
+            <li>
+                 <a 
+                    href="#"
+                    onclick="openLogoutModal()">
+                    <i class="bi bi-box-arrow-right"></i>
+                    Logout
+                    </a>
+            </li>
         </ul>
     </div>
 
-    <!-- ================= CONTENT ================= -->
     <div class="dashboard-content">
         <div class="topbar">
             <div>
@@ -50,9 +63,7 @@ $query = mysqli_query($koneksi, "SELECT * FROM tb_customer LEFT JOIN tb_paket ON
             </div>
         </div>
 
-        <!-- ================= TABLE CARD ================= -->
         <div class="table-card">
-            <!-- HEADER TABLE -->
             <div class="table-header">
                 <h3>Data Pelanggan</h3>
                 <a href="tambah.php" class="btn-orange">
@@ -60,7 +71,6 @@ $query = mysqli_query($koneksi, "SELECT * FROM tb_customer LEFT JOIN tb_paket ON
                 </a>
             </div>
 
-            <!-- TABLE -->
             <table>
                 <thead>
                     <tr>
@@ -76,7 +86,7 @@ $query = mysqli_query($koneksi, "SELECT * FROM tb_customer LEFT JOIN tb_paket ON
                 <tbody>
                     <?php 
                     $no = 1;
-                    while($data = mysqli_fetch_assoc($query)) : 
+                    while ($data = mysqli_fetch_assoc($query)) : 
                     ?>
                     <tr>
                         <td><?= $no++; ?></td>
@@ -85,7 +95,7 @@ $query = mysqli_query($koneksi, "SELECT * FROM tb_customer LEFT JOIN tb_paket ON
                         <td><?= $data['telepon_customer']; ?></td>
                         <td><?= $data['nama_paket'] ?? '-'; ?></td>
                         <td>
-                            <?php if($data['status_paket'] == 'Aktif') : ?>
+                            <?php if (isset($data['status_langganan']) && strtolower($data['status_langganan']) == 'aktif') : ?>
                                 <span class="status-active">Aktif</span>
                             <?php else : ?>
                                 <span class="status-pending">Pending</span>
@@ -105,5 +115,30 @@ $query = mysqli_query($koneksi, "SELECT * FROM tb_customer LEFT JOIN tb_paket ON
     </div>
 </div>
 
+<div class="logout-modal" id="logoutModal">
+        <div class="logout-modal-content">
+            <div class="logout-icon">
+                <i class="bi bi-box-arrow-right"></i>
+            </div>
+
+            <h2>Konfirmasi Logout</h2>
+            <p>Apakah Anda yakin ingin keluar?</p>
+
+            <div class="logout-modal-action">
+                <button 
+                    class="btn-cancel"
+                    onclick="closeLogoutModal()"
+                >
+                    Batal
+                </button>
+                <a 
+                    href="../../auth/logout.php"
+                    class="btn-confirm"
+                >
+                    Ya, Logout
+                </a>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

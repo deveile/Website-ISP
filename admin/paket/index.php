@@ -14,11 +14,12 @@ $data = mysqli_query($koneksi, "SELECT * FROM tb_paket ORDER BY id_paket DESC");
     <link rel="icon" type="image/png" href="../../assets/images/logo.png">
     <link rel="stylesheet" href="../../assets/css/style.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <script src="../../assets/js/script.js" defer></script>
 </head>
 
 <body>
     <div class="dashboard-layout">
-        <!-- SIDEBAR -->
         <div class="sidebar">
             <div class="sidebar-logo">
                 <img src="../../assets/images/logo.png">
@@ -56,16 +57,16 @@ $data = mysqli_query($koneksi, "SELECT * FROM tb_paket ORDER BY id_paket DESC");
                     </a>
                 </li>
                 <li>
-                    <a href="../../auth/logout.php"
-                    onclick="return confirm('Apakah Anda yakin ingin logout?')">
-                        <i class="bi bi-box-arrow-right"></i>
-                        Logout
+                    <a 
+                    href="#"
+                    onclick="openLogoutModal()">
+                    <i class="bi bi-box-arrow-right"></i>
+                    Logout
                     </a>
                 </li>
             </ul>
         </div>
 
-        <!-- CONTENT -->
         <div class="dashboard-content">
             <div class="topbar">
                 <div>
@@ -75,7 +76,6 @@ $data = mysqli_query($koneksi, "SELECT * FROM tb_paket ORDER BY id_paket DESC");
             </div>
 
             <div class="paket-admin-layout">
-                <!-- LIST PAKET -->
                 <div class="paket-grid">
                     <?php while ($paket = mysqli_fetch_assoc($data)) : ?>
                         <div class="paket-admin-card">
@@ -95,7 +95,6 @@ $data = mysqli_query($koneksi, "SELECT * FROM tb_paket ORDER BY id_paket DESC");
                     <?php endwhile; ?>
                 </div>
 
-                <!-- FORM -->
                 <div class="form-paket-card">
                     <h3>Tambah Paket</h3>
                     <form action="tambah.php" method="POST">
@@ -124,6 +123,31 @@ $data = mysqli_query($koneksi, "SELECT * FROM tb_paket ORDER BY id_paket DESC");
                         </button>
                     </form>
                 </div>
+            </div>
+        </div>
+    </div>
+        <div class="logout-modal" id="logoutModal">
+        <div class="logout-modal-content">
+            <div class="logout-icon">
+                <i class="bi bi-box-arrow-right"></i>
+            </div>
+
+            <h2>Konfirmasi Logout</h2>
+            <p>Apakah Anda yakin ingin keluar?</p>
+
+            <div class="logout-modal-action">
+                <button 
+                    class="btn-cancel"
+                    onclick="closeLogoutModal()"
+                >
+                    Batal
+                </button>
+                <a 
+                    href="../../auth/logout.php"
+                    class="btn-confirm"
+                >
+                    Ya, Logout
+                </a>
             </div>
         </div>
     </div>

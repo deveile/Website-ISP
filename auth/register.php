@@ -14,7 +14,7 @@
         <form action="register_action.php" method="POST" class="auth-card">
 
             <h2>Register</h2>
-            <p>Buat akun pelanggan baru</p>
+            <p>Buat akun baru</p>
 
             <input 
                 type="text" 
