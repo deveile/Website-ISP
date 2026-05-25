@@ -53,12 +53,9 @@ $result = mysqli_query($koneksi,
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <script src="../../assets/js/script.js" defer></script>
     <style>
-        /* ✅ Fix 1: cursor pointer pada tombol hapus */
         .btn-hapus {
             cursor: pointer !important;
         }
-
-        /* ✅ Fix 2: tombol hapus warna merah solid */
         .btn-hapus {
             display: inline-flex;
             align-items: center;
@@ -78,7 +75,6 @@ $result = mysqli_query($koneksi,
             cursor: pointer !important;
         }
 
-        /* ✅ Fix 3: tombol kembali — icon panah kiri */
         .btn-kembali {
             cursor: pointer;
         }

@@ -30,7 +30,7 @@ while($c = mysqli_fetch_assoc($customer)){
          AND tahun_tagihan = '$tahun'"
     );
 
-    /* ================= JIKA BELUM ADA, GENERATE TAGIHAN BARU ================= */
+    /* ================= GENERATE TAGIHAN BARU ================= */
     if(mysqli_num_rows($cek) == 0){
 
         /* ================= FORMAT KODE INVOICE ================= */

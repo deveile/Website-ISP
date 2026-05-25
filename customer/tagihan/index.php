@@ -9,7 +9,12 @@ $customer = mysqli_fetch_assoc($query_customer);
 
 $langganan = null;
 if ($customer) {
-    $query_langganan = mysqli_query($koneksi, "SELECT tb_langganan.*, tb_paket.nama_paket, tb_paket.kecepatan, tb_paket.harga FROM tb_langganan LEFT JOIN tb_paket ON tb_langganan.id_paket = tb_paket.id_paket WHERE tb_langganan.id_customer = '" . $customer['id_customer'] . "' LIMIT 1");
+    $sql_langganan = "SELECT tb_langganan.*, tb_paket.nama_paket, tb_paket.kecepatan, tb_paket.harga 
+                      FROM tb_langganan 
+                      LEFT JOIN tb_paket ON tb_langganan.id_paket = tb_paket.id_paket 
+                      WHERE tb_langganan.id_customer = '" . $customer['id_customer'] . "' LIMIT 1";
+    
+    $query_langganan = mysqli_query($koneksi, $sql_langganan);
     $langganan = mysqli_fetch_assoc($query_langganan);
 }
 
@@ -19,6 +24,7 @@ $where   = "WHERE 1=0";
 
 if ($langganan) {
     $where = "WHERE id_langganan = '" . $langganan['id_langganan'] . "'";
+    
     if ($periode != '') {
         $split = explode('-', $periode);
         $where .= " AND bulan_tagihan = '" . $split[1] . "' AND tahun_tagihan = '" . $split[0] . "'";
@@ -48,7 +54,10 @@ $query = mysqli_query($koneksi, "SELECT * FROM tb_transaksi $where ORDER BY id_t
 <body>
 <div class="dashboard-layout">
     <div class="sidebar">
-        <div class="sidebar-logo"><img src="../../assets/images/logo.png"><h2>Anuwani</h2></div>
+        <div class="sidebar-logo">
+            <img src="../../assets/images/logo.png">
+            <h2>Anuwani</h2>
+        </div>
         <ul>
             <li><a href="../index.php"><i class="bi bi-grid"></i> Dashboard</a></li>
             <li><a href="index.php" class="active"><i class="bi bi-receipt"></i> Tagihan Saya</a></li>
@@ -59,7 +68,13 @@ $query = mysqli_query($koneksi, "SELECT * FROM tb_transaksi $where ORDER BY id_t
     </div>
 
     <div class="dashboard-content">
-        <div class="topbar"><div><h1>Tagihan Saya</h1><p>Riwayat pembayaran internet</p></div></div>
+        <div class="topbar">
+            <div>
+                <h1>Tagihan Saya</h1>
+                <p>Riwayat pembayaran internet</p>
+            </div>
+        </div>
+        
         <div class="table-card">
             <div class="table-header">
                 <h3>Daftar Tagihan</h3>
@@ -74,19 +89,34 @@ $query = mysqli_query($koneksi, "SELECT * FROM tb_transaksi $where ORDER BY id_t
                     <button type="submit" class="btn-orange">Filter</button>
                 </form>
             </div>
+            
             <table>
                 <thead>
                     <tr>
-                        <th>Invoice</th><th>Periode</th><th>Jumlah</th><th>Status</th><th>Tanggal Bayar</th><th>Aksi</th>
+                        <th>Invoice</th>
+                        <th>Periode</th>
+                        <th>Jumlah</th>
+                        <th>Status</th>
+                        <th>Tanggal Bayar</th>
+                        <th>Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
                 <?php if ($query && mysqli_num_rows($query) > 0) : ?>
                     <?php while ($t = mysqli_fetch_assoc($query)) : 
                         $status_pay = strtolower($t['status_pembayaran']);
-                        $status_class = ($status_pay == 'lunas') ? 'active' : (($status_pay == 'menunggu_verifikasi') ? 'pending' : 'belum');
-                        $status_text  = ($status_pay == 'lunas') ? 'Lunas' : (($status_pay == 'menunggu_verifikasi') ? 'Menunggu Verifikasi' : 'Belum Bayar');
                         $periode_tagihan = date('F Y', strtotime($t['tahun_tagihan'].'-'.$t['bulan_tagihan'].'-01'));
+                        
+                        if ($status_pay == 'lunas') {
+                            $status_class = 'active';
+                            $status_text  = 'Lunas';
+                        } elseif ($status_pay == 'menunggu_verifikasi') {
+                            $status_class = 'pending';
+                            $status_text  = 'Menunggu Verifikasi';
+                        } else {
+                            $status_class = 'belum';
+                            $status_text  = 'Belum Bayar';
+                        }
                     ?>
                     <tr>
                         <td><?= $t['kode_invoice']; ?></td>
@@ -104,7 +134,9 @@ $query = mysqli_query($koneksi, "SELECT * FROM tb_transaksi $where ORDER BY id_t
                     </tr>
                     <?php endwhile; ?>
                 <?php else : ?>
-                    <tr><td colspan="6" style="text-align:center;">Belum ada tagihan</td></tr>
+                    <tr>
+                        <td colspan="6" style="text-align:center;">Belum ada tagihan</td>
+                    </tr>
                 <?php endif; ?>
                 </tbody>
             </table>

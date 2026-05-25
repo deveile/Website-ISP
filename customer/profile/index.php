@@ -4,10 +4,8 @@ require_once __DIR__ . '/../../koneksi.php';
 
 $id_user = $_SESSION['id_user'];
 
-/* ================= AMBIL DATA CUSTOMER ================= */
-$query = mysqli_query(
-    $koneksi,
-    "SELECT 
+$query = mysqli_query($koneksi, "
+    SELECT 
         tb_customer.*,
         tb_user.username,
         tb_langganan.id_langganan,
@@ -19,12 +17,11 @@ $query = mysqli_query(
     LEFT JOIN tb_langganan ON tb_customer.id_customer = tb_langganan.id_customer
     LEFT JOIN tb_paket ON tb_langganan.id_paket = tb_paket.id_paket
     WHERE tb_customer.id_user = '$id_user'
-    LIMIT 1"
-);
+    LIMIT 1
+");
 
 $data = mysqli_fetch_assoc($query);
 
-/* ================= VALIDASI ================= */
 if (!$data) {
     die("Data customer tidak ditemukan");
 }
@@ -35,69 +32,29 @@ if (!$data) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profil Customer</title>
-
-    <!-- CSS -->
     <link rel="stylesheet" href="../../assets/css/style.css">
-
-    <!-- ICON -->
-    <link rel="icon" type="image/png" href="../../assets/images/logo.png">
-
-    <!-- BOOTSTRAP ICON -->
+    <link class="icon" type="image/png" href="../../assets/images/logo.png">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-
-    <!-- JS -->
     <script src="../../assets/js/script.js" defer></script>
 </head>
 <body>
 
 <div class="dashboard-layout">
-
-    <!-- ================= SIDEBAR ================= -->
     <div class="sidebar">
         <div class="sidebar-logo">
             <img src="../../assets/images/logo.png">
             <h2>Anuwani</h2>
         </div>
-
         <ul>
-            <li>
-                <a href="../index.php">
-                    <i class="bi bi-grid"></i>
-                    Dashboard
-                </a>
-            </li>
-            <li>
-                <a href="../tagihan/index.php">
-                    <i class="bi bi-receipt"></i>
-                    Tagihan Saya
-                </a>
-            </li>
-            <li>
-                <a href="../paket/index.php">
-                    <i class="bi bi-wifi"></i>
-                    Paket Internet
-                </a>
-            </li>
-            <li>
-                <a href="index.php" class="active">
-                    <i class="bi bi-person"></i>
-                    Profile
-                </a>
-            </li>
-            <!-- LOGOUT -->
-            <li>
-                <a href="#" onclick="openLogoutModal()">
-                    <i class="bi bi-box-arrow-right"></i>
-                    Logout
-                </a>
-            </li>
+            <li><a href="../index.php"><i class="bi bi-grid"></i> Dashboard</a></li>
+            <li><a href="../tagihan/index.php"><i class="bi bi-receipt"></i> Tagihan Saya</a></li>
+            <li><a href="../paket/index.php"><i class="bi bi-wifi"></i> Paket Internet</a></li>
+            <li><a href="index.php" class="active"><i class="bi bi-person"></i> Profile</a></li>
+            <li><a href="#" onclick="openLogoutModal()"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
         </ul>
     </div>
 
-    <!-- ================= CONTENT ================= -->
     <div class="dashboard-content">
-
-        <!-- ================= TOPBAR ================= -->
         <div class="topbar">
             <div>
                 <h1>Profil Customer</h1>
@@ -105,88 +62,57 @@ if (!$data) {
             </div>
         </div>
 
-        <!-- ================= PROFILE CARD ================= -->
         <div class="profile-customer-card">
-
-            <!-- HEADER -->
             <div class="profile-customer-header">
-                <div class="profile-avatar">
-                    <i class="bi bi-person-fill"></i>
-                </div>
+                <div class="profile-avatar"><i class="bi bi-person-fill"></i></div>
                 <div>
                     <h2><?= $data['nama_customer']; ?></h2>
                     <p>@<?= $data['username']; ?></p>
                 </div>
             </div>
 
-            <!-- ================= INFO GRID ================= -->
             <div class="profile-info-grid">
-                <!-- PAKET -->
                 <div class="profile-info-item">
                     <span>Paket Aktif</span>
-                    <strong>
-                        <?= $data['nama_paket'] ? $data['nama_paket'] : 'Belum Berlangganan'; ?>
-                    </strong>
+                    <strong><?= $data['nama_paket'] ? $data['nama_paket'] : 'Belum Berlangganan'; ?></strong>
                 </div>
-
-                <!-- KECEPATAN -->
                 <div class="profile-info-item">
                     <span>Kecepatan</span>
-                    <strong>
-                        <?= $data['kecepatan'] ? $data['kecepatan'] : '-'; ?>
-                    </strong>
+                    <strong><?= $data['kecepatan'] ? $data['kecepatan'] : '-'; ?></strong>
                 </div>
             </div>
 
-            <!-- ================= DETAIL ================= -->
             <div class="profile-detail-list">
-                <!-- EMAIL -->
                 <div class="profile-detail-item">
                     <span>Email</span>
                     <strong><?= $data['email_customer']; ?></strong>
                 </div>
-
-                <!-- TELEPON -->
                 <div class="profile-detail-item">
                     <span>Telepon</span>
                     <strong><?= $data['telepon_customer']; ?></strong>
                 </div>
-
-                <!-- ALAMAT -->
                 <div class="profile-detail-item">
                     <span>Alamat</span>
                     <strong><?= $data['alamat_customer']; ?></strong>
                 </div>
-
-                <!-- STATUS -->
                 <div class="profile-detail-item">
                     <span>Status Langganan</span>
-                    <strong>
-                        <?= $data['status_langganan'] ? $data['status_langganan'] : 'Belum Aktif'; ?>
-                    </strong>
+                    <strong><?= $data['status_langganan'] ? $data['status_langganan'] : 'Belum Aktif'; ?></strong>
                 </div>
             </div>
 
-            <!-- ================= BUTTON ================= -->
             <div class="profile-action">
                 <a href="edit.php" class="btn-orange">Edit Profil</a>
             </div>
-
         </div>
-
     </div>
-
 </div>
 
-<!-- ================= LOGOUT MODAL ================= -->
 <div class="logout-modal" id="logoutModal">
     <div class="logout-modal-content">
-        <div class="logout-icon">
-            <i class="bi bi-box-arrow-right"></i>
-        </div>
+        <div class="logout-icon"><i class="bi bi-box-arrow-right"></i></div>
         <h2>Konfirmasi Logout</h2>
         <p>Apakah Anda yakin ingin keluar?</p>
-
         <div class="logout-modal-action">
             <button class="btn-cancel" onclick="closeLogoutModal()">Batal</button>
             <a href="../../auth/logout.php" class="btn-confirm">Ya, Logout</a>
