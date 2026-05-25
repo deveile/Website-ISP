@@ -8,12 +8,9 @@ if($_SESSION['role'] != 'admin'){
     exit;
 }
 
-/* ================= FILTER ================= */
 $where = "WHERE 1=1";
 
-/* ================= FILTER PERIODE ================= */
 if(isset($_GET['periode']) && $_GET['periode'] != ''){
-
     $explode = explode('-', $_GET['periode']);
     $tahun = $explode[0];
     $bulan = $explode[1];
@@ -24,27 +21,23 @@ if(isset($_GET['periode']) && $_GET['periode'] != ''){
     ";
 }
 
-/* ================= FILTER STATUS ================= */
 if(isset($_GET['status']) && $_GET['status'] != ''){
-
     $status = $_GET['status'];
-
     $where .= "
         AND tb_transaksi.status_pembayaran='$status'
     ";
 }
 
-$query = mysqli_query(
-    $koneksi, 
-    "SELECT
-        tb_transaksi.*,
-        tb_customer.nama_customer
-     FROM tb_transaksi
-     INNER JOIN tb_langganan ON tb_transaksi.id_langganan = tb_langganan.id_langganan
-     INNER JOIN tb_customer ON tb_langganan.id_customer = tb_customer.id_customer
-     $where
-     ORDER BY tb_transaksi.id_transaksi DESC"
-);
+$sql = "SELECT tb_transaksi.*, tb_customer.nama_customer
+        FROM tb_transaksi
+        INNER JOIN tb_langganan 
+            ON tb_transaksi.id_langganan = tb_langganan.id_langganan
+        INNER JOIN tb_customer 
+            ON tb_langganan.id_customer = tb_customer.id_customer
+        $where
+        ORDER BY tb_transaksi.id_transaksi DESC";
+
+$query = mysqli_query($koneksi, $sql);
 ?>
 
 <!DOCTYPE html>
@@ -57,14 +50,17 @@ $query = mysqli_query(
     <link rel="icon" type="image/png" href="../../assets/images/logo.png">
     <link rel="stylesheet" href="../../assets/css/style.css">
 
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/style.css">
+    <link rel="stylesheet" 
+          href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" 
+          href="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/style.css">
     
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/index.js"></script>
     <script src="../../assets/js/script.js" defer></script>
 
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" 
+          href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
 <body>
 
@@ -133,9 +129,18 @@ $query = mysqli_query(
 
                     <select name="status">
                         <option value="">Semua Status</option>
-                        <option value="belum" <?= (isset($_GET['status']) && $_GET['status'] == 'belum') ? 'selected' : ''; ?>>Belum Bayar</option>
-                        <option value="menunggu" <?= (isset($_GET['status']) && $_GET['status'] == 'menunggu') ? 'selected' : ''; ?>>Menunggu Konfirmasi</option>
-                        <option value="lunas" <?= (isset($_GET['status']) && $_GET['status'] == 'lunas') ? 'selected' : ''; ?>>Lunas</option>
+                        <option value="belum_bayar" 
+                            <?= (isset($_GET['status']) && $_GET['status'] == 'belum_bayar') ? 'selected' : ''; ?>>
+                            Belum Bayar
+                        </option>
+                        <option value="menunggu_verifikasi" 
+                            <?= (isset($_GET['status']) && $_GET['status'] == 'menunggu_verifikasi') ? 'selected' : ''; ?>>
+                            Menunggu Verifikasi
+                        </option>
+                        <option value="lunas" 
+                            <?= (isset($_GET['status']) && $_GET['status'] == 'lunas') ? 'selected' : ''; ?>>
+                            Lunas
+                        </option>
                     </select>
 
                     <button type="submit" class="btn-orange">
@@ -177,10 +182,17 @@ $query = mysqli_query(
                             if($status == 'lunas') : 
                             ?>
                                 <span class="status-active">Lunas</span>
-                            <?php elseif($status == 'menunggu') : ?>
-                                <span class="status-pending">Menunggu</span>
+                            <?php elseif($status == 'menunggu_verifikasi') : ?>
+                                <span class="status-pending">Menunggu Verifikasi</span>
                             <?php else : ?>
-                                <span class="status-belum" style="background: #f8d7da; color: #721c24; padding: 4px 10px; border-radius: 4px; font-size: 0.85rem;">Belum Bayar</span>
+                                <span class="status-belum" 
+                                      style="background: #f8d7da; 
+                                             color: #721c24; 
+                                             padding: 4px 10px; 
+                                             border-radius: 4px; 
+                                             font-size: 0.85rem;">
+                                    Belum Bayar
+                                </span>
                             <?php endif; ?>
                         </td>
                         <td><?= !empty($data['tanggal_bayar']) ? $data['tanggal_bayar'] : '-'; ?></td>
@@ -190,7 +202,9 @@ $query = mysqli_query(
                     else : 
                     ?>
                         <tr>
-                            <td colspan="7" style="text-align: center; color: #888;">Tidak ada data transaksi ditemukan.</td>
+                            <td colspan="7" style="text-align: center; color: #888;">
+                                Tidak ada data transaksi ditemukan.
+                            </td>
                         </tr>
                     <?php endif; ?>
                 </tbody>
@@ -214,7 +228,6 @@ flatpickr("#periode", {
 });
 </script>
 
-<!-- ================= LOGOUT MODAL ================= -->
 <div class="logout-modal" id="logoutModal">
     <div class="logout-modal-content">
         <div class="logout-icon">

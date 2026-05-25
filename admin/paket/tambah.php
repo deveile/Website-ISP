@@ -24,4 +24,4 @@ mysqli_query($koneksi, "
     )
 ");
 
-header("Location:index.php");
+header("Location:index.php?success=tambah");

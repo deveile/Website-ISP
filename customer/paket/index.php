@@ -2,17 +2,16 @@
 require_once __DIR__ . '/../../auth/cek_login.php';
 require_once __DIR__ . '/../../koneksi.php';
 
-/* ================= VALIDASI ROLE ================= */
 if ($_SESSION['role'] != 'customer') {
     header("Location: ../../auth/login.php");
     exit;
 }
 
-/* ================= AMBIL DATA PAKET ================= */
 $data = mysqli_query(
     $koneksi,
     "SELECT *
     FROM tb_paket
+    where status='aktif'
     ORDER BY id_paket DESC"
 );
 ?>
@@ -32,8 +31,6 @@ $data = mysqli_query(
 <body>
 
 <div class="dashboard-layout">
-
-    <!-- ================= SIDEBAR ================= -->
     <div class="sidebar">
         <div class="sidebar-logo">
             <img src="../../assets/images/logo.png">
@@ -41,35 +38,30 @@ $data = mysqli_query(
         </div>
 
         <ul>
-            <!-- DASHBOARD -->
             <li>
                 <a href="../index.php">
                     <i class="bi bi-grid"></i>
                     Dashboard
                 </a>
             </li>
-            <!-- TAGIHAN -->
             <li>
                 <a href="../tagihan/index.php">
                     <i class="bi bi-receipt"></i>
                     Tagihan Saya
                 </a>
             </li>
-            <!-- PAKET -->
             <li>
                 <a href="index.php" class="active">
                     <i class="bi bi-wifi"></i>
                     Paket Internet
                 </a>
             </li>
-            <!-- PROFILE -->
             <li>
                 <a href="../profile/index.php">
                     <i class="bi bi-person"></i>
                     Profile
                 </a>
             </li>
-            <!-- LOGOUT -->
             <li>
                 <a href="#" onclick="openLogoutModal()">
                     <i class="bi bi-box-arrow-right"></i>
@@ -79,10 +71,8 @@ $data = mysqli_query(
         </ul>
     </div>
 
-    <!-- ================= CONTENT ================= -->
     <div class="dashboard-content">
 
-        <!-- ================= TOPBAR ================= -->
         <div class="topbar">
             <div>
                 <h1>Paket Internet</h1>
@@ -90,23 +80,18 @@ $data = mysqli_query(
             </div>
         </div>
 
-        <!-- ================= GRID PAKET ================= -->
         <div class="paket-grid">
             <?php while ($paket = mysqli_fetch_assoc($data)) : ?>
                 <div class="customer-paket-card">
-                    <!-- NAMA -->
+
                     <h3><?= $paket['nama_paket']; ?></h3>
 
-                    <!-- KECEPATAN -->
                     <h1><?= $paket['kecepatan']; ?></h1>
 
-                    <!-- HARGA -->
                     <h2>Rp <?= number_format($paket['harga']); ?></h2>
 
-                    <!-- DESKRIPSI -->
                     <p><?= nl2br($paket['deskripsi']); ?></p>
 
-                    <!-- BUTTON -->
                     <a href="../pemasangan/index.php?id=<?= $paket['id_paket']; ?>" class="btn-orange">
                         Pesan Sekarang
                     </a>

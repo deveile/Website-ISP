@@ -4,6 +4,7 @@ include 'koneksi.php';
 $paket = mysqli_query(
     $koneksi,
     "SELECT * FROM tb_paket
+    where status='aktif'
     ORDER BY id_paket DESC
     LIMIT 3"
 );

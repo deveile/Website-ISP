@@ -4,9 +4,6 @@ require_once __DIR__ . '/../../koneksi.php';
 $bulan = date('n');
 $tahun = date('Y');
 
-/* ================= AMBIL CUSTOMER YANG LANGGANANNYA AKTIF (FIXED JOIN) ================= */
-// Kita hubungkan tb_customer dengan tb_langganan untuk mengecek status_langganan, 
-// serta tb_paket untuk mengambil nominal harga paketnya secara real-time.
 $customer = mysqli_query(
     $koneksi, 
     "SELECT 
@@ -19,14 +16,12 @@ $customer = mysqli_query(
      WHERE LOWER(tb_langganan.status_langganan) = 'aktif'"
 );
 
-/* ================= LOOP CUSTOMER ================= */
 while($c = mysqli_fetch_assoc($customer)){
 
     $id_customer = $c['id_customer'];
     $id_langganan = $c['id_langganan'];
-    $jumlah = $c['harga']; // Mengambil kolom 'harga' dari tb_paket yang sudah di-join di atas
+    $jumlah = $c['harga']; 
 
-    /* ================= CEK APAKAH TAGIHAN BULAN INI SUDAH ADA ================= */
     $cek = mysqli_query(
         $koneksi, 
         "SELECT * FROM tb_transaksi 
@@ -41,7 +36,6 @@ while($c = mysqli_fetch_assoc($customer)){
         /* ================= FORMAT KODE INVOICE ================= */
         $invoice = "INV-" . $tahun . str_pad($bulan, 2, "0", STR_PAD_LEFT) . "-" . $id_customer;
 
-        /* ================= INSERT KE DATA TRANSAKSI ================= */
         mysqli_query(
             $koneksi, 
             "INSERT INTO tb_transaksi (
@@ -57,7 +51,7 @@ while($c = mysqli_fetch_assoc($customer)){
                 '$bulan',
                 '$tahun',
                 '$jumlah',
-                'belum'
+                'belum_bayar'
             )"
         );
     }
