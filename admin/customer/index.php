@@ -7,7 +7,6 @@ if ($_SESSION['role'] != 'admin') {
     exit;
 }
 
-/* ================= AMBIL DATA KUSTOMER + TANGGAL SELESAI MASA AKTIF ================= */
 $query = mysqli_query($koneksi, "
     SELECT 
         tb_customer.*, 
@@ -20,7 +19,6 @@ $query = mysqli_query($koneksi, "
     ORDER BY tb_customer.id_customer DESC
 ");
 
-/* ================= HELPER FORMAT TANGGAL INDONESIA ================= */
 function tgl_indo($tanggal) {
     if (empty($tanggal) || $tanggal == '0000-00-00') return '-';
     $bulan_array = [

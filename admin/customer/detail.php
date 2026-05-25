@@ -9,7 +9,6 @@ if($_SESSION['role'] != 'admin'){
 
 $id = $_GET['id'];
 
-/* ================= QUERY UPDATE: MENAMBAHKAN TANGGAL SELESAI ================= */
 $query = mysqli_query($koneksi, "
     SELECT 
         tb_customer.*, 
@@ -29,7 +28,6 @@ if(!$data){
     exit;
 }
 
-/* ================= HELPER FORMAT TANGGAL INDONESIA ================= */
 function tgl_indo($tanggal) {
     if (empty($tanggal) || $tanggal == '0000-00-00') return '-';
     $bulan_array = [
@@ -137,9 +135,6 @@ function tgl_indo($tanggal) {
             </div>
 
             <div class="detail-action">
-                <a href="edit.php?id=<?= $data['id_customer']; ?>" class="btn-orange">
-                    <i class="bi bi-pencil-square"></i> Edit Customer
-                </a>
                 <a href="index.php" class="btn-delete">Kembali</a>
             </div>
         </div>

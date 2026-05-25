@@ -102,19 +102,18 @@ if (isset($_POST['submit'])) {
 
         <div class="form-wrapper-admin">
             <form method="POST" class="form-admin-card">
-                <h2>Form Admin</h2>
+                
+                <div class="form-admin-header">
+                    <h2>Form Admin</h2>
+                    <a href="list_admin.php" class="btn-ke-daftar">
+                        <i class="bi bi-list-ul"></i> List Admin
+                    </a>
+                </div>
 
                 <?php if ($error): ?>
                     <div class="alert-box alert-error">
                         <i class="bi bi-exclamation-circle me-1"></i>
                         <?= htmlspecialchars($error) ?>
-                    </div>
-                <?php endif; ?>
-                <?php if ($success): ?>
-                    <div class="alert-box alert-success">
-                        <i class="bi bi-check-circle me-1"></i>
-                        <?= htmlspecialchars($success) ?>
-                        &nbsp;·&nbsp; <a href="index.php">Lihat daftar admin</a>
                     </div>
                 <?php endif; ?>
 
@@ -159,15 +158,27 @@ if (isset($_POST['submit'])) {
     </div>
 </div>
 
+<div class="success-modal" id="successModal">
+    <div class="success-modal-content">
+        <div class="success-icon">
+            <i class="bi bi-check-circle-fill"></i>
+        </div>
+        <h2>Berhasil!</h2>
+        <p>Akun admin baru telah berhasil dibuat.</p>
+        <div class="success-modal-action">
+            <button class="btn-close-popup" onclick="closeSuccessModal()">Tetap di Sini</button>
+            <a href="index.php" class="btn-view-list">Lihat Daftar</a>
+        </div>
+    </div>
+</div>
+
 <div class="logout-modal" id="logoutModal">
     <div class="logout-modal-content">
         <div class="logout-icon">
             <i class="bi bi-box-arrow-right"></i>
         </div>
-
         <h2>Konfirmasi Logout</h2>
         <p>Apakah Anda yakin ingin keluar?</p>
-
         <div class="logout-modal-action">
             <button class="btn-cancel" onclick="closeLogoutModal()">Batal</button>
             <a href="../../auth/logout.php" class="btn-confirm">Ya, Logout</a>
@@ -176,7 +187,6 @@ if (isset($_POST['submit'])) {
 </div>
 
 <script>
-    // Toggle tampilkan/sembunyikan password (Sudah disesuaikan untuk tag ikon langsung)
     document.getElementById('togglePass').addEventListener('click', function () {
         const inp = document.getElementById('passInput');
         if (inp.type === 'password') {
@@ -187,6 +197,14 @@ if (isset($_POST['submit'])) {
             this.className = 'bi bi-eye toggle-pass';
         }
     });
+
+    function closeSuccessModal() {
+        document.getElementById('successModal').style.display = 'none';
+    }
+
+    <?php if (!empty($success)): ?>
+        document.getElementById('successModal').style.display = 'flex';
+    <?php endif; ?>
 </script>
 
 </body>

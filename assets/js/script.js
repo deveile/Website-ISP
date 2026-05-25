@@ -1,11 +1,9 @@
-   /*1. MODAL SYSTEM (LOGOUT & UPDATE)*/
 function openLogoutModal() {
     document.getElementById('logoutModal').classList.add('show');
 }
 function closeLogoutModal() {
     document.getElementById('logoutModal').classList.remove('show');
 }
-// Fungsi untuk Modal Update Sukses (Baru Ditambahkan)
 function showUpdateModal() {
     document.getElementById('updateSuccessModal').classList.add('show');
 }
@@ -16,7 +14,6 @@ function closeUpdateModal() {
 
 
 
-   /*2. METODE PEMBAYARAN TOGGLE*/
 const metode = document.getElementById('metodePembayaran');
 const bankBox = document.getElementById('bankBox');
 const qrisBox = document.getElementById('qrisBox');
