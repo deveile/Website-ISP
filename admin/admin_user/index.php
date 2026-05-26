@@ -84,6 +84,7 @@ if (isset($_POST['submit'])) {
             <li><a href="../paket/index.php"><i class="bi bi-wifi"></i> Kelola Paket</a></li>
             <li><a href="../customer/index.php"><i class="bi bi-people"></i> Data Pelanggan</a></li>
             <li><a href="../transaksi/index.php"><i class="bi bi-credit-card"></i> Data Transaksi</a></li>
+            <li><a href="../laporan_keuangan/index.php"><i class="bi bi-bar-chart-line"></i> Laporan Keuangan</a></li>
             <li><a href="index.php" class="active"><i class="bi bi-person-plus"></i> Tambah Admin</a></li>
             <li>
                 <a href="#" onclick="openLogoutModal()">

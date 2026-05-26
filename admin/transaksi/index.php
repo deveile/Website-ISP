@@ -65,6 +65,7 @@ $query = mysqli_query($koneksi, $sql);
             <li><a href="../paket/index.php"><i class="bi bi-wifi"></i> Kelola Paket</a></li>
             <li><a href="../customer/index.php"><i class="bi bi-people"></i> Data Pelanggan</a></li>
             <li><a href="index.php" class="active"><i class="bi bi-credit-card"></i> Data Transaksi</a></li>
+            <li><a href="../laporan_keuangan/index.php"><i class="bi bi-bar-chart-line"></i> Laporan Keuangan</a></li>
             <li><a href="../admin_user/index.php"><i class="bi bi-person-plus"></i> Tambah Admin</a></li>
             <li><a href="#" onclick="openLogoutModal()"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
         </ul>

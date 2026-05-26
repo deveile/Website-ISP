@@ -86,6 +86,7 @@ $total_pendapatan = $pendapatan['total_pendapatan'] ?? 0;
                     <i class="bi bi-credit-card"></i> Data Transaksi
                 </a>
             </li>
+            <li><a href="laporan_keuangan/index.php"><i class="bi bi-bar-chart-line"></i> Laporan Keuangan</a></li>
             <li>
                 <a href="admin_user/index.php">
                     <i class="bi bi-person-plus"></i> Tambah Admin
