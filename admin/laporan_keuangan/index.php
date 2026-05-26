@@ -7,17 +7,14 @@ if ($_SESSION['role'] != 'admin') {
     exit;
 }
 
-// ── Filter ──────────────────────────────────────────────────────────────────
 $filter_tahun = isset($_GET['tahun']) && $_GET['tahun'] != '' ? (int)$_GET['tahun'] : date('Y');
 $filter_tipe  = isset($_GET['tipe'])  && in_array($_GET['tipe'], ['bulanan','tahunan']) ? $_GET['tipe'] : 'bulanan';
 
-// Daftar tahun yang tersedia
 $q_tahun = mysqli_query($koneksi, "SELECT DISTINCT tahun_tagihan FROM tb_transaksi ORDER BY tahun_tagihan DESC");
 $list_tahun = [];
 while ($r = mysqli_fetch_assoc($q_tahun)) $list_tahun[] = $r['tahun_tagihan'];
 if (empty($list_tahun)) $list_tahun = [date('Y')];
 
-// ── Data Ringkasan Tahun Terpilih ────────────────────────────────────────────
 $q_ringkasan = mysqli_query($koneksi, "
     SELECT
         COUNT(*) AS total_transaksi,
@@ -33,7 +30,6 @@ $q_ringkasan = mysqli_query($koneksi, "
 ");
 $ringkasan = mysqli_fetch_assoc($q_ringkasan);
 
-// ── Data Bulanan (untuk laporan bulanan & grafik) ────────────────────────────
 $q_bulanan = mysqli_query($koneksi, "
     SELECT
         bulan_tagihan,
@@ -54,7 +50,6 @@ $q_bulanan = mysqli_query($koneksi, "
 $data_bulanan = [];
 while ($r = mysqli_fetch_assoc($q_bulanan)) $data_bulanan[] = $r;
 
-// ── Data Tahunan ─────────────────────────────────────────────────────────────
 $q_tahunan = mysqli_query($koneksi, "
     SELECT
         tahun_tagihan,
@@ -72,13 +67,11 @@ $q_tahunan = mysqli_query($koneksi, "
 $data_tahunan = [];
 while ($r = mysqli_fetch_assoc($q_tahunan)) $data_tahunan[] = $r;
 
-// ── Helper ────────────────────────────────────────────────────────────────────
 $nama_bulan = ['','Januari','Februari','Maret','April','Mei','Juni',
                'Juli','Agustus','September','Oktober','November','Desember'];
 
 function rp($n) { return 'Rp ' . number_format((int)$n, 0, ',', '.'); }
 
-// ── Data grafik untuk Chart.js ────────────────────────────────────────────────
 $chart_labels    = [];
 $chart_masuk     = [];
 $chart_belum     = [];
@@ -108,7 +101,7 @@ for ($i = 1; $i <= 12; $i++) {
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="../../assets/js/script.js" defer></script>
 <style>
-/* ── Laporan-specific styles ── */
+
 .lap-stat-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 18px; margin-bottom: 28px; }
 .lap-stat {
     background: #fff; border-radius: 16px; padding: 22px 24px;
@@ -226,17 +219,15 @@ for ($i = 1; $i <= 12; $i++) {
     </ul>
 </div>
 
-<!-- CONTENT -->
 <div class="dashboard-content">
     <div class="topbar">
         <h1>Laporan Keuangan</h1>
         <p>Rekap pendapatan dan tagihan Anuwani Network</p>
     </div>
 
-    <!-- Filter Bar -->
     <div class="filter-bar">
         <form method="GET" style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;width:100%;">
-            <!-- Tipe -->
+
             <label>Tampilkan:</label>
             <div class="tab-group">
                 <a href="?tipe=bulanan&tahun=<?= $filter_tahun ?>"
@@ -259,7 +250,7 @@ for ($i = 1; $i <= 12; $i++) {
             <input type="hidden" name="tipe" value="bulanan">
             <?php endif; ?>
 
-            <!-- Export Buttons -->
+
             <div class="export-group">
                 <a href="export_pdf.php?tipe=<?= $filter_tipe ?>&tahun=<?= $filter_tahun ?>"
                    target="_blank" class="btn-export-pdf">
@@ -275,7 +266,7 @@ for ($i = 1; $i <= 12; $i++) {
 
     <?php if ($filter_tipe === 'bulanan'): ?>
 
-    <!-- STATISTIK RINGKASAN -->
+
     <div class="lap-stat-grid">
         <div class="lap-stat">
             <div class="lap-stat-icon icon-orange"><i class="bi bi-cash-stack"></i></div>
@@ -311,7 +302,6 @@ for ($i = 1; $i <= 12; $i++) {
         </div>
     </div>
 
-    <!-- GRAFIK BULANAN -->
     <div class="lap-section">
         <div class="lap-section-header">
             <h3><i class="bi bi-bar-chart" style="color:#f4600c;margin-right:8px;"></i>Grafik Pendapatan <?= $filter_tahun ?></h3>
@@ -323,7 +313,6 @@ for ($i = 1; $i <= 12; $i++) {
         </div>
     </div>
 
-    <!-- TABEL BULANAN -->
     <div class="lap-section">
         <div class="lap-section-header">
             <h3><i class="bi bi-table" style="color:#f4600c;margin-right:8px;"></i>Rincian Per Bulan — <?= $filter_tahun ?></h3>
@@ -400,9 +389,8 @@ for ($i = 1; $i <= 12; $i++) {
         </div>
     </div>
 
-    <?php else: /* TAHUNAN */ ?>
+    <?php else: ?>
 
-    <!-- STATISTIK SEMUA TAHUN -->
     <?php
     $q_all = mysqli_fetch_assoc(mysqli_query($koneksi,
         "SELECT COUNT(*) AS tot, SUM(jumlah_bayar) AS total,
@@ -434,7 +422,6 @@ for ($i = 1; $i <= 12; $i++) {
         </div>
     </div>
 
-    <!-- GRAFIK TAHUNAN -->
     <div class="lap-section">
         <div class="lap-section-header">
             <h3><i class="bi bi-bar-chart" style="color:#f4600c;margin-right:8px;"></i>Grafik Pendapatan Per Tahun</h3>
@@ -446,7 +433,7 @@ for ($i = 1; $i <= 12; $i++) {
         </div>
     </div>
 
-    <!-- TABEL TAHUNAN -->
+
     <div class="lap-section">
         <div class="lap-section-header">
             <h3><i class="bi bi-table" style="color:#f4600c;margin-right:8px;"></i>Rekap Per Tahun</h3>
@@ -497,10 +484,9 @@ for ($i = 1; $i <= 12; $i++) {
     </div>
 
     <?php endif; ?>
-</div><!-- /dashboard-content -->
-</div><!-- /dashboard-layout -->
+</div>
+</div>
 
-<!-- Logout Modal -->
 <div class="logout-modal" id="logoutModal">
     <div class="logout-modal-content">
         <div class="logout-icon"><i class="bi bi-box-arrow-right"></i></div>
@@ -557,7 +543,6 @@ new Chart(document.getElementById('chartBulanan'), {
     }
 });
 <?php else: ?>
-// Grafik Tahunan
 const tahunLabels = <?= json_encode(array_column($data_tahunan, 'tahun_tagihan')) ?>;
 const tahunMasuk  = <?= json_encode(array_map(fn($r)=>(int)$r['pendapatan'], $data_tahunan)) ?>;
 const tahunBelum  = <?= json_encode(array_map(fn($r)=>(int)$r['belum_bayar'], $data_tahunan)) ?>;

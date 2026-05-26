@@ -65,6 +65,7 @@ $jam      = date('H:i');
 <head>
 <meta charset="UTF-8">
 <title><?= $judul ?></title>
+<link rel="icon" type="image/png" href="../../assets/images/logo.png">
 <style>
   @page { size: A4 landscape; margin: 15mm 16mm; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -149,7 +150,7 @@ $jam      = date('H:i');
          onerror="this.style.display='none'" alt="Logo">
     <div class="pdf-title">
         <h1><?= $judul ?></h1>
-        <p>Anuwani Network · Laporan resmi sistem</p>
+        <p>Anuwani Network</p>
     </div>
     <div class="pdf-meta">
         Dicetak: <?= $tanggal ?>, <?= $jam ?> WIB<br>
