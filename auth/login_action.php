@@ -17,7 +17,7 @@ if ($data) {
         $icon = 'success';
         $title = 'Login Berhasil';
         $text = ($data['role'] == 'admin') ? 'Selamat datang Admin' : 'Selamat datang';
-        $redirect = ($data['role'] == 'admin') ? '/isp_projek/admin/index.php' : '/isp_projek/customer/index.php';
+        $redirect = ($data['role'] == 'admin') ? '/website-isp/admin/index.php' : '/website-isp/customer/index.php';
     } else {
         $icon = 'error';
         $title = 'Login Gagal';
