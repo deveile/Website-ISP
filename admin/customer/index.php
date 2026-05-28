@@ -60,6 +60,32 @@ function tgl_indo($tanggal) {
             0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239,68,68,.4); }
             50%       { transform: scale(1.1); box-shadow: 0 0 0 5px rgba(239,68,68,0); }
         }
+        .status-active {
+    background: #dcfce7;
+    color: #166534;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.status-pending {
+    background: #fef3c7;
+    color: #92400e;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.status-nonactive {
+    background: #fee2e2;
+    color: #991b1b;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+}
     </style>
 </head>
 <body>
@@ -132,10 +158,17 @@ function tgl_indo($tanggal) {
                         </td>
                         
                         <td>
-                            <?php if (isset($data['status_langganan']) && strtolower($data['status_langganan']) == 'aktif') : ?>
+                            <?php 
+                            $status = strtolower($data['status_langganan'] ?? '');
+                            if ($status == 'aktif') : 
+                            ?>
                                 <span class="status-active">Aktif</span>
+                            <?php elseif ($status == 'suspend') : ?>
+                                <span class="status-pending">Suspend</span>
+                            <?php elseif ($status == 'berhenti') : ?>
+                                <span class="status-nonactive">Berhenti</span>
                             <?php else : ?>
-                                <span class="status-pending">Pending</span>
+                                <span class="status-pending">Tidak Aktif</span>
                             <?php endif; ?>
                         </td>
                         <td>

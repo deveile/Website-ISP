@@ -25,7 +25,7 @@ if (!$trx) {
     header("Location: index.php"); exit;
 }
 
-if (strtolower($trx['status_pembayaran']) !== 'menunggu') {
+if (strtolower($trx['status_pembayaran']) !== 'menunggu_verifikasi') {
     $pesan = urlencode('Transaksi ini sudah diproses sebelumnya.');
     header("Location: detail.php?id=$id_transaksi&pesan=$pesan&tipe=error");
     exit;
@@ -33,6 +33,12 @@ if (strtolower($trx['status_pembayaran']) !== 'menunggu') {
 
 if ($aksi === 'terima') {
     $tanggal_bayar = date('Y-m-d');
+    $id_langganan = (int)$trx['id_langganan'];
+
+    if (!$id_langganan) {
+        die('ID Langganan tidak ditemukan pada transaksi ini');
+    }
+
     $ok = mysqli_query($koneksi, "
         UPDATE tb_transaksi SET
             status_pembayaran = 'lunas',
@@ -41,6 +47,16 @@ if ($aksi === 'terima') {
     ");
 
     if ($ok) {
+        $update_langganan = mysqli_query($koneksi, "
+            UPDATE tb_langganan SET
+                status_langganan = 'aktif'
+            WHERE id_langganan = $id_langganan
+        ");
+
+        if (!$update_langganan) {
+            die(mysqli_error($koneksi));
+        }
+
         $pesan = urlencode('Pembayaran berhasil diverifikasi. Status transaksi sekarang Lunas.');
         header("Location: detail.php?id=$id_transaksi&pesan=$pesan&tipe=sukses");
     } else {
@@ -50,6 +66,7 @@ if ($aksi === 'terima') {
     exit;
 
 } elseif ($aksi === 'tolak') {
+    $id_langganan = (int)$trx['id_langganan'];
     $bukti_lama = $trx['bukti_pembayaran'] ?? '';
 
     $ok = mysqli_query($koneksi, "
@@ -62,14 +79,21 @@ if ($aksi === 'terima') {
     ");
 
     if ($ok) {
+        mysqli_query($koneksi, "
+            UPDATE tb_langganan SET
+                status_langganan = 'suspend'
+            WHERE id_langganan = $id_langganan
+        ");
+
         if (!empty($bukti_lama)) {
             $file_path = __DIR__ . '/../../uploads/bukti/' . $bukti_lama;
+
             if (file_exists($file_path)) {
                 unlink($file_path);
             }
         }
 
-        $pesan = urlencode('Pembayaran ditolak. Status kembali ke Belum Bayar. Pelanggan perlu mengirim ulang bukti.');
+        $pesan = urlencode('Pembayaran ditolak. Status kembali ke Belum Bayar.');
         header("Location: detail.php?id=$id_transaksi&pesan=$pesan&tipe=sukses");
     } else {
         $pesan = urlencode('Gagal menolak pembayaran: ' . mysqli_error($koneksi));

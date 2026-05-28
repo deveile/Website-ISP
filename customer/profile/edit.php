@@ -20,7 +20,8 @@ if (isset($_POST['simpan'])) {
         alamat_customer = '$alamat' 
         WHERE id_user = '$id_user'");
 
-    echo "<script>alert('Profil berhasil diperbarui'); window.location='index.php';</script>";
+    header("Location: index.php?update=sukses");
+    exit;
 }
 ?>
 <!DOCTYPE html>
