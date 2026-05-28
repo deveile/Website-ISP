@@ -7,6 +7,14 @@ if ($_SESSION['role'] != 'admin') {
     exit;
 }
 
+$query_notif = mysqli_query($koneksi, "
+    SELECT COUNT(*) AS total_notif
+    FROM tb_transaksi
+    WHERE status_pembayaran = 'menunggu_verifikasi'
+");
+
+$total_notif = mysqli_fetch_assoc($query_notif)['total_notif'];
+
 $filter_tahun = isset($_GET['tahun']) && $_GET['tahun'] != '' ? (int)$_GET['tahun'] : date('Y');
 $filter_tipe  = isset($_GET['tipe'])  && in_array($_GET['tipe'], ['bulanan','tahunan']) ? $_GET['tipe'] : 'bulanan';
 
@@ -21,10 +29,10 @@ $q_ringkasan = mysqli_query($koneksi, "
         SUM(jumlah_bayar) AS total_tagihan,
         SUM(CASE WHEN status_pembayaran='lunas' THEN jumlah_bayar ELSE 0 END) AS total_masuk,
         SUM(CASE WHEN status_pembayaran='belum_bayar' THEN jumlah_bayar ELSE 0 END) AS total_belum,
-        SUM(CASE WHEN status_pembayaran='menunggu' THEN jumlah_bayar ELSE 0 END) AS total_menunggu,
+        SUM(CASE WHEN status_pembayaran='menunggu_verifikasi' THEN jumlah_bayar ELSE 0 END) AS total_menunggu,
         COUNT(CASE WHEN status_pembayaran='lunas' THEN 1 END) AS jml_lunas,
         COUNT(CASE WHEN status_pembayaran='belum_bayar' THEN 1 END) AS jml_belum,
-        COUNT(CASE WHEN status_pembayaran='menunggu' THEN 1 END) AS jml_menunggu
+        COUNT(CASE WHEN status_pembayaran='menunggu_verifikasi' THEN 1 END) AS jml_menunggu
     FROM tb_transaksi
     WHERE tahun_tagihan = $filter_tahun
 ");
@@ -40,7 +48,7 @@ $q_bulanan = mysqli_query($koneksi, "
         SUM(CASE WHEN status_pembayaran='belum_bayar' THEN jumlah_bayar ELSE 0 END) AS belum_bayar,
         COUNT(CASE WHEN status_pembayaran='lunas' THEN 1 END) AS jml_lunas,
         COUNT(CASE WHEN status_pembayaran='belum_bayar' THEN 1 END) AS jml_belum,
-        COUNT(CASE WHEN status_pembayaran='menunggu' THEN 1 END) AS jml_menunggu
+        COUNT(CASE WHEN status_pembayaran='menunggu_verifikasi' THEN 1 END) AS jml_menunggu
     FROM tb_transaksi
     WHERE tahun_tagihan = $filter_tahun
     GROUP BY tahun_tagihan, bulan_tagihan
@@ -101,6 +109,18 @@ for ($i = 1; $i <= 12; $i++) {
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="../../assets/js/script.js" defer></script>
 <style>
+    .notif-badge {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 20px; height: 20px; border-radius: 50%;
+            background: #ef4444; color: #fff;
+            font-size: 11px; font-weight: 800;
+            margin-left: auto; flex-shrink: 0;
+            animation: pulse-badge 1.8s ease-in-out infinite;
+        }
+        @keyframes pulse-badge {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239,68,68,.4); }
+            50%       { transform: scale(1.1); box-shadow: 0 0 0 5px rgba(239,68,68,0); }
+        }
 
 .lap-stat-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 18px; margin-bottom: 28px; }
 .lap-stat {
@@ -202,7 +222,6 @@ for ($i = 1; $i <= 12; $i++) {
 <body>
 <div class="dashboard-layout">
 
-<!-- SIDEBAR -->
 <div class="sidebar">
     <div class="sidebar-logo">
         <img src="../../assets/images/logo.png" alt="Logo">
@@ -212,9 +231,13 @@ for ($i = 1; $i <= 12; $i++) {
         <li><a href="../index.php"><i class="bi bi-grid"></i> Dashboard</a></li>
         <li><a href="../paket/index.php"><i class="bi bi-wifi"></i> Kelola Paket</a></li>
         <li><a href="../customer/index.php"><i class="bi bi-people"></i> Data Pelanggan</a></li>
-        <li><a href="../transaksi/index.php"><i class="bi bi-credit-card"></i> Data Transaksi</a></li>
+        <li><a href="../transaksi/index.php"><i class="bi bi-credit-card"></i> Data Transaksi
+    <?php if ($total_notif > 0): ?>
+        <span class="notif-badge"><?= $total_notif; ?></span>
+    <?php endif; ?>
+    </a></li>
         <li><a href="index.php" class="active"><i class="bi bi-bar-chart-line"></i> Laporan Keuangan</a></li>
-        <li><a href="../admin_user/list_admin.php"><i class="bi bi-person-gear"></i> Kelola Admin</a></li>
+        <li><a href="../admin_user/index.php"><i class="bi bi-person-gear"></i> Kelola Admin</a></li>
         <li><a href="#" onclick="openLogoutModal()"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
     </ul>
 </div>

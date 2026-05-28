@@ -34,6 +34,14 @@ $query_pending = mysqli_query($koneksi, "
 ");
 $pending = mysqli_fetch_assoc($query_pending)['total_pending'];
 
+$query_notif = mysqli_query($koneksi, "
+    SELECT COUNT(*) AS total_notif
+    FROM tb_transaksi
+    WHERE status_pembayaran = 'menunggu_verifikasi'
+");
+
+$total_notif = mysqli_fetch_assoc($query_notif)['total_notif'];
+
 $query_income = mysqli_query($koneksi, "
     SELECT SUM(jumlah_bayar) AS total_pendapatan
     FROM tb_transaksi
@@ -54,6 +62,21 @@ $total_pendapatan = $pendapatan['total_pendapatan'] ?? 0;
     <link rel="icon" type="image/png" href="../assets/images/logo.png">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <script src="../assets/js/script.js" defer></script>
+
+    <style>
+        .notif-badge {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 20px; height: 20px; border-radius: 50%;
+            background: #ef4444; color: #fff;
+            font-size: 11px; font-weight: 800;
+            margin-left: auto; flex-shrink: 0;
+            animation: pulse-badge 1.8s ease-in-out infinite;
+        }
+        @keyframes pulse-badge {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239,68,68,.4); }
+            50%       { transform: scale(1.1); box-shadow: 0 0 0 5px rgba(239,68,68,0); }
+        }
+    </style>
 </head>
 <body>
 
@@ -84,12 +107,15 @@ $total_pendapatan = $pendapatan['total_pendapatan'] ?? 0;
             <li>
                 <a href="transaksi/index.php">
                     <i class="bi bi-credit-card"></i> Data Transaksi
+                    <?php if ($total_notif > 0): ?>
+                        <span class="notif-badge"><?= $total_notif; ?></span>
+                    <?php endif; ?>
                 </a>
             </li>
             <li><a href="laporan_keuangan/index.php"><i class="bi bi-bar-chart-line"></i> Laporan Keuangan</a></li>
             <li>
                 <a href="admin_user/index.php">
-                    <i class="bi bi-person-plus"></i> Tambah Admin
+                    <i class="bi bi-person-plus"></i> Kelola Admin
                 </a>
             </li>
             <li>

@@ -7,6 +7,13 @@ if ($_SESSION['role'] != 'admin') {
     exit;
 }
 
+$query_notif = mysqli_query($koneksi, "
+    SELECT COUNT(*) AS total_notif
+    FROM tb_transaksi
+    WHERE status_pembayaran = 'menunggu_verifikasi'
+");
+$total_notif = mysqli_fetch_assoc($query_notif)['total_notif'];
+
 $pesan_error  = '';
 $pesan_sukses = '';
 
@@ -78,6 +85,18 @@ $result = mysqli_query($koneksi,
         .btn-kembali {
             cursor: pointer;
         }
+        .notif-badge {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 20px; height: 20px; border-radius: 50%;
+            background: #ef4444; color: #fff;
+            font-size: 11px; font-weight: 800;
+            margin-left: auto; flex-shrink: 0;
+            animation: pulse-badge 1.8s ease-in-out infinite;
+        }
+        @keyframes pulse-badge {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239,68,68,.4); }
+            50%       { transform: scale(1.1); box-shadow: 0 0 0 5px rgba(239,68,68,0); }
+        }
     </style>
 </head>
 <body>
@@ -93,7 +112,12 @@ $result = mysqli_query($koneksi,
             <li><a href="../index.php"><i class="bi bi-grid"></i> Dashboard</a></li>
             <li><a href="../paket/index.php"><i class="bi bi-wifi"></i> Kelola Paket</a></li>
             <li><a href="../customer/index.php"><i class="bi bi-people"></i> Data Pelanggan</a></li>
-            <li><a href="../transaksi/index.php"><i class="bi bi-credit-card"></i> Data Transaksi</a></li>
+            <li><a href="../transaksi/index.php"><i class="bi bi-credit-card"></i> Data Transaksi
+        <?php if ($total_notif > 0): ?>
+            <span class="notif-badge"><?= $total_notif; ?></span>
+        <?php endif; ?>
+    </a></li>
+            <li><a href="../laporan_keuangan/index.php"><i class="bi bi-bar-chart-line"></i> Laporan Keuangan</a></li>
             <li><a href="list_admin.php" class="active"><i class="bi bi-person-gear"></i> Kelola Admin</a></li>
             <li>
                 <a href="#" onclick="openLogoutModal()">

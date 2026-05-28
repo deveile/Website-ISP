@@ -134,7 +134,6 @@ $jam      = date('H:i');
 </head>
 <body>
 
-<!-- Print Bar -->
 <div class="print-bar no-print">
     <a href="index.php?tipe=<?= $filter_tipe ?>&tahun=<?= $filter_tahun ?>" class="btn-close">
         ✕ Tutup
@@ -144,7 +143,6 @@ $jam      = date('H:i');
     </button>
 </div>
 
-<!-- Header -->
 <div class="pdf-header">
     <img class="pdf-logo" src="../../assets/images/logo.png"
          onerror="this.style.display='none'" alt="Logo">
@@ -158,7 +156,6 @@ $jam      = date('H:i');
     </div>
 </div>
 
-<!-- Summary -->
 <div class="summary">
     <div class="sum-box sum-blue">
         <small>Total Transaksi</small>
@@ -178,7 +175,6 @@ $jam      = date('H:i');
     </div>
 </div>
 
-<!-- Table -->
 <?php if ($filter_tipe === 'bulanan'): ?>
 <table>
     <thead>
@@ -288,11 +284,8 @@ $jam      = date('H:i');
 </div>
 
 <script>
-// Auto print setelah halaman siap
 window.addEventListener('load', function() {
-    // Beri delay kecil agar logo sempat load
     setTimeout(function() {
-        // Tidak auto print, biarkan user pilih
     }, 500);
 });
 </script>

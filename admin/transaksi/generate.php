@@ -30,10 +30,8 @@ while($c = mysqli_fetch_assoc($customer)){
          AND tahun_tagihan = '$tahun'"
     );
 
-    /* ================= GENERATE TAGIHAN BARU ================= */
     if(mysqli_num_rows($cek) == 0){
 
-        /* ================= FORMAT KODE INVOICE ================= */
         $invoice = "INV-" . $tahun . str_pad($bulan, 2, "0", STR_PAD_LEFT) . "-" . $id_customer;
 
         mysqli_query(
