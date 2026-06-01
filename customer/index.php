@@ -4,6 +4,7 @@ require_once __DIR__ . '/../koneksi.php';
 
 $id_user = $_SESSION['id_user'];
 
+// Kolom jatuh tempo disesuaikan dengan database kamu: tanggal_selesai
 $sql = "SELECT c.*, l.id_langganan, l.status_langganan, 
         l.tanggal_mulai, l.tanggal_selesai, 
         p.nama_paket, p.harga, p.kecepatan 
@@ -21,19 +22,17 @@ $nominal = 0;
 $riwayat = mysqli_query($koneksi, "SELECT * FROM tb_transaksi WHERE 1=0");
 
 if ($data && !empty($data['id_langganan'])) {
-    $bulan = date('n');
-    $tahun = date('Y');
-
+    // FIX: Ambil transaksi paling terakhir agar tombol bayar tidak hilang saat lewat bulan
     $sql_t = "SELECT * FROM tb_transaksi 
               WHERE id_langganan = '" . $data['id_langganan'] . "' 
-              AND bulan_tagihan = '$bulan' 
-              AND tahun_tagihan = '$tahun' LIMIT 1";
+              ORDER BY id_transaksi DESC LIMIT 1";
     
     $tagihan = mysqli_query($koneksi, $sql_t);
     $t = mysqli_fetch_assoc($tagihan);
     $nominal = ($t && $t['status_pembayaran'] != 'lunas') 
                ? $t['jumlah_bayar'] : 0;
 
+    // Ambil 5 riwayat transaksi terakhir
     $sql_r = "SELECT * FROM tb_transaksi 
               WHERE id_langganan = '" . $data['id_langganan'] . "' 
               ORDER BY id_transaksi DESC LIMIT 5";
@@ -94,7 +93,12 @@ function tgl_indo($tgl) {
         
         <div class="customer-hero-card">
             <div class="hero-left">
-                <span class="hero-label">Paket Aktif</span>
+                <?php if (strtolower($data['status_langganan']) == 'suspend') : ?>
+                    <span class="hero-label" style="background-color: #ef4444; color: white;">Paket Suspend </span>
+                <?php else : ?>
+                    <span class="hero-label" style="background-color: #b29786; color: white;">Paket Aktif</span>
+                <?php endif; ?>
+
                 <h1 class="hero-package">
                     <?= $data['nama_paket'] ?? 'Belum Berlangganan'; ?>
                 </h1>
@@ -117,7 +121,7 @@ function tgl_indo($tgl) {
                             <span>Tagihan Bulan Ini</span>
                             <h3>
                                 <?php if($nominal > 0) : ?>
-                                    Rp<?= number_format($nominal); ?>
+                                    Rp<?= number_format($nominal, 0, ',', '.'); ?>
                                 <?php else : ?>
                                     Tidak Ada
                                 <?php endif; ?>
@@ -164,11 +168,16 @@ function tgl_indo($tgl) {
                         $s_pay = strtolower($r['status_pembayaran']);
                         $class = ($s_pay == 'lunas') ? 'active' : (($s_pay == 'menunggu_verifikasi') ? 'pending' : 'belum');
                         $text  = ($s_pay == 'lunas') ? 'Lunas' : (($s_pay == 'menunggu_verifikasi') ? 'Menunggu Verifikasi' : 'Belum Bayar');
+                        
+                        // FIX PERIODE 1970: Memaksa PHP membaca format tanggal secara rapi menggunakan sprintf
+                        $format_bulan = sprintf('%02d', $r['bulan_tagihan']);
+                        $string_tanggal = $r['tahun_tagihan'] . '-' . $format_bulan . '-01';
+                        $periode_tgl = date('F Y', strtotime($string_tanggal));
                     ?>
                     <tr>
-                        <td><?= $r['kode_invoice']; ?></td>
-                        <td><?= date('F Y', strtotime($r['tahun_tagihan'].'-'.$r['bulan_tagihan'].'-01')); ?></td>
-                        <td>Rp<?= number_format($r['jumlah_bayar']); ?></td>
+                        <td><?= $r['kode_invoice'] ?? '-'; ?></td>
+                        <td><?= $periode_tgl; ?></td>
+                        <td>Rp<?= number_format($r['jumlah_bayar'], 0, ',', '.'); ?></td>
                         <td><span class="status-<?= $class; ?>"><?= $text; ?></span></td>
                         <td><?= !empty($r['tanggal_bayar']) ? tgl_indo($r['tanggal_bayar']) : '-'; ?></td>
                         <td>

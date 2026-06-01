@@ -297,10 +297,7 @@ $tipe_msg = $_GET['tipe']    ?? '';
                     <div class="field-item">
                         <label>Periode Tagihan</label>
                         <div class="field-value">
-                            Bulan <?= (int)$data['bulan_tagihan'] ?> /
-                            Tahun <?= (int)$data['tahun_tagihan'] ?>
-                            &nbsp;·&nbsp;
-                            <strong><?= $nama_bln[(int)$data['bulan_tagihan']] ?> <?= $data['tahun_tagihan'] ?></strong>
+                            <?= $nama_bln[(int)$data['bulan_tagihan']] ?> <?= $data['tahun_tagihan'] ?>
                         </div>
                     </div>
                     <div class="field-item">

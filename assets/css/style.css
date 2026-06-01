@@ -116,6 +116,84 @@ nav ul li a:hover { color: var(--dark); background: var(--surface-3); }
 nav ul li a.active { color: var(--primary); font-weight: 700; background: var(--primary-soft); }
 
 /* ==========================================================================
+   2.1 RESPONSIVE NAVBAR (FIXED FOR HP & LAPTOP)
+   ========================================================================== */
+
+/* Pastikan tombol hamburger tersembunyi di desktop dan punya struktur flex */
+.menu-toggle {
+    display: none; 
+    flex-direction: column;
+    gap: 5px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    z-index: 1000;
+}
+
+.menu-toggle span {
+    display: block;
+    width: 24px;
+    height: 3px;
+    background-color: var(--dark, #333);
+    border-radius: 2px;
+    transition: 0.3s;
+}
+
+@media (max-width: 991px) {
+    .navbar-wrapper {
+        display: flex !important;
+        flex-direction: row !important; 
+        justify-content: space-between !important; 
+        align-items: center !important;
+        padding: 0 20px !important; 
+        height: 68px;
+        position: relative;
+    }
+
+    .menu-toggle {
+        display: flex !important; 
+    }
+
+    nav {
+        position: absolute;
+        top: 68px; 
+        left: 0;
+        width: 100%;
+        background: rgba(250, 249, 247, 0.98); 
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border-bottom: 1px solid var(--line, #eee);
+        max-height: 0; 
+        overflow: hidden;
+        transition: max-height 0.3s ease-in-out;
+        z-index: 999;
+    }
+
+    nav.show {
+        max-height: 350px; 
+    }
+
+    nav ul {
+        flex-direction: column !important;
+        gap: 5px !important;
+        padding: 15px 20px !important;
+    }
+
+    nav ul li {
+        width: 100%;
+    }
+
+    nav ul li a {
+        display: block;
+        padding: 12px 16px;
+        width: 100%;
+        font-size: 15px;
+        text-align: left; 
+    }
+}
+
+/* ==========================================================================
    3. HERO SECTION
    ========================================================================== */
 .hero-section {

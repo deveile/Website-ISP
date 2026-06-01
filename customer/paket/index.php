@@ -7,6 +7,19 @@ if ($_SESSION['role'] != 'customer') {
     exit;
 }
 
+// 1. Ambil id_user dari session login kamu
+$id_user = $_SESSION['id_user'] ?? '';
+
+// 2. Cari id_customer ke tb_customer bermodalkan id_user tadi
+$queryCustomer = mysqli_query($koneksi, "SELECT * FROM tb_customer WHERE id_user = '$id_user'");
+$customer = mysqli_fetch_assoc($queryCustomer);
+$id_customer = $customer['id_customer'] ?? '';
+
+// 3. Cek di tb_langganan apakah customer ini sudah punya paket aktif / suspend
+$cek_langganan = mysqli_query($koneksi, "SELECT * FROM tb_langganan WHERE id_customer = '$id_customer' AND status_langganan IN ('aktif', 'suspend') LIMIT 1");
+$langganan = mysqli_fetch_assoc($cek_langganan);
+
+// 4. Ambil daftar semua paket yang berstatus aktif untuk ditampilkan di grid
 $data = mysqli_query($koneksi, "SELECT * FROM tb_paket WHERE status='aktif' ORDER BY id_paket DESC");
 ?>
 <!DOCTYPE html>
@@ -19,6 +32,22 @@ $data = mysqli_query($koneksi, "SELECT * FROM tb_paket WHERE status='aktif' ORDE
     <link rel="stylesheet" href="../../assets/css/style.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <script src="../../assets/js/script.js" defer></script>
+    <style>
+        /* Style agar tombol paket yang sedang aktif berubah abu-abu manis */
+        .btn-disabled {
+            display: inline-block;
+            width: 100%;
+            padding: 12px;
+            background-color: #cbd5e1;
+            color: #64748b;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            text-align: center;
+            cursor: not-allowed;
+            text-decoration: none;
+        }
+    </style>
 </head>
 <body>
 
@@ -49,10 +78,21 @@ $data = mysqli_query($koneksi, "SELECT * FROM tb_paket WHERE status='aktif' ORDE
             <?php while ($paket = mysqli_fetch_assoc($data)) : ?>
                 <div class="customer-paket-card">
                     <h3><?= $paket['nama_paket']; ?></h3>
-                    <h1><?= $paket['kecepatan']; ?></h1>
+                    <h1><?= $paket['kecepatan']; ?> Mbps</h1>
                     <h2>Rp <?= number_format($paket['harga']); ?></h2>
                     <p><?= nl2br($paket['deskripsi']); ?></p>
-                    <a href="../pemasangan/index.php?id=<?= $paket['id_paket']; ?>" class="btn-orange">Pesan Sekarang</a>
+                    
+                    <?php if (!$langganan) : ?>
+                        <a href="../pemasangan/index.php?id=<?= $paket['id_paket']; ?>" class="btn-orange">Pesan Sekarang</a>
+                    
+                    <?php else : ?>
+                        <?php if ($langganan['id_paket'] == $paket['id_paket']) : ?>
+                            <button class="btn-disabled" disabled><i class="bi bi-check-circle-fill"></i> Paket Aktif Anda</button>
+                        <?php else : ?>
+                            <a href="../pemasangan/proses.php?id_paket=<?= $paket['id_paket']; ?>&id_langganan=<?= $langganan['id_langganan']; ?>&aksi=upgrade" class="btn-orange">Upgrade Paket</a>
+                        <?php endif; ?>
+                        
+                    <?php endif; ?>
                 </div>
             <?php endwhile; ?>
         </div>

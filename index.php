@@ -7,7 +7,7 @@ $paket = mysqli_query($koneksi, "SELECT * FROM tb_paket where status='aktif' ORD
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Anuwani.Net</title>
+    <title>Anuwani Network</title>
     <link rel="icon" type="image/png" href="assets/images/logo.png">
     <link rel="stylesheet" href="assets/template/bootslander/assets/vendor/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="assets/template/bootslander/assets/vendor/bootstrap-icons/bootstrap-icons.css">
@@ -15,25 +15,30 @@ $paket = mysqli_query($koneksi, "SELECT * FROM tb_paket where status='aktif' ORD
 </head>
 <body>
 
-    <header class="navbar-custom">
-        <div class="container">
-            <div class="navbar-wrapper">
-                <div class="logo-area">
-                    <img src="assets/images/logo.png" class="main-logo">
-                    <h2>Anuwani Network</h2>
-                </div>
-                <nav>
-                    <ul>
-                        <li><a href="#hero" class="active">Beranda</a></li>
-                        <li><a href="#paket">Paket Internet</a></li>
-                        <li><a href="#tentang">Tentang</a></li>
-                        <li><a href="#kontak">Kontak</a></li>
-                        <li><a href="auth/login.php">Login</a></li>
-                    </ul>
-                </nav>
-            </div>
+  <header class="navbar-custom">
+    <div class="navbar-wrapper">
+        <div class="logo-area">
+            <img src="assets/images/logo.png" class="main-logo" alt="Logo">
+            <h2>Anuwani Network</h2>
         </div>
-    </header>
+
+        <button class="menu-toggle" id="menuToggle" aria-label="Menu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+
+        <nav id="navMenu">
+            <ul>
+                <li><a href="#" class="active">Beranda</a></li>
+                <li><a href="#paket">Paket Internet</a></li>
+                <li><a href="#tentang">Tentang</a></li>
+                <li><a href="#kontak">Kontak</a></li>
+                <li><a href="auth/login.php">Login</a></li>
+            </ul>
+        </nav>
+    </div>
+</header>
 
     <section id="hero" class="hero-section">
         <div class="container">
@@ -155,5 +160,20 @@ $paket = mysqli_query($koneksi, "SELECT * FROM tb_paket where status='aktif' ORD
         </div>
     </footer>
 
+    <script>
+    const menuToggle = document.getElementById('menuToggle');
+    const navMenu = document.getElementById('navMenu');
+
+    menuToggle.addEventListener('click', () => {
+        navMenu.classList.toggle('show');
+    });
+
+    const navLinks = document.querySelectorAll('nav ul li a');
+    navLinks.forEach(link => {
+        link.addEventListener('click', () => {
+            navMenu.classList.remove('show');
+        });
+    });
+</script>
 </body>
 </html>

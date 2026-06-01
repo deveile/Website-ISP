@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register | Anuwani.net</title>
-    <link class="icon" type="image/png" href="../assets/images/logo.png"> 
+    <link rel="icon" type="image/png" href="../assets/images/logo.png"> 
     <link rel="stylesheet" href="../assets/css/style.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
@@ -13,11 +13,12 @@
         <form action="register_action.php" method="POST" class="auth-card">
             <h2>Register</h2>
             <p>Buat akun baru</p>
-
             <input type="text" name="nama_customer" placeholder="Nama Lengkap" required>
             <input type="text" name="username" placeholder="Username" required>
             <input type="email" name="email_customer" placeholder="Email" required>
-            <input type="text" name="telepon_customer" placeholder="Nomor Telepon" required>
+            <input type="text" name="telepon_customer" id="telepon" maxlength="12" pattern="[0-9]{10,12}" placeholder="Nomor Telepon" required
+            oninvalid="this.setCustomValidity('Nomor telepon harus terdiri dari 12 digit angka')"
+            oninput="this.setCustomValidity('')">
             <textarea name="alamat_customer" placeholder="Alamat" required></textarea>
 
             <div class="password-wrapper" style="margin-bottom: 20px !important;">

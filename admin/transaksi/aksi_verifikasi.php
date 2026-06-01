@@ -18,8 +18,9 @@ if (!$id_transaksi || !in_array($aksi, ['terima', 'tolak'])) {
     header("Location: index.php"); exit;
 }
 
-$trx = mysqli_fetch_assoc(mysqli_query($koneksi,
-    "SELECT * FROM tb_transaksi WHERE id_transaksi = $id_transaksi LIMIT 1"));
+$trx = mysqli_fetch_assoc(mysqli_query($koneksi, 
+    "SELECT * FROM tb_transaksi WHERE id_transaksi = $id_transaksi LIMIT 1"
+));
 
 if (!$trx) {
     header("Location: index.php"); exit;
@@ -33,25 +34,40 @@ if (strtolower($trx['status_pembayaran']) !== 'menunggu_verifikasi') {
 
 if ($aksi === 'terima') {
     $tanggal_bayar = date('Y-m-d');
-    $id_langganan = (int)$trx['id_langganan'];
+    $id_langganan  = (int)$trx['id_langganan'];
 
     if (!$id_langganan) {
-        die('ID Langganan tidak ditemukan pada transaksi ini');
+        die('ID Langganan tidak ditemukan');
     }
 
     $ok = mysqli_query($koneksi, "
-        UPDATE tb_transaksi SET
-            status_pembayaran = 'lunas',
-            tanggal_bayar     = '$tanggal_bayar'
+        UPDATE tb_transaksi 
+        SET status_pembayaran = 'lunas', tanggal_bayar = '$tanggal_bayar' 
         WHERE id_transaksi = $id_transaksi
     ");
 
     if ($ok) {
-        $update_langganan = mysqli_query($koneksi, "
-            UPDATE tb_langganan SET
-                status_langganan = 'aktif'
-            WHERE id_langganan = $id_langganan
-        ");
+        $tgl_selesai_baru = date('Y-m-d', 
+            strtotime('+1 month', strtotime($tanggal_bayar))
+        );
+
+        if ($trx['jenis_transaksi'] == 'upgrade') {
+            $id_paket_baru = (int)$trx['id_paket_baru'];
+            $update_langganan = mysqli_query($koneksi, "
+                UPDATE tb_langganan 
+                SET id_paket = '$id_paket_baru', 
+                    status_langganan = 'aktif', 
+                    tanggal_selesai = '$tgl_selesai_baru' 
+                WHERE id_langganan = '$id_langganan'
+            ");
+        } else {
+            $update_langganan = mysqli_query($koneksi, "
+                UPDATE tb_langganan 
+                SET status_langganan = 'aktif', 
+                    tanggal_selesai = '$tgl_selesai_baru' 
+                WHERE id_langganan = '$id_langganan'
+            ");
+        }
 
         if (!$update_langganan) {
             die(mysqli_error($koneksi));
@@ -64,30 +80,28 @@ if ($aksi === 'terima') {
         header("Location: detail.php?id=$id_transaksi&pesan=$pesan&tipe=error");
     }
     exit;
-
 } elseif ($aksi === 'tolak') {
     $id_langganan = (int)$trx['id_langganan'];
     $bukti_lama = $trx['bukti_pembayaran'] ?? '';
 
     $ok = mysqli_query($koneksi, "
-        UPDATE tb_transaksi SET
-            status_pembayaran  = 'belum_bayar',
-            bukti_pembayaran   = NULL,
-            metode_pembayaran  = NULL,
-            tanggal_bayar      = NULL
+        UPDATE tb_transaksi 
+        SET status_pembayaran = 'belum_bayar', 
+            bukti_pembayaran = NULL, 
+            metode_pembayaran = NULL, 
+            tanggal_bayar = NULL 
         WHERE id_transaksi = $id_transaksi
     ");
 
     if ($ok) {
         mysqli_query($koneksi, "
-            UPDATE tb_langganan SET
-                status_langganan = 'suspend'
+            UPDATE tb_langganan 
+            SET status_langganan = 'suspend' 
             WHERE id_langganan = $id_langganan
         ");
 
         if (!empty($bukti_lama)) {
             $file_path = __DIR__ . '/../../uploads/bukti/' . $bukti_lama;
-
             if (file_exists($file_path)) {
                 unlink($file_path);
             }

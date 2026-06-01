@@ -5,6 +5,9 @@ $nama     = $_POST['nama_customer'] ?? '';
 $username = $_POST['username'] ?? '';
 $email    = $_POST['email_customer'] ?? '';
 $telepon  = $_POST['telepon_customer'] ?? '';
+if (!preg_match('/^[0-9]{10,12}$/', $telepon)) {
+    die("Nomor telepon tidak valid. Harus terdiri dari 10-12 digit angka.");
+}
 $alamat   = $_POST['alamat_customer'] ?? '';
 $password = $_POST['password'] ?? '';
 
