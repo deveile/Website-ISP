@@ -110,142 +110,198 @@ for ($i = 1; $i <= 12; $i++) {
 <script src="../../assets/js/script.js" defer></script>
 <style>
     .notif-badge {
-            display: inline-flex; align-items: center; justify-content: center;
-            width: 20px; height: 20px; border-radius: 50%;
-            background: #ef4444; color: #fff;
-            font-size: 11px; font-weight: 800;
-            margin-left: auto; flex-shrink: 0;
-            animation: pulse-badge 1.8s ease-in-out infinite;
-        }
-        @keyframes pulse-badge {
-            0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239,68,68,.4); }
-            50%       { transform: scale(1.1); box-shadow: 0 0 0 5px rgba(239,68,68,0); }
-        }
+        display: inline-flex; align-items: center; justify-content: center;
+        width: 20px; height: 20px; border-radius: 50%;
+        background: #ef4444; color: #fff;
+        font-size: 11px; font-weight: 800;
+        margin-left: auto; flex-shrink: 0;
+        animation: pulse-badge 1.8s ease-in-out infinite;
+    }
+    @keyframes pulse-badge {
+        0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239,68,68,.4); }
+        50%       { transform: scale(1.1); box-shadow: 0 0 0 5px rgba(239,68,68,0); }
+    }
 
-.lap-stat-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 18px; margin-bottom: 28px; }
-.lap-stat {
-    background: #fff; border-radius: 16px; padding: 22px 24px;
-    border: 1px solid #e4e4e7; transition: all .2s;
-    display: flex; align-items: center; gap: 16px;
-}
-.lap-stat:hover { box-shadow: 0 6px 20px rgba(0,0,0,.08); transform: translateY(-2px); }
-.lap-stat-icon {
-    width: 52px; height: 52px; border-radius: 14px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 22px; flex-shrink: 0;
-}
-.lap-stat-body small { font-size: 12px; color: #a1a1aa; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; display: block; margin-bottom: 4px; }
-.lap-stat-body strong { font-size: 20px; font-weight: 800; color: #18181b; display: block; line-height: 1.2; }
-.lap-stat-body span   { font-size: 12px; color: #a1a1aa; }
+    .topbar-header-wrapper {
+        display: flex !important;
+        align-items: center !important; 
+        gap: 16px !important;
+        width: 100% !important;
+    }
+    .btn-hamburger {
+        background: #f4f4f5 !important; 
+        border: none !important;
+        border-radius: 10px !important;
+        width: 40px !important;
+        height: 40px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        cursor: pointer !important;
+        color: #18181b !important;
+        transition: all 0.2s ease !important;
+        padding: 0 !important;
+        flex-shrink: 0 !important;
+    }
+    .btn-hamburger i {
+        font-size: 22px !important;
+        font-weight: 900 !important;
+        -webkit-text-stroke: 0.4px #18181b; 
+        display: inline-block !important;
+        line-height: 1 !important;
+    }
+    .btn-hamburger:hover {
+        background: #e4e4e7 !important;
+    }
 
-.icon-green  { background: #f0fdf4; color: #22c55e; }
-.icon-red    { background: #fef2f2; color: #ef4444; }
-.icon-orange { background: #fff4ee; color: #f4600c; }
-.icon-blue   { background: #eff6ff; color: #3b82f6; }
-.icon-yellow { background: #fffbeb; color: #f59e0b; }
+    .lap-stat-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 18px; margin-bottom: 28px; }
+    .lap-stat {
+        background: #fff; border-radius: 16px; padding: 22px 24px;
+        border: 1px solid #e4e4e7; transition: all .2s;
+        display: flex; align-items: center; gap: 16px;
+    }
+    .lap-stat:hover { box-shadow: 0 6px 20px rgba(0,0,0,.08); transform: translateY(-2px); }
+    .lap-stat-icon {
+        width: 52px; height: 52px; border-radius: 14px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 22px; flex-shrink: 0;
+    }
+    .lap-stat-body small { font-size: 12px; color: #a1a1aa; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; display: block; margin-bottom: 4px; }
+    .lap-stat-body strong { font-size: 20px; font-weight: 800; color: #18181b; display: block; line-height: 1.2; }
+    .lap-stat-body span   { font-size: 12px; color: #a1a1aa; }
 
-.lap-section {
-    background: #fff; border-radius: 16px; border: 1px solid #e4e4e7;
-    overflow: hidden; margin-bottom: 24px;
-}
-.lap-section-header {
-    padding: 18px 24px; border-bottom: 1px solid #e4e4e7;
-    display: flex; align-items: center; justify-content: space-between;
-    flex-wrap: wrap; gap: 12px;
-}
-.lap-section-header h3 { font-size: 16px; font-weight: 800; color: #18181b; margin: 0; }
-.lap-section-body { padding: 24px; overflow-x: auto; }
+    .icon-green  { background: #f0fdf4; color: #22c55e; }
+    .icon-red    { background: #fef2f2; color: #ef4444; }
+    .icon-orange { background: #fff4ee; color: #f4600c; }
+    .icon-blue   { background: #eff6ff; color: #3b82f6; }
+    .icon-yellow { background: #fffbeb; color: #f59e0b; }
 
-.lap-table { width: 100%; border-collapse: collapse; min-width: 600px; }
-.lap-table thead tr { background: #fafafa; }
-.lap-table th { padding: 11px 16px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .6px; color: #a1a1aa; border-bottom: 1px solid #e4e4e7; text-align: left; }
-.lap-table td { padding: 13px 16px; font-size: 14px; color: #18181b; border-bottom: 1px solid #f4f4f5; }
-.lap-table tbody tr:last-child td { border-bottom: none; }
-.lap-table tbody tr:hover td { background: #fafafa; }
-.lap-table tfoot td { padding: 13px 16px; font-size: 14px; font-weight: 700; color: #18181b; border-top: 2px solid #e4e4e7; background: #fafafa; }
+    .lap-section {
+        background: #fff; border-radius: 16px; border: 1px solid #e4e4e7;
+        overflow: hidden; margin-bottom: 24px;
+    }
+    .lap-section-header {
+        padding: 18px 24px; border-bottom: 1px solid #e4e4e7;
+        display: flex; align-items: center; justify-content: space-between;
+        flex-wrap: wrap; gap: 12px;
+    }
+    .lap-section-header h3 { font-size: 16px; font-weight: 800; color: #18181b; margin: 0; }
+    .lap-section-body { padding: 24px; overflow-x: auto; }
 
-.chip { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; }
-.chip-green  { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
-.chip-red    { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
-.chip-yellow { background: #fffbeb; color: #d97706; border: 1px solid #fde68a; }
+    .lap-table { width: 100%; border-collapse: collapse; min-width: 600px; }
+    .lap-table thead tr { background: #fafafa; }
+    .lap-table th { padding: 11px 16px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .6px; color: #a1a1aa; border-bottom: 1px solid #e4e4e7; text-align: left; }
+    .lap-table td { padding: 13px 16px; font-size: 14px; color: #18181b; border-bottom: 1px solid #f4f4f5; }
+    .lap-table tbody tr:last-child td { border-bottom: none; }
+    .lap-table tbody tr:hover td { background: #fafafa; }
+    .lap-table tfoot td { padding: 13px 16px; font-size: 14px; font-weight: 700; color: #18181b; border-top: 2px solid #e4e4e7; background: #fafafa; }
 
-.chart-wrapper { height: 300px; position: relative; }
+    .chip { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; }
+    .chip-green  { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
+    .chip-red    { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+    .chip-yellow { background: #fffbeb; color: #d97706; border: 1px solid #fde68a; }
 
-.filter-bar {
-    background: #fff; border-radius: 14px; border: 1px solid #e4e4e7;
-    padding: 18px 22px; margin-bottom: 24px;
-    display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
-}
-.filter-bar label { font-size: 13px; font-weight: 700; color: #52525b; }
-.filter-bar select, .filter-bar input {
-    padding: 9px 14px; border-radius: 8px;
-    border: 1.5px solid #e4e4e7; font-size: 14px;
-    outline: none; background: #fafafa; color: #18181b;
-    transition: all .2s; cursor: pointer;
-}
-.filter-bar select:focus { border-color: #f4600c; box-shadow: 0 0 0 3px rgba(244,96,12,.12); }
+    .chart-wrapper { height: 300px; position: relative; }
 
-.export-group { display: flex; gap: 8px; margin-left: auto; }
+    .filter-bar {
+        background: #fff; border-radius: 14px; border: 1px solid #e4e4e7;
+        padding: 18px 22px; margin-bottom: 24px;
+        display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+    }
+    .filter-bar label { font-size: 13px; font-weight: 700; color: #52525b; }
+    .filter-bar select, .filter-bar input {
+        padding: 9px 14px; border-radius: 8px;
+        border: 1.5px solid #e4e4e7; font-size: 14px;
+        outline: none; background: #fafafa; color: #18181b;
+        transition: all .2s; cursor: pointer;
+    }
+    .filter-bar select:focus { border-color: #f4600c; box-shadow: 0 0 0 3px rgba(244,96,12,.12); }
 
-.btn-export-pdf {
-    display: inline-flex; align-items: center; gap: 7px;
-    padding: 10px 18px; border-radius: 8px; font-size: 13px; font-weight: 700;
-    border: none; cursor: pointer; transition: all .2s; text-decoration: none;
-    background: #fef2f2; color: #dc2626; border: 1.5px solid #fecaca;
-}
-.btn-export-pdf:hover { background: #dc2626; color: #fff; border-color: #dc2626; }
+    .export-group { display: flex; gap: 8px; margin-left: auto; }
 
-.btn-export-excel {
-    display: inline-flex; align-items: center; gap: 7px;
-    padding: 10px 18px; border-radius: 8px; font-size: 13px; font-weight: 700;
-    border: none; cursor: pointer; transition: all .2s; text-decoration: none;
-    background: #f0fdf4; color: #16a34a; border: 1.5px solid #bbf7d0;
-}
-.btn-export-excel:hover { background: #16a34a; color: #fff; border-color: #16a34a; }
+    .btn-export-pdf {
+        display: inline-flex; align-items: center; gap: 7px;
+        padding: 10px 18px; border-radius: 8px; font-size: 13px; font-weight: 700;
+        border: none; cursor: pointer; transition: all .2s; text-decoration: none;
+        background: #fef2f2; color: #dc2626; border: 1.5px solid #fecaca;
+    }
+    .btn-export-pdf:hover { background: #dc2626; color: #fff; border-color: #dc2626; }
 
-.tab-group { display: flex; gap: 6px; }
-.tab-btn {
-    padding: 8px 18px; border-radius: 8px; font-size: 13px; font-weight: 700;
-    border: 1.5px solid #e4e4e7; background: #fafafa; color: #52525b;
-    cursor: pointer; transition: all .2s; text-decoration: none; display: inline-block;
-}
-.tab-btn.active { background: #f4600c; color: #fff; border-color: #f4600c; }
-.tab-btn:hover:not(.active) { background: #f4f4f5; color: #18181b; }
+    .btn-export-excel {
+        display: inline-flex; align-items: center; gap: 7px;
+        padding: 10px 18px; border-radius: 8px; font-size: 13px; font-weight: 700;
+        border: none; cursor: pointer; transition: all .2s; text-decoration: none;
+        background: #f0fdf4; color: #16a34a; border: 1.5px solid #bbf7d0;
+    }
+    .btn-export-excel:hover { background: #16a34a; color: #fff; border-color: #16a34a; }
 
-.progress-bar-wrap { background: #f4f4f5; border-radius: 4px; height: 6px; margin-top: 6px; overflow: hidden; }
-.progress-bar-fill { height: 100%; border-radius: 4px; background: #22c55e; }
+    .tab-group { display: flex; gap: 6px; }
+    .tab-btn {
+        padding: 8px 18px; border-radius: 8px; font-size: 13px; font-weight: 700;
+        border: 1.5px solid #e4e4e7; background: #fafafa; color: #52525b;
+        cursor: pointer; transition: all .2s; text-decoration: none; display: inline-block;
+    }
+    .tab-btn.active { background: #f4600c; color: #fff; border-color: #f4600c; }
+    .tab-btn:hover:not(.active) { background: #f4f4f5; color: #18181b; }
 
-@media (max-width: 900px) { .lap-stat-grid { grid-template-columns: repeat(2,1fr); } }
-@media (max-width: 560px) { .lap-stat-grid { grid-template-columns: 1fr; } }
+    .progress-bar-wrap { background: #f4f4f5; border-radius: 4px; height: 6px; margin-top: 6px; overflow: hidden; }
+    .progress-bar-fill { height: 100%; border-radius: 4px; background: #22c55e; }
+
+    @media (max-width: 900px) { .lap-stat-grid { grid-template-columns: repeat(2,1fr); } }
+    @media (max-width: 560px) { .lap-stat-grid { grid-template-columns: 1fr; } }
+
+    .dashboard-layout { display: flex !important; width: 100%; min-height: 100vh; overflow-x: hidden; }
+    .sidebar { width: 260px !important; min-width: 260px !important; max-width: 260px !important; transition: all 0.3s ease !important; }
+    .dashboard-content { flex-grow: 1 !important; width: calc(100% - 260px) !important; transition: all 0.3s ease !important; padding: 24px; }
+
+    @media (min-width: 1025px) {
+        .sidebar.collapsed { width: 70px !important; min-width: 70px !important; max-width: 70px !important; padding: 24px 8px !important; }
+        .sidebar.collapsed + .dashboard-content { width: calc(100% - 70px) !important; }
+        .sidebar.collapsed .sidebar-logo h2, .sidebar.collapsed ul li a span, .sidebar.collapsed .notif-badge { display: none !important; }
+        .sidebar.collapsed ul li a { justify-content: center !important; }
+    }
+
+    @media (max-width: 1024px) {
+        .sidebar { position: fixed !important; left: -260px !important; top: 0; bottom: 0; width: 260px !important; z-index: 9999; background: #fff; }
+        .sidebar.active { left: 0 !important; }
+        .dashboard-content { width: 100% !important; }
+    }
 </style>
 </head>
 <body>
 <div class="dashboard-layout">
 
-<div class="sidebar">
+<div class="sidebar" id="sidebarMenu">
     <div class="sidebar-logo">
         <img src="../../assets/images/logo.png" alt="Logo">
         <h2>Anuwani</h2>
     </div>
     <ul>
-        <li><a href="../index.php"><i class="bi bi-grid"></i> Dashboard</a></li>
-        <li><a href="../paket/index.php"><i class="bi bi-wifi"></i> Kelola Paket</a></li>
-        <li><a href="../customer/index.php"><i class="bi bi-people"></i> Data Pelanggan</a></li>
-        <li><a href="../transaksi/index.php"><i class="bi bi-credit-card"></i> Data Transaksi
+        <li><a href="../index.php"><i class="bi bi-grid"></i> <span>Dashboard</span></a></li>
+        <li><a href="../paket/index.php"><i class="bi bi-wifi"></i> <span>Kelola Paket</span></a></li>
+        <li><a href="../customer/index.php"><i class="bi bi-people"></i> <span>Data Pelanggan</span></a></li>
+        <li><a href="../transaksi/index.php"><i class="bi bi-credit-card"></i> <span>Data Transaksi</span>
     <?php if ($total_notif > 0): ?>
         <span class="notif-badge"><?= $total_notif; ?></span>
     <?php endif; ?>
     </a></li>
-        <li><a href="index.php" class="active"><i class="bi bi-bar-chart-line"></i> Laporan Keuangan</a></li>
-        <li><a href="../admin_user/index.php"><i class="bi bi-person-gear"></i> Kelola Admin</a></li>
-        <li><a href="#" onclick="openLogoutModal()"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
+        <li><a href="index.php" class="active"><i class="bi bi-bar-chart-line"></i> <span>Laporan Keuangan</span></a></li>
+        <li><a href="../admin_user/index.php"><i class="bi bi-person-gear"></i> <span>Kelola Admin</span></a></li>
+        <li><a href="#" onclick="openLogoutModal()"><i class="bi bi-box-arrow-right"></i> <span>Logout</span></a></li>
     </ul>
 </div>
 
 <div class="dashboard-content">
     <div class="topbar">
-        <h1>Laporan Keuangan</h1>
-        <p>Rekap pendapatan dan tagihan Anuwani Network</p>
+        <div class="topbar-header-wrapper">
+            <button class="btn-hamburger" id="hamburgerBtn">
+                <i class="bi bi-list"></i>
+            </button>
+            <div>
+                <h1 style="margin:0; font-size:24px; font-weight:800; color:#18181b; line-height:1.2;">Laporan Keuangan</h1>
+                <p style="margin:4px 0 0 0; color:#71717a; font-size:14px;">Rekap pendapatan dan tagihan Anuwani Network</p>
+            </div>
+        </div>
     </div>
 
     <div class="filter-bar">
@@ -288,7 +344,6 @@ for ($i = 1; $i <= 12; $i++) {
     </div>
 
     <?php if ($filter_tipe === 'bulanan'): ?>
-
 
     <div class="lap-stat-grid">
         <div class="lap-stat">
@@ -523,8 +578,29 @@ for ($i = 1; $i <= 12; $i++) {
 </div>
 
 <script>
+document.addEventListener('DOMContentLoaded', function() {
+    const hamburgerBtn = document.getElementById('hamburgerBtn');
+    const sidebar = document.getElementById('sidebarMenu');
+
+    if (hamburgerBtn && sidebar) {
+        hamburgerBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            if (window.innerWidth >= 1025) {
+                sidebar.classList.toggle('collapsed');
+            } else {
+                sidebar.classList.toggle('active');
+            }
+        });
+
+        document.addEventListener('click', function(e) {
+            if (window.innerWidth <= 1024 && !sidebar.contains(e.target) && !hamburgerBtn.contains(e.target)) {
+                sidebar.classList.remove('active');
+            }
+        });
+    }
+});
+
 <?php if ($filter_tipe === 'bulanan'): ?>
-// Grafik Bulanan
 new Chart(document.getElementById('chartBulanan'), {
     type: 'bar',
     data: {

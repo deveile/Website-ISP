@@ -333,7 +333,7 @@ $total_pendapatan = $pendapatan['total_pendapatan'] ?? 0;
 
             <div class="admin-card">
                 <div>
-                    <h5>Total Paket</h5>
+                    <h5>Total Produk Paket</h5>
                     <h2><?php echo $total_paket; ?></h2>
                 </div>
                 <i class="bi bi-wifi"></i>
