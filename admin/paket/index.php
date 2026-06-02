@@ -175,6 +175,7 @@ $total_notif = mysqli_fetch_assoc($query_notif)['total_notif'];
             <li><a href="../index.php"><i class="bi bi-grid"></i> <span>Dashboard</span></a></li>
             <li><a href="index.php" class="active"><i class="bi bi-wifi"></i> <span>Kelola Paket</span></a></li>
             <li><a href="../customer/index.php"><i class="bi bi-people"></i> <span>Data Pelanggan</span></a></li>
+            <li><a href="../pemasangan/index.php"><i class="bi bi-tools"></i> <span>Kelola Pemasangan</span></a></li>
             <li>
                 <a href="../transaksi/index.php">
                     <i class="bi bi-credit-card"></i> <span>Data Transaksi</span>

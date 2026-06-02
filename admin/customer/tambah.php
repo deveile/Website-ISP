@@ -128,6 +128,94 @@ if(isset($_POST['simpan'])){
         die("Gagal menyimpan data paket langganan: " . mysqli_error($koneksi));
     }
 
+$id_langganan = mysqli_insert_id($koneksi);
+
+$get_paket = mysqli_query(
+    $koneksi,
+    "SELECT harga FROM tb_paket WHERE id_paket='$id_paket'"
+);
+
+$paket_data = mysqli_fetch_assoc($get_paket);
+
+$harga_paket = $paket_data['harga'];
+
+$kode_invoice = 'INV-' . date('YmdHis');
+
+$metode_pembayaran = $_POST['metode_pembayaran'] ?? 'cash';
+
+$bukti_pembayaran = NULL;
+
+if (
+    $metode_pembayaran != 'cash'
+    && empty($_FILES['bukti_pembayaran']['name'])
+) {
+    die('Bukti pembayaran wajib diupload untuk Transfer atau QRIS');
+}
+
+if (!empty($_FILES['bukti_pembayaran']['name'])) {
+
+    $ext = strtolower(
+        pathinfo(
+            $_FILES['bukti_pembayaran']['name'],
+            PATHINFO_EXTENSION
+        )
+    );
+
+    $allowed = ['jpg','jpeg','png','webp'];
+
+    if (!in_array($ext, $allowed)) {
+        die('Format bukti pembayaran harus JPG, JPEG, PNG atau WEBP');
+    }
+
+    $bukti_pembayaran =
+        'BUKTI-' .
+        $kode_invoice .
+        '-' .
+        time() .
+        '.' .
+        $ext;
+
+    if (!move_uploaded_file(
+        $_FILES['bukti_pembayaran']['tmp_name'],
+        '../../assets/uploads/bukti/' . $bukti_pembayaran
+    )) {
+        die('Gagal upload bukti pembayaran');
+    }
+}
+
+$insert_transaksi = mysqli_query($koneksi, "
+    INSERT INTO tb_transaksi (
+       id_langganan,
+        kode_invoice,
+        bulan_tagihan,
+        tahun_tagihan,
+        jumlah_bayar,
+        metode_pembayaran,
+        bukti_pembayaran,
+        status_pembayaran,
+        jenis_transaksi,
+        tanggal_bayar
+    )
+    VALUES (
+        '$id_langganan',
+        '$kode_invoice',
+        '".date('n')."',
+        '".date('Y')."',
+        '$harga_paket',
+        '$metode_pembayaran',
+        '$bukti_pembayaran',
+        'lunas',
+        'baru',
+        CURDATE()
+    )
+");
+
+if(!$insert_transaksi){
+    die(
+        'Gagal menyimpan data transaksi: '
+        . mysqli_error($koneksi)
+    );
+}
     echo "
     <script>
         alert('Pelanggan offline, riwayat pemasangan, & paket langganan berhasil ditambahkan!');
@@ -361,6 +449,56 @@ if(isset($_POST['simpan'])){
             box-shadow: 0 0 0 3px rgba(255, 107, 0, 0.1);
         }
 
+        .payment-section{
+    margin-top:30px;
+    padding-top:25px;
+    border-top:1px solid #e2e8f0;
+}
+
+.payment-section h2{
+    font-size:22px;
+    margin-bottom:8px;
+    color:#1e293b;
+}
+
+.payment-desc{
+    color:#64748b;
+    font-size:14px;
+    margin-bottom:20px;
+}
+
+.payment-box{
+    background:#f8fafc;
+    border:1px solid #e2e8f0;
+    border-radius:12px;
+    padding:15px;
+    margin-bottom:20px;
+}
+
+.payment-box h4{
+    margin-bottom:10px;
+    color:#ff6b00;
+}
+
+.payment-box p{
+    margin:5px 0;
+}
+
+.qris-image{
+    max-width:250px;
+    width:100%;
+    display:block;
+    margin:auto;
+    border-radius:10px;
+}
+
+#buktiPembayaran{
+    width:100%;
+    padding:12px;
+    border:1px solid #e2e8f0;
+    border-radius:10px;
+    background:#f8fafc;
+}
         .status-badge-info {
             display: inline-flex;
             align-items: center;
@@ -436,7 +574,7 @@ if(isset($_POST['simpan'])){
         </div>
 
         <div class="form-card-wrapper">
-            <form method="POST">
+            <form method="POST" enctype="multipart/form-data">
                 <div class="form-group">
                     <label>Nama Lengkap</label>
                     <input type="text" name="nama_customer" required>
@@ -485,6 +623,43 @@ if(isset($_POST['simpan'])){
                     <input type="hidden" name="status_paket" value="aktif">
                 </div>
 
+             <div class="payment-section">
+    <h2>Pembayaran</h2>
+    <p class="payment-desc">
+        Pilih metode pembayaran pelanggan.
+    </p>
+
+   <div class="form-group">
+    <label>Metode Pembayaran</label>
+    <select name="metode_pembayaran" required>
+        <option value="cash">Cash</option>
+        <option value="transfer">Transfer Bank</option>
+        <option value="qris">QRIS</option>
+    </select>
+</div>
+
+    <div class="payment-box" id="bankBox" style="display:none;">
+        <h4>Transfer Bank</h4>
+        <p>BCA : 1234567890</p>
+        <p>Mandiri : 9876543210</p>
+        <p>A/N PT Anuwani Network</p>
+    </div>
+
+    <div class="payment-box" id="qrisBox" style="display:none;">
+        <h4>QRIS Payment</h4>
+        <img src="../../assets/images/qris.png" class="qris-image" alt="QRIS">
+    </div>
+
+    <div class="form-group" id="buktiGroup">
+        <label>Upload Bukti Pembayaran</label>
+        <input
+            type="file"
+            name="bukti_pembayaran"
+            id="buktiPembayaran"
+            accept="image/*">
+    </div>
+</div>
+                    
                 <button type="submit" name="simpan">Simpan Pelanggan</button>
             </form>
         </div>
@@ -536,6 +711,49 @@ if(isset($_POST['simpan'])){
     function closeLogoutModal() {
         document.getElementById('logoutModal').style.display = 'none';
     }
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    const metode = document.getElementById('metodePembayaran');
+    const bankBox = document.getElementById('bankBox');
+    const qrisBox = document.getElementById('qrisBox');
+    const bukti = document.getElementById('buktiPembayaran');
+    const buktiGroup = document.getElementById('buktiGroup');
+
+    function updateMetode() {
+
+        bankBox.style.display = 'none';
+        qrisBox.style.display = 'none';
+
+        if (metode.value === 'Transfer Bank') {
+
+            bankBox.style.display = 'block';
+
+            bukti.required = true;
+            buktiGroup.style.display = 'block';
+
+        } else if (metode.value === 'QRIS') {
+
+            qrisBox.style.display = 'block';
+
+            bukti.required = true;
+            buktiGroup.style.display = 'block';
+
+        } else if (metode.value === 'Cash') {
+
+            bukti.required = false;
+            bukti.value = '';
+
+            buktiGroup.style.display = 'none';
+        }
+    }
+
+    metode.addEventListener('change', updateMetode);
+
+    updateMetode();
+});
 </script>
 </body>
 </html>

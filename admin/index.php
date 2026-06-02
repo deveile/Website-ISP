@@ -268,6 +268,11 @@ $total_pendapatan = $pendapatan['total_pendapatan'] ?? 0;
                 </a>
             </li>
             <li>
+                <a href="pemasangan/index.php">
+                    <i class="bi bi-tools"></i> <span>Kelola Pemasangan</span>
+                </a>
+            </li>
+            <li>
                 <a href="transaksi/index.php">
                     <i class="bi bi-credit-card"></i> <span>Data Transaksi</span>
                     <?php if ($total_notif > 0): ?>

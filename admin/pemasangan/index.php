@@ -8,24 +8,41 @@ if ($_SESSION['role'] != 'admin') {
 }
 
 $query = mysqli_query($koneksi, "
-    SELECT 
-        tb_customer.*, 
-        tb_langganan.status_langganan, 
-        tb_langganan.tanggal_selesai, 
-        tb_paket.nama_paket 
-    FROM tb_customer 
-    LEFT JOIN tb_langganan ON tb_customer.id_customer = tb_langganan.id_customer 
-    LEFT JOIN tb_paket ON tb_langganan.id_paket = tb_paket.id_paket 
-    ORDER BY tb_customer.id_customer DESC
+    SELECT
+        p.id_pemasangan,
+        c.nama_customer,
+        pk.nama_paket,
+        p.tanggal_pengajuan,
+        p.tanggal_pasang,
+        p.alamat_pasang,
+        p.status_pemasangan,
+        p.catatan
+    FROM tb_pemasangan p
+    LEFT JOIN tb_customer c
+        ON p.id_customer = c.id_customer
+    LEFT JOIN tb_paket pk
+        ON p.id_paket = pk.id_paket
+    ORDER BY p.id_pemasangan DESC
 ");
 
-$query_notif = mysqli_query($koneksi, "
-    SELECT COUNT(*) AS total_notif
+$query_notif_transaksi = mysqli_query($koneksi, "
+    SELECT COUNT(*) AS total
     FROM tb_transaksi
     WHERE status_pembayaran = 'menunggu_verifikasi'
 ");
 
-$total_notif = mysqli_fetch_assoc($query_notif)['total_notif'];
+$total_notif_transaksi =
+    mysqli_fetch_assoc($query_notif_transaksi)['total'];
+
+$query_notif_pemasangan = mysqli_query($koneksi, "
+    SELECT COUNT(*) AS total
+    FROM tb_pemasangan
+    WHERE status_pemasangan = 'Pending'
+");
+
+$total_notif_pemasangan =
+    mysqli_fetch_assoc($query_notif_pemasangan)['total'];
+$total_notif = $total_notif_transaksi + $total_notif_pemasangan;
 
 function tgl_indo($tanggal) {
     if (empty($tanggal) || $tanggal == '0000-00-00') return '-';
@@ -42,12 +59,20 @@ function tgl_indo($tanggal) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Data Pelanggan</title>
+    <title>Kelola Pemasangan</title>
     <link rel="icon" type="image/png" href="../../assets/images/logo.png">
     <link rel="stylesheet" href="../../assets/css/style.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <script src="../../assets/js/script.js" defer></script>
     <style>
+        .table-responsive{
+    width:100%;
+    overflow-x:auto;
+}
+
+.table-responsive table{
+    min-width:1200px;
+}
         .notif-badge {
             display: inline-flex; align-items: center; justify-content: center;
             width: 20px; height: 20px; border-radius: 50%;
@@ -210,13 +235,28 @@ function tgl_indo($tanggal) {
         <ul>
             <li><a href="../index.php"><i class="bi bi-grid"></i> <span>Dashboard</span></a></li>
             <li><a href="../paket/index.php"><i class="bi bi-wifi"></i> <span>Kelola Paket</span></a></li>
-            <li><a href="index.php" class="active"><i class="bi bi-people"></i> <span>Data Pelanggan</span></a></li>
-            <li><a href="../pemasangan/index.php"><i class="bi bi-tools"></i> <span>Kelola Pemasangan</span></a></li>
+            <li><a href="../customer/index.php"><i class="bi bi-people"></i><span>Data Pelanggan</span></a></li>
+            <li><a href="../pemasangan/index.php">
+                <i class="bi bi-tools"></i>
+                <span>Kelola Pemasangan</span>
+
+                <?php if ($total_notif_pemasangan > 0): ?>
+                    <span class="notif-badge">
+                        <?= $total_notif_pemasangan; ?>
+                    </span>
+                <?php endif; ?>
+                </a>
+            </li>
+
             <li>
                 <a href="../transaksi/index.php">
-                    <i class="bi bi-credit-card"></i> <span>Data Transaksi</span>
-                    <?php if ($total_notif > 0): ?>
-                        <span class="notif-badge"><?= $total_notif; ?></span>
+                    <i class="bi bi-credit-card"></i>
+                    <span>Data Transaksi</span>
+
+                    <?php if ($total_notif_transaksi > 0): ?>
+                        <span class="notif-badge">
+                            <?= $total_notif_transaksi; ?>
+                        </span>
                     <?php endif; ?>
                 </a>
             </li>
@@ -226,83 +266,112 @@ function tgl_indo($tanggal) {
         </ul>
     </div>
 
-    <div class="dashboard-content">
-        <div class="topbar">
-            <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle Sidebar">
-                <span></span>
-                <span></span>
-                <span></span>
-            </button>
-            <div>
-                <h1>Data Pelanggan</h1>
-                <p>Kelola seluruh data customer Anuwani.net</p>
+        <div class="dashboard-content">
+                <div class="topbar">
+                    <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle Sidebar">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </button>
+                    <div>
+                        <h1>Kelola Pemasangan</h1>
+                        <p>Kelola seluruh data pemasangan Anuwani.net</p>
+                    </div>
+                </div>
+
+                <div class="table-card">
+                    <div class="table-header">
+                    <h3>Data Pemasangan</h3>
+
+                    <a href="tambah.php" class="btn-orange">
+                        <i class="bi bi-plus-circle"></i>
+                        Tambah Pemasangan
+                    </a>
+                </div>
+
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Nama Customer</th>
+                            <th>Paket</th>
+                            <th>Tanggal Pengajuan</th>
+                            <th>Tanggal Pasang</th>
+                            <th>Alamat Pasang</th>
+                            <th>Status</th>
+                            <th>Catatan</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <?php
+                        $no = 1;
+
+                        while ($data = mysqli_fetch_assoc($query)) :
+                        ?>
+                            <tr>
+                                <td><?= $no++; ?></td>
+
+                                <td><?= htmlspecialchars($data['nama_customer']); ?></td>
+
+                                <td><?= htmlspecialchars($data['nama_paket']); ?></td>
+
+                                <td><?= tgl_indo($data['tanggal_pengajuan']); ?></td>
+
+                                <td><?= tgl_indo($data['tanggal_pasang']); ?></td>
+
+                                <td><?= htmlspecialchars($data['alamat_pasang']); ?></td>
+
+                                <td>
+                                    <?php
+                                    $status = strtolower(trim($data['status_pemasangan']));
+
+                                    if ($status == 'selesai') {
+                                        echo '<span class="status-active">Selesai</span>';
+                                    } elseif ($status == 'pending') {
+                                        echo '<span class="status-pending">Pending</span>';
+                                    } elseif ($status == 'proses') {
+                                        echo '<span class="status-pending">Proses</span>';
+                                    } else {
+                                        echo '<span class="status-nonactive">'
+                                            . htmlspecialchars($data['status_pemasangan'])
+                                            . '</span>';
+                                    }
+                                    ?>
+                                </td>
+
+                                <td><?= htmlspecialchars($data['catatan']); ?></td>
+
+                                <td>
+                                    <div class="table-action">
+                                        <a href="detail.php?id=<?= $data['id_pemasangan']; ?>"
+                                        class="btn-edit">
+                                            Detail
+                                        </a>
+
+                                        <a href="hapus.php?id=<?= $data['id_pemasangan']; ?>"
+                                        class="btn-delete"
+                                        onclick="return confirm('Hapus data pemasangan ini?')">
+                                            Hapus
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        <?php endwhile; ?>
+
+                        <?php if (mysqli_num_rows($query) == 0) : ?>
+                            <tr>
+                                <td colspan="9" style="text-align:center;">
+                                    Belum ada data pemasangan
+                                </td>
+                            </tr>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
             </div>
         </div>
-
-        <div class="table-card">
-            <div class="table-header">
-                <h3>Data Pelanggan</h3>
-                <a href="tambah.php" class="btn-orange">
-                    <i class="bi bi-plus-circle"></i> Tambah Pelanggan
-                </a>
-            </div>
-
-            <table>
-                <thead>
-                    <tr>
-                        <th>No</th>
-                        <th>Nama</th>
-                        <th>Email</th>
-                        <th>Telepon</th>
-                        <th>Paket</th>
-                        <th>Aktif Sampai</th> <th>Status</th>
-                        <th>Aksi</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php 
-                    $no = 1;
-                    while ($data = mysqli_fetch_assoc($query)) : 
-                    ?>
-                    <tr>
-                        <td><?= $no++; ?></td>
-                        <td><?= $data['nama_customer']; ?></td>
-                        <td><?= $data['email_customer']; ?></td>
-                        <td><?= $data['telepon_customer']; ?></td>
-                        <td><?= $data['nama_paket'] ?? '-'; ?></td>
-                        
-                        <td>
-                            <span style="font-weight: 500; color: #333;">
-                                <?= tgl_indo($data['tanggal_selesai']); ?>
-                            </span>
-                        </td>
-                        
-                        <td>
-                            <?php 
-                            $status = strtolower($data['status_langganan'] ?? '');
-                            if ($status == 'aktif') : 
-                            ?>
-                                <span class="status-active">Aktif</span>
-                            <?php elseif ($status == 'suspend') : ?>
-                                <span class="status-pending">Suspend</span>
-                            <?php elseif ($status == 'berhenti') : ?>
-                                <span class="status-nonactive">Berhenti</span>
-                            <?php else : ?>
-                                <span class="status-pending">Tidak Aktif</span>
-                            <?php endif; ?>
-                        </td>
-                        <td>
-                            <div class="table-action">
-                                <a href="detail.php?id=<?= $data['id_customer']; ?>" class="btn-edit">Detail</a>
-                                <a href="hapus.php?id=<?= $data['id_customer']; ?>" class="btn-delete" onclick="return confirm('Hapus customer ini?')">Hapus</a>
-                            </div>
-                        </td>
-                    </tr>
-                    <?php endwhile; ?>
-                </tbody>
-            </table>
-        </div>
-    </div>
 </div>
 
 <div class="logout-modal" id="logoutModal">

@@ -280,6 +280,7 @@ for ($i = 1; $i <= 12; $i++) {
         <li><a href="../index.php"><i class="bi bi-grid"></i> <span>Dashboard</span></a></li>
         <li><a href="../paket/index.php"><i class="bi bi-wifi"></i> <span>Kelola Paket</span></a></li>
         <li><a href="../customer/index.php"><i class="bi bi-people"></i> <span>Data Pelanggan</span></a></li>
+        <li><a href="../pemasangan/index.php"><i class="bi bi-tools"></i> <span>Kelola Pemasangan</span></a></li>
         <li><a href="../transaksi/index.php"><i class="bi bi-credit-card"></i> <span>Data Transaksi</span>
     <?php if ($total_notif > 0): ?>
         <span class="notif-badge"><?= $total_notif; ?></span>
