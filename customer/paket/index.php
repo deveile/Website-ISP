@@ -78,7 +78,7 @@ $data = mysqli_query($koneksi, "SELECT * FROM tb_paket WHERE status='aktif' ORDE
             <?php while ($paket = mysqli_fetch_assoc($data)) : ?>
                 <div class="customer-paket-card">
                     <h3><?= $paket['nama_paket']; ?></h3>
-                    <h1><?= $paket['kecepatan']; ?> Mbps</h1>
+                    <h1><?= $paket['kecepatan']; ?> </h1>
                     <h2>Rp <?= number_format($paket['harga']); ?></h2>
                     <p><?= nl2br($paket['deskripsi']); ?></p>
                     
