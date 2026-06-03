@@ -7,6 +7,13 @@ if($_SESSION['role'] != 'admin'){
     exit;
 }
 
+$query_notif = mysqli_query($koneksi, "
+    SELECT COUNT(*) AS total_notif
+    FROM tb_transaksi
+    WHERE status_pembayaran = 'menunggu_verifikasi'
+");
+$total_notif = mysqli_fetch_assoc($query_notif)['total_notif'];
+
 $id = $_GET['id'];
 
 $query = mysqli_query($koneksi, "
@@ -60,6 +67,17 @@ function tgl_indo($tanggal) {
             <li><a href="../index.php"><i class="bi bi-grid"></i> Dashboard</a></li>
             <li><a href="../paket/index.php"><i class="bi bi-wifi"></i> Kelola Paket</a></li>
             <li><a href="index.php" class="active"><i class="bi bi-people"></i> Data Pelanggan</a></li>
+            <li><a href="../pemasangan/index.php"><i class="bi bi-tools"></i> Kelola Pemasangan</a></li>
+            <li>
+                <a href="../transaksi/index.php">
+                    <i class="bi bi-credit-card"></i> <span>Data Transaksi</span>
+                    <?php if ($total_notif > 0): ?>
+                        <span class="notif-badge"><?= $total_notif; ?></span>
+                    <?php endif; ?>
+                </a>
+            </li>
+            <li><a href="../laporan_keuangan/index.php"><i class="bi bi-bar-chart-line"></i> <span>Laporan Keuangan</span></a></li>
+            <li><a href="list_admin.php" class="active"><i class="bi bi-person-gear"></i> <span>Kelola Admin</span></a></li>
             <li>
                 <a href="../../auth/logout.php" onclick="return confirm('Apakah Anda yakin ingin logout?')">
                     <i class="bi bi-box-arrow-right"></i> Logout

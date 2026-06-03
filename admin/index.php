@@ -48,41 +48,40 @@ if ($last_run !== $today) {
     file_put_contents($log_file, $today);
 }
 
+// 1. Total Pelanggan
 $query_customer = mysqli_query($koneksi, "
     SELECT COUNT(*) AS total_customer
     FROM tb_customer
 ");
 $total_customer = mysqli_fetch_assoc($query_customer)['total_customer'];
 
+// 2. Total Produk Paket
 $query_paket = mysqli_query($koneksi, "
     SELECT COUNT(*) AS total_paket
     FROM tb_paket
 ");
 $total_paket = mysqli_fetch_assoc($query_paket)['total_paket'];
 
-$query_transaksi = mysqli_query($koneksi, "
-    SELECT COUNT(*) AS total_transaksi
+// 3. Transaksi Belum Dibayar
+$query_belum_bayar = mysqli_query($koneksi, "
+    SELECT COUNT(*) AS total_belum_bayar
     FROM tb_transaksi
+    WHERE status_pembayaran = 'belum_bayar'
 ");
-$total_transaksi = mysqli_fetch_assoc($query_transaksi)['total_transaksi'];
+$total_belum_bayar = mysqli_fetch_assoc($query_belum_bayar)['total_belum_bayar'];
 
-$query_pending = mysqli_query($koneksi, "
-    SELECT COUNT(*) AS total_pending
-    FROM tb_transaksi
-    WHERE 
-        status_pembayaran = 'belum_bayar'
-        OR status_pembayaran = 'menunggu_verifikasi'
-");
-$pending = mysqli_fetch_assoc($query_pending)['total_pending'];
-
-$query_notif = mysqli_query($koneksi, "
-    SELECT COUNT(*) AS total_notif
+// 4. Menunggu Verifikasi
+$query_verifikasi = mysqli_query($koneksi, "
+    SELECT COUNT(*) AS total_verifikasi
     FROM tb_transaksi
     WHERE status_pembayaran = 'menunggu_verifikasi'
 ");
+$menunggu_verifikasi = mysqli_fetch_assoc($query_verifikasi)['total_verifikasi'];
 
-$total_notif = mysqli_fetch_assoc($query_notif)['total_notif'];
+// Badge notifikasi sidebar mengikuti total verifikasi
+$total_notif = $menunggu_verifikasi;
 
+// 5. Total Pendapatan
 $query_income = mysqli_query($koneksi, "
     SELECT SUM(jumlah_bayar) AS total_pendapatan
     FROM tb_transaksi
@@ -305,7 +304,7 @@ $total_pendapatan = $pendapatan['total_pendapatan'] ?? 0;
             <div>
                 <h1>Dashboard Admin</h1>
                 <p>Selamat datang, 
-                    <strong><?php echo $_SESSION['username']; ?></strong>
+                    <strong><?php echo htmlspecialchars($_SESSION['username']); ?></strong>
                 </p>
             </div>
         </div>
@@ -330,14 +329,6 @@ $total_pendapatan = $pendapatan['total_pendapatan'] ?? 0;
 
             <div class="admin-card">
                 <div>
-                    <h5>Transaksi Pending</h5>
-                    <h2><?php echo $pending; ?></h2>
-                </div>
-                <i class="bi bi-hourglass-split"></i>
-            </div>
-
-            <div class="admin-card">
-                <div>
                     <h5>Total Produk Paket</h5>
                     <h2><?php echo $total_paket; ?></h2>
                 </div>
@@ -346,10 +337,18 @@ $total_pendapatan = $pendapatan['total_pendapatan'] ?? 0;
 
             <div class="admin-card">
                 <div>
-                    <h5>Total Transaksi</h5>
-                    <h2><?php echo $total_transaksi; ?></h2>
+                    <h5>Transaksi Belum Dibayar</h5>
+                    <h2><?php echo $total_belum_bayar; ?></h2>
                 </div>
-                <i class="bi bi-credit-card"></i>
+                <i class="bi bi-hourglass-split"></i>
+            </div>
+
+            <div class="admin-card">
+                <div>
+                    <h5>Transaksi Menunggu Verifikasi</h5>
+                    <h2><?php echo $menunggu_verifikasi; ?></h2>
+                </div>
+                <i class="bi bi-patch-check"></i>
             </div>
 
         </div>
@@ -387,7 +386,7 @@ $total_pendapatan = $pendapatan['total_pendapatan'] ?? 0;
             });
 
             document.addEventListener('click', function(e) {
-                if (window.innerWidth < 992) {
+                if (window.innerWidth < 991) {
                     if (!sidebar.contains(e.target) && sidebar.classList.contains('active')) {
                         sidebar.classList.remove('active');
                     }

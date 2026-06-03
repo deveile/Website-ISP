@@ -31,17 +31,15 @@ $query_notif_transaksi = mysqli_query($koneksi, "
     WHERE status_pembayaran = 'menunggu_verifikasi'
 ");
 
-$total_notif_transaksi =
-    mysqli_fetch_assoc($query_notif_transaksi)['total'];
+$total_notif_transaksi = mysqli_fetch_assoc($query_notif_transaksi)['total'];
 
 $query_notif_pemasangan = mysqli_query($koneksi, "
     SELECT COUNT(*) AS total
     FROM tb_pemasangan
-    WHERE status_pemasangan = 'Pending'
+    WHERE status_pemasangan = 'menunggu'
 ");
 
-$total_notif_pemasangan =
-    mysqli_fetch_assoc($query_notif_pemasangan)['total'];
+$total_notif_pemasangan = mysqli_fetch_assoc($query_notif_pemasangan)['total'];
 $total_notif = $total_notif_transaksi + $total_notif_pemasangan;
 
 function tgl_indo($tanggal) {
@@ -66,13 +64,13 @@ function tgl_indo($tanggal) {
     <script src="../../assets/js/script.js" defer></script>
     <style>
         .table-responsive{
-    width:100%;
-    overflow-x:auto;
-}
+            width:100%;
+            overflow-x:auto;
+        }
 
-.table-responsive table{
-    min-width:1200px;
-}
+        .table-responsive table{
+            min-width:1200px;
+        }
         .notif-badge {
             display: inline-flex; align-items: center; justify-content: center;
             width: 20px; height: 20px; border-radius: 50%;
@@ -85,20 +83,36 @@ function tgl_indo($tanggal) {
             0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239,68,68,.4); }
             50%       { transform: scale(1.1); box-shadow: 0 0 0 5px rgba(239,68,68,0); }
         }
+
         .status-active {
             background: #dcfce7; color: #166534;
             padding: 6px 12px; border-radius: 20px;
             font-size: 12px; font-weight: 600;
+            display: inline-block;
         }
         .status-pending {
             background: #fef3c7; color: #92400e;
             padding: 6px 12px; border-radius: 20px;
             font-size: 12px; font-weight: 600;
+            display: inline-block;
+        }
+        .status-process {
+            background: #e0f2fe; color: #0369a1;
+            padding: 6px 12px; border-radius: 20px;
+            font-size: 12px; font-weight: 600;
+            display: inline-block;
         }
         .status-nonactive {
             background: #fee2e2; color: #991b1b;
             padding: 6px 12px; border-radius: 20px;
             font-size: 12px; font-weight: 600;
+            display: inline-block;
+        }
+
+        .table-action {
+            display: flex !important;
+            gap: 8px !important;
+            align-items: center;
         }
 
         .dashboard-layout {
@@ -236,7 +250,7 @@ function tgl_indo($tanggal) {
             <li><a href="../index.php"><i class="bi bi-grid"></i> <span>Dashboard</span></a></li>
             <li><a href="../paket/index.php"><i class="bi bi-wifi"></i> <span>Kelola Paket</span></a></li>
             <li><a href="../customer/index.php"><i class="bi bi-people"></i><span>Data Pelanggan</span></a></li>
-            <li><a href="../pemasangan/index.php">
+            <li><a href="../pemasangan/index.php" class="active">
                 <i class="bi bi-tools"></i>
                 <span>Kelola Pemasangan</span>
 
@@ -266,28 +280,23 @@ function tgl_indo($tanggal) {
         </ul>
     </div>
 
-        <div class="dashboard-content">
-                <div class="topbar">
-                    <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle Sidebar">
-                        <span></span>
-                        <span></span>
-                        <span></span>
-                    </button>
-                    <div>
-                        <h1>Kelola Pemasangan</h1>
-                        <p>Kelola seluruh data pemasangan Anuwani.net</p>
-                    </div>
-                </div>
+    <div class="dashboard-content">
+        <div class="topbar">
+            <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle Sidebar">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <div>
+                <h1>Kelola Pemasangan</h1>
+                <p>Kelola seluruh data pemasangan Anuwani.net</p>
+            </div>
+        </div>
 
-                <div class="table-card">
-                    <div class="table-header">
-                    <h3>Data Pemasangan</h3>
-
-                    <a href="tambah.php" class="btn-orange">
-                        <i class="bi bi-plus-circle"></i>
-                        Tambah Pemasangan
-                    </a>
-                </div>
+        <div class="table-card">
+            <div class="table-header">
+                <h3>Data Pemasangan</h3>
+            </div>
 
             <div class="table-responsive">
                 <table>
@@ -308,52 +317,40 @@ function tgl_indo($tanggal) {
                     <tbody>
                         <?php
                         $no = 1;
-
                         while ($data = mysqli_fetch_assoc($query)) :
                         ?>
                             <tr>
                                 <td><?= $no++; ?></td>
-
                                 <td><?= htmlspecialchars($data['nama_customer']); ?></td>
-
                                 <td><?= htmlspecialchars($data['nama_paket']); ?></td>
-
                                 <td><?= tgl_indo($data['tanggal_pengajuan']); ?></td>
-
                                 <td><?= tgl_indo($data['tanggal_pasang']); ?></td>
-
                                 <td><?= htmlspecialchars($data['alamat_pasang']); ?></td>
-
                                 <td>
                                     <?php
+                                    // Menyesuaikan string dengan data asli enum MySQL
                                     $status = strtolower(trim($data['status_pemasangan']));
 
-                                    if ($status == 'selesai') {
-                                        echo '<span class="status-active">Selesai</span>';
-                                    } elseif ($status == 'pending') {
-                                        echo '<span class="status-pending">Pending</span>';
-                                    } elseif ($status == 'proses') {
-                                        echo '<span class="status-pending">Proses</span>';
+                                    if ($status == 'terpasang') {
+                                        echo '<span class="status-active">Terpasang</span>';
+                                    } elseif ($status == 'menunggu') {
+                                        echo '<span class="status-pending">Menunggu</span>';
+                                    } elseif ($status == 'diproses') {
+                                        echo '<span class="status-process">Diproses</span>';
+                                    } elseif ($status == 'dibatalkan') {
+                                        echo '<span class="status-nonactive">Dibatalkan</span>';
                                     } else {
-                                        echo '<span class="status-nonactive">'
-                                            . htmlspecialchars($data['status_pemasangan'])
-                                            . '</span>';
+                                        echo '<span class="status-pending">' . htmlspecialchars($data['status_pemasangan']) . '</span>';
                                     }
                                     ?>
                                 </td>
-
                                 <td><?= htmlspecialchars($data['catatan']); ?></td>
-
                                 <td>
                                     <div class="table-action">
-                                        <a href="detail.php?id=<?= $data['id_pemasangan']; ?>"
-                                        class="btn-edit">
+                                        <a href="detail.php?id=<?= $data['id_pemasangan']; ?>" class="btn-edit">
                                             Detail
                                         </a>
-
-                                        <a href="hapus.php?id=<?= $data['id_pemasangan']; ?>"
-                                        class="btn-delete"
-                                        onclick="return confirm('Hapus data pemasangan ini?')">
+                                        <a href="hapus.php?id=<?= $data['id_pemasangan']; ?>" class="btn-delete" onclick="return confirm('Hapus data pemasangan ini?')">
                                             Hapus
                                         </a>
                                     </div>
@@ -372,6 +369,7 @@ function tgl_indo($tanggal) {
                 </table>
             </div>
         </div>
+    </div>
 </div>
 
 <div class="logout-modal" id="logoutModal">

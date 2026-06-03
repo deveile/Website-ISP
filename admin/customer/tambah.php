@@ -76,7 +76,7 @@ if(isset($_POST['simpan'])){
     $id_customer = mysqli_insert_id($koneksi);
 
     $tanggal_sekarang = date('Y-m-d');
-    $status_pemasangan = ($status == 'aktif') ? 'Selesai' : 'Pending';
+    $status_pemasangan = 'menunggu';
     $catatan_pemasangan = "Pendaftaran offline langsung diinput oleh Admin.";
 
     $insert_pemasangan = mysqli_query($koneksi, "
@@ -92,7 +92,7 @@ if(isset($_POST['simpan'])){
             '$id_customer',
             '$id_paket',
             '$tanggal_sekarang',
-            '$tanggal_sekarang',
+            NULL,
             '$alamat',
             '$status_pemasangan',
             '$catatan_pemasangan'
@@ -546,6 +546,7 @@ if(!$insert_transaksi){
             <li><a href="../index.php"><i class="bi bi-grid"></i> <span>Dashboard</span></a></li>
             <li><a href="../paket/index.php"><i class="bi bi-wifi"></i> <span>Kelola Paket</span></a></li>
             <li><a href="index.php" class="active"><i class="bi bi-people"></i> <span>Data Pelanggan</span></a></li>
+            <li><a href="../pemasangan/index.php"><i class="bi bi-tools"></i> <span>Kelola Pemasangan</span></a></li>
             <li>
                 <a href="../transaksi/index.php">
                     <i class="bi bi-credit-card"></i> <span>Data Transaksi</span>
