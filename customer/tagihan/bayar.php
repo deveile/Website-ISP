@@ -5,18 +5,23 @@ require_once __DIR__ . '/../../koneksi.php';
 $id_transaksi = $_GET['id'] ?? '';
 
 $sql = "
-SELECT t.*,
-    CASE WHEN t.jenis_transaksi='upgrade' THEN p_baru.nama_paket ELSE p_lama.nama_paket END AS nama_paket,
-    CASE WHEN t.jenis_transaksi='upgrade' THEN p_baru.kecepatan ELSE p_lama.kecepatan END AS kecepatan,
-    CASE WHEN t.jenis_transaksi='upgrade' THEN p_baru.harga ELSE p_lama.harga END AS harga
+SELECT
+    t.*,
+    p.nama_paket,
+    p.kecepatan,
+    p.harga
 FROM tb_transaksi t
-LEFT JOIN tb_langganan l ON t.id_langganan = l.id_langganan
-LEFT JOIN tb_paket p_lama ON l.id_paket = p_lama.id_paket
-LEFT JOIN tb_paket p_baru ON t.id_paket_baru = p_baru.id_paket
+LEFT JOIN tb_langganan l
+    ON t.id_langganan = l.id_langganan
+LEFT JOIN tb_paket p
+    ON l.id_paket = p.id_paket
 WHERE t.id_transaksi = '$id_transaksi'
 ";
 
 $query = mysqli_query($koneksi, $sql);
+if(!$query){
+    die("Query Error: " . mysqli_error($koneksi));
+}
 $data = mysqli_fetch_assoc($query);
 $js_script = "";
 

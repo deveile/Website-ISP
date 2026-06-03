@@ -133,9 +133,9 @@ function tgl_indo($tgl) {
 
             <div class="hero-right">
                 <i class="bi bi-wifi hero-wifi-icon"></i>
-                <?php $status = strtolower($t['status_pembayaran'] ?? ''); ?>
-
-                <?php if($status == 'belum_bayar') : ?>
+                <?php $status = strtolower(trim($t['status_pembayaran'] ?? '')); ?>
+                <?php echo "<pre>Status: ".$status."</pre>"; ?>
+                <?php if($status == 'belum') : ?>
                     <a href="tagihan/bayar.php?id=<?= $t['id_transaksi']; ?>" 
                     class="hero-button">Bayar Tagihan</a>
                 <?php elseif($status == 'menunggu_verifikasi') : ?>
@@ -181,8 +181,8 @@ function tgl_indo($tgl) {
                         <td><span class="status-<?= $class; ?>"><?= $text; ?></span></td>
                         <td><?= !empty($r['tanggal_bayar']) ? tgl_indo($r['tanggal_bayar']) : '-'; ?></td>
                         <td>
-                            <?php if ($s_pay == 'belum_bayar') : ?>
-                                <a href="tagihan/bayar.php?id=<?= $r['id_transaksi']; ?>" class="btn-bayar">Bayar</a>
+                            <?php if ($s_pay == 'belum') : ?>
+                            <a href="tagihan/bayar.php?id=<?= $r['id_transaksi']; ?>" class="btn-bayar">Bayar</a>
                             <?php else : ?>
                                 <a href="tagihan/detail.php?id=<?= $r['id_transaksi']; ?>" class="btn-detail">Detail</a>
                             <?php endif; ?>
