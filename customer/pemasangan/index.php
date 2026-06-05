@@ -27,14 +27,15 @@ if (isset($_POST['submit'])) {
             tanggal_pasang, 
             alamat_pasang, 
             status_pemasangan, 
-            catatan, created_at
+            catatan, 
+            created_at
         ) VALUES (
             '".$customer['id_customer']."', 
             '$id_paket', 
             CURDATE(), 
             NULL, 
             '$alamat', 
-            'Pending', 
+            'menunggu', 
             '$catatan',
              NOW()
         )
@@ -102,9 +103,6 @@ if (isset($_POST['submit'])) {
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
 <style>
-    /* =========================
-   BASE LAYOUT FIX
-========================= */
 html, body {
     height: 100%;
     margin: 0;
@@ -116,9 +114,6 @@ html, body {
     min-height: 100vh;
 }
 
-/* =========================
-   SIDEBAR 
-========================= */
 .sidebar {
     display: flex;
     flex-direction: column;
@@ -131,13 +126,6 @@ html, body {
     overflow: hidden;
 }
 
-
-
-
-
-/* =========================
-   TOGGLE BUTTON
-========================= */
 .sidebar-toggle {
     display: flex;
     flex-direction: column;
@@ -156,9 +144,6 @@ html, body {
     border-radius: 2px;
 }
 
-/* =========================
-   DESKTOP COLLAPSE
-========================= */
 @media (min-width: 992px) {
 
     .sidebar.collapsed {
@@ -189,9 +174,6 @@ html, body {
     }
 }
 
-/* =========================
-   MOBILE SIDEBAR
-========================= */
 @media (max-width: 991px) {
 
     .dashboard-layout {
@@ -217,9 +199,6 @@ html, body {
     }
 }
 
-/* =========================
-   NOTIF BADGE
-========================= */
 .notif-badge {
     display: inline-flex;
     align-items: center;

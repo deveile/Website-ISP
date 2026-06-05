@@ -71,28 +71,37 @@ if (isset($_GET['aksi']) && $_GET['aksi'] === 'upgrade') {
     }
 }
 
-$id_paket = $_POST['id_paket'];
-$alamat   = $_POST['alamat'];
-$catatan  = $_POST['catatan'];
-$metode   = $_POST['metode_pembayaran'];
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-$bukti = $_FILES['bukti_pembayaran']['name'];
-$tmp   = $_FILES['bukti_pembayaran']['tmp_name'];
-$folder = "../../uploads/pembayaran/";
+    $id_paket = (int)($_POST['id_paket'] ?? 0);
+    $alamat   = mysqli_real_escape_string($koneksi, trim($_POST['alamat']  ?? ''));
+    $catatan  = mysqli_real_escape_string($koneksi, trim($_POST['catatan'] ?? ''));
 
-move_uploaded_file($tmp, $folder . $bukti);
+    $insert_pasang = mysqli_query($koneksi, "
+        INSERT INTO tb_pemasangan (
+            id_customer,
+            id_paket,
+            tanggal_pengajuan,
+            tanggal_pasang,
+            alamat_pasang,
+            status_pemasangan,
+            catatan
+        ) VALUES (
+            '$id_customer',
+            '$id_paket',
+            NOW(),
+            NULL,
+            '$alamat',
+            'menunggu',
+            '$catatan'
+        )
+    ");
 
-mysqli_query($koneksi, "
-    INSERT INTO tb_pemasangan (
-        id_customer, id_paket, alamat_pasang, 
-        tanggal_pasang, catatan, status_pemasangan, 
-        metode_pembayaran, bukti_pembayaran, status_pembayaran
-    ) VALUES (
-        '$id_customer', '$id_paket', '$alamat', 
-        NOW(), '$catatan', 'menunggu', 
-        '$metode', '$bukti', 'menunggu_konfimasi'
-    )
-");
+    if (!$insert_pasang) {
+        die('Gagal simpan pemasangan: ' . mysqli_error($koneksi));
+    }
 
-header("Location: berhasil.php");
+    header("Location: berhasil.php");
+    exit;
+}
 ?>

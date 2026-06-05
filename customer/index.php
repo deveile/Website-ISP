@@ -32,10 +32,9 @@ if ($data && !empty($data['id_langganan'])) {
     $nominal = ($t && $t['status_pembayaran'] != 'lunas') 
                ? $t['jumlah_bayar'] : 0;
 
-    // Ambil 5 riwayat transaksi terakhir
     $sql_r = "SELECT * FROM tb_transaksi 
               WHERE id_langganan = '" . $data['id_langganan'] . "' 
-              ORDER BY id_transaksi DESC LIMIT 5";
+              ORDER BY id_transaksi DESC LIMIT 3";
               
     $riwayat = mysqli_query($koneksi, $sql_r);
 }
@@ -55,15 +54,13 @@ function tgl_indo($tgl) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
-    <link rel="stylesheet" href="../assets/css/style.css">
     <link rel="icon" type="image/png" href="../assets/images/logo.png">
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <link class="icon" type="image/png" href="../assets/images/logo.png">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <script src="../assets/js/script.js" defer></script>
 
-   <style>
-/* =========================
-   BASE LAYOUT FIX
-========================= */
+    <style>
 html, body {
     height: 100%;
     margin: 0;
@@ -75,9 +72,6 @@ html, body {
     min-height: 100vh;
 }
 
-/* =========================
-   SIDEBAR 
-========================= */
 .sidebar {
     display: flex;
     flex-direction: column;
@@ -90,13 +84,6 @@ html, body {
     overflow: hidden;
 }
 
-
-
-
-
-/* =========================
-   TOGGLE BUTTON
-========================= */
 .sidebar-toggle {
     display: flex;
     flex-direction: column;
@@ -115,11 +102,7 @@ html, body {
     border-radius: 2px;
 }
 
-/* =========================
-   DESKTOP COLLAPSE
-========================= */
 @media (min-width: 992px) {
-
     .sidebar.collapsed {
         width: 70px !important;
         min-width: 70px !important;
@@ -148,11 +131,7 @@ html, body {
     }
 }
 
-/* =========================
-   MOBILE SIDEBAR
-========================= */
 @media (max-width: 991px) {
-
     .dashboard-layout {
         flex-direction: column;
     }
@@ -176,9 +155,6 @@ html, body {
     }
 }
 
-/* =========================
-   NOTIF BADGE
-========================= */
 .notif-badge {
     display: inline-flex;
     align-items: center;
@@ -191,6 +167,39 @@ html, body {
     font-size: 11px;
     font-weight: 800;
     margin-left: auto;
+}
+
+.customer-hero-card {
+    display: flex !important;
+    justify-content: space-between;
+    align-items: stretch; 
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.hero-left {
+    flex: 1;
+    min-width: 250px;
+}
+
+.hero-right {
+    display: flex !important;
+    flex-direction: column;
+    justify-content: space-between; 
+    align-items: flex-end; 
+    text-align: right;
+    min-width: 150px;
+}
+
+@media (max-width: 576px) {
+    .customer-hero-card {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .hero-right {
+        align-items: flex-end; 
+        min-height: 120px;
+    }
 }
 </style>
 </head>
@@ -210,63 +219,56 @@ html, body {
 <div class="dashboard-layout">
 
     <div class="sidebar">
-    <div class="sidebar-logo">
-        <img src="../assets/images/logo.png">
-        <h2>Anuwani</h2>
-    </div>
-           <ul class="sidebar-menu">
-    <li>
-        <a href="index.php" class="active">
-            <i class="bi bi-grid"></i>
-            <span>Dashboard</span>
-        </a>
-    </li>
-
-    <li>
-        <a href="tagihan/index.php">
-            <i class="bi bi-receipt"></i>
-            <span>Tagihan Saya</span>
-        </a>
-    </li>
-
-    <li>
-        <a href="paket/index.php">
-            <i class="bi bi-wifi"></i>
-            <span>Paket Internet</span>
-        </a>
-    </li>
-
-    <li>
-        <a href="profile/index.php">
-            <i class="bi bi-person"></i>
-            <span>Profile</span>
-        </a>
-    </li>
-
-    <li>
-    <a href="#" onclick="openLogoutModal()">
-        <i class="bi bi-box-arrow-right"></i>
-        <span>Logout</span>
-    </a>
-    </li>   
-</ul>
-
+        <div class="sidebar-logo">
+            <img src="../assets/images/logo.png">
+            <h2>Anuwani</h2>
         </div>
-
-         <div class="dashboard-content">
-
-            <div class="topbar">
-                <button class="sidebar-toggle" id="sidebarToggle">
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                </button>
-
-    <div>
-        <h1>Halo, <?= $data['nama_customer']; ?></h1>
-        <p>Selamat datang kembali</p>
+        <ul class="sidebar-menu">
+            <li>
+                <a href="index.php" class="active">
+                    <i class="bi bi-grid"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            <li>
+                <a href="tagihan/index.php">
+                    <i class="bi bi-receipt"></i>
+                    <span>Tagihan Saya</span>
+                </a>
+            </li>
+            <li>
+                <a href="paket/index.php">
+                    <i class="bi bi-wifi"></i>
+                    <span>Paket Internet</span>
+                </a>
+            </li>
+            <li>
+                <a href="profile/index.php">
+                    <i class="bi bi-person"></i>
+                    <span>Profile</span>
+                </a>
+            </li>
+            <li>
+                <a href="#" onclick="openLogoutModal()">
+                    <i class="bi bi-box-arrow-right"></i>
+                    <span>Logout</span>
+                </a>
+            </li>   
+        </ul>
     </div>
-</div>
+
+    <div class="dashboard-content">
+        <div class="topbar">
+            <button class="sidebar-toggle" id="sidebarToggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <div>
+                <h1>Halo, <?= $data['nama_customer']; ?></h1>
+                <p>Selamat datang kembali</p>
+            </div>
+        </div>
         
         <div class="customer-hero-card">
             <div class="hero-left">
@@ -311,18 +313,13 @@ html, body {
             <div class="hero-right">
                 <i class="bi bi-wifi hero-wifi-icon"></i>
                 <?php $status = strtolower(trim($t['status_pembayaran'] ?? '')); ?>
-                <?php echo "<pre>Status: ".$status."</pre>"; ?>
-                <?php if($status == 'belum') : ?>
-                    <a href="tagihan/bayar.php?id=<?= $t['id_transaksi']; ?>" 
-                    class="hero-button">Bayar Tagihan</a>
+                
+                <?php if($status == 'belum_bayar') : ?>
+                    <a href="tagihan/bayar.php?id=<?= $t['id_transaksi']; ?>" class="hero-button">Bayar Tagihan</a>
                 <?php elseif($status == 'menunggu_verifikasi') : ?>
-                    <button class="hero-button waiting-btn" disabled>
-                        Menunggu Verifikasi
-                    </button>
+                    <button class="hero-button waiting-btn" disabled>Menunggu Verifikasi</button>
                 <?php else : ?>
-                    <button class="hero-button disabled-btn" disabled>
-                        Belum Ada Tagihan
-                    </button>
+                    <button class="hero-button disabled-btn" disabled>Belum Ada Tagihan</button>
                 <?php endif; ?>
             </div>
         </div>
@@ -346,7 +343,6 @@ html, body {
                         $class = ($s_pay == 'lunas') ? 'active' : (($s_pay == 'menunggu_verifikasi') ? 'pending' : 'belum');
                         $text  = ($s_pay == 'lunas') ? 'Lunas' : (($s_pay == 'menunggu_verifikasi') ? 'Menunggu Verifikasi' : 'Belum Bayar');
                         
-                        // FIX PERIODE 1970: Memaksa PHP membaca format tanggal secara rapi menggunakan sprintf
                         $format_bulan = sprintf('%02d', $r['bulan_tagihan']);
                         $string_tanggal = $r['tahun_tagihan'] . '-' . $format_bulan . '-01';
                         $periode_tgl = date('F Y', strtotime($string_tanggal));

@@ -182,6 +182,7 @@ $tipe_msg = $_GET['tipe']    ?? '';
             <li><a href="../index.php"><i class="bi bi-grid"></i> Dashboard</a></li>
             <li><a href="../paket/index.php"><i class="bi bi-wifi"></i> Kelola Paket</a></li>
             <li><a href="../customer/index.php"><i class="bi bi-people"></i> Data Pelanggan</a></li>
+            <li><a href="../pemasangan/index.php"><i class="bi bi-tools"></i><span>Kelola Pemasangan</span></a></li>
             <li><a href="index.php" class="active"><i class="bi bi-credit-card"></i> Data Transaksi</a></li>
             <li><a href="../laporan_keuangan/index.php"><i class="bi bi-bar-chart-line"></i> Laporan Keuangan</a></li>
             <li><a href="../admin_user/list_admin.php"><i class="bi bi-person-gear"></i> Kelola Admin</a></li>
