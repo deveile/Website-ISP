@@ -48,21 +48,18 @@ if ($last_run !== $today) {
     file_put_contents($log_file, $today);
 }
 
-// 1. Total Pelanggan
 $query_customer = mysqli_query($koneksi, "
     SELECT COUNT(*) AS total_customer
     FROM tb_customer
 ");
 $total_customer = mysqli_fetch_assoc($query_customer)['total_customer'];
 
-// 2. Total Produk Paket
 $query_paket = mysqli_query($koneksi, "
     SELECT COUNT(*) AS total_paket
     FROM tb_paket
 ");
 $total_paket = mysqli_fetch_assoc($query_paket)['total_paket'];
 
-// 3. Transaksi Belum Dibayar
 $query_belum_bayar = mysqli_query($koneksi, "
     SELECT COUNT(*) AS total_belum_bayar
     FROM tb_transaksi
@@ -70,7 +67,6 @@ $query_belum_bayar = mysqli_query($koneksi, "
 ");
 $total_belum_bayar = mysqli_fetch_assoc($query_belum_bayar)['total_belum_bayar'];
 
-// 4. Menunggu Verifikasi
 $query_verifikasi = mysqli_query($koneksi, "
     SELECT COUNT(*) AS total_verifikasi
     FROM tb_transaksi
@@ -78,10 +74,15 @@ $query_verifikasi = mysqli_query($koneksi, "
 ");
 $menunggu_verifikasi = mysqli_fetch_assoc($query_verifikasi)['total_verifikasi'];
 
-// Badge notifikasi sidebar mengikuti total verifikasi
 $total_notif = $menunggu_verifikasi;
 
-// 5. Total Pendapatan
+$query_pemasangan = mysqli_query($koneksi, "
+    SELECT COUNT(*) AS total_pemasangan
+    FROM tb_pemasangan 
+    WHERE status_pemasangan = 'menunggu '
+");
+$total_notif_pemasangan = mysqli_fetch_assoc($query_pemasangan)['total_pemasangan'] ?? 0;
+
 $query_income = mysqli_query($koneksi, "
     SELECT SUM(jumlah_bayar) AS total_pendapatan
     FROM tb_transaksi
@@ -266,9 +267,15 @@ $total_pendapatan = $pendapatan['total_pendapatan'] ?? 0;
                     <i class="bi bi-people"></i> <span>Data Pelanggan</span>
                 </a>
             </li>
-            <li>
-                <a href="pemasangan/index.php">
-                    <i class="bi bi-tools"></i> <span>Kelola Pemasangan</span>
+            <li><a href="../pemasangan/index.php">
+                <i class="bi bi-tools"></i>
+                <span>Kelola Pemasangan</span>
+
+                <?php if ($total_notif_pemasangan > 0): ?>
+                    <span class="notif-badge">
+                        <?= $total_notif_pemasangan; ?>
+                    </span>
+                <?php endif; ?>
                 </a>
             </li>
             <li>

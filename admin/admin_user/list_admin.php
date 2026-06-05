@@ -7,12 +7,19 @@ if ($_SESSION['role'] != 'admin') {
     exit;
 }
 
-$query_notif = mysqli_query($koneksi, "
-    SELECT COUNT(*) AS total_notif
+$query_notif_pemasangan = mysqli_query($koneksi, "
+    SELECT COUNT(*) AS total
+    FROM tb_pemasangan
+    WHERE status_pemasangan = 'menunggu'
+");
+$total_notif_pemasangan = mysqli_fetch_assoc($query_notif_pemasangan)['total'];
+
+$query_notif_transaksi = mysqli_query($koneksi, "
+    SELECT COUNT(*) AS total
     FROM tb_transaksi
     WHERE status_pembayaran = 'menunggu_verifikasi'
 ");
-$total_notif = mysqli_fetch_assoc($query_notif)['total_notif'];
+$total_notif_transaksi = mysqli_fetch_assoc($query_notif_transaksi)['total'] ?? 0;
 
 $pesan_error  = '';
 $pesan_sukses = '';
@@ -98,9 +105,6 @@ $result = mysqli_query($koneksi,
             50%       { transform: scale(1.1); box-shadow: 0 0 0 5px rgba(239,68,68,0); }
         }
 
-        /* ==========================================================================
-           CSS UPDATE: SINKRONISASI LAYOUT LIST ADMIN & HAMBURGER
-           ========================================================================== */
         .dashboard-layout {
             display: flex !important;
             width: 100%;
@@ -108,7 +112,6 @@ $result = mysqli_query($koneksi,
             overflow-x: hidden;
         }
 
-        /* Desain Tombol Hamburger */
         .sidebar-toggle {
             display: flex !important;
             flex-direction: column;
@@ -132,7 +135,6 @@ $result = mysqli_query($koneksi,
             border-radius: 2px;
         }
 
-        /* TAMPILAN LAPTOP / DESKTOP (Min 992px) */
         @media (min-width: 992px) {
             .sidebar {
                 position: fixed !important;
@@ -160,7 +162,6 @@ $result = mysqli_query($koneksi,
                 justify-content: flex-start !important;
             }
 
-            /* EFEK COLLAPSED (Sidebar Mengecil Menjadi 70px) */
             .sidebar.collapsed {
                 width: 70px !important;
                 min-width: 70px !important;
@@ -193,7 +194,6 @@ $result = mysqli_query($koneksi,
             }
         }
 
-        /* TAMPILAN SMARTPHONE / TABLET (Max 991px) */
         @media (max-width: 991px) {
             .dashboard-layout {
                 flex-direction: column !important;
@@ -241,12 +241,21 @@ $result = mysqli_query($koneksi,
             <li><a href="../index.php"><i class="bi bi-grid"></i> <span>Dashboard</span></a></li>
             <li><a href="../paket/index.php"><i class="bi bi-wifi"></i> <span>Kelola Paket</span></a></li>
             <li><a href="../customer/index.php"><i class="bi bi-people"></i> <span>Data Pelanggan</span></a></li>
-            <li><a href="../pemasangan/index.php"><i class="bi bi-tools"></i> <span>Kelola Pemasangan</span></a></li>
+            <li><a href="../pemasangan/index.php">
+                <i class="bi bi-tools"></i>
+                <span>Kelola Pemasangan</span>
+                <?php if ($total_notif_pemasangan > 0): ?>
+                    <span class="notif-badge">
+                        <?= $total_notif_pemasangan; ?>
+                    </span>
+                <?php endif; ?>
+                </a>
+            </li>
             <li>
                 <a href="../transaksi/index.php">
                     <i class="bi bi-credit-card"></i> <span>Data Transaksi</span>
-                    <?php if ($total_notif > 0): ?>
-                        <span class="notif-badge"><?= $total_notif; ?></span>
+                    <?php if ($total_notif_transaksi > 0): ?>
+                        <span class="notif-badge"><?= $total_notif_transaksi; ?></span>
                     <?php endif; ?>
                 </a>
             </li>

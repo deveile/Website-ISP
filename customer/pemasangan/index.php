@@ -46,20 +46,20 @@ if (isset($_POST['submit'])) {
     }
 
     mysqli_query($koneksi, "
-        INSERT INTO tb_langganan (
-            id_customer, 
-            id_paket, 
-            tanggal_mulai, 
-            tanggal_selesai, 
-            status_langganan
-        ) VALUES (
-            '" . $customer['id_customer'] . "', 
-            '$id_paket', CURDATE(), 
-            DATE_ADD(CURDATE(), 
-            INTERVAL 30 DAY), 
-            'Pending'
-        )
-    ");
+    INSERT INTO tb_langganan (
+        id_customer, 
+        id_paket, 
+        tanggal_mulai, 
+        tanggal_selesai, 
+        status_langganan
+    ) VALUES (
+        '" . $customer['id_customer'] . "', 
+        '$id_paket', 
+        NULL, 
+        NULL, 
+        'Pending'
+    )
+");
 
     $id_langganan = mysqli_insert_id($koneksi);
 

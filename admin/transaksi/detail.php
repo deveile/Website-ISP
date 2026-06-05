@@ -36,6 +36,20 @@ $nama_bln = ['','Januari','Februari','Maret','April','Mei','Juni',
 
 $pesan    = $_GET['pesan']   ?? '';
 $tipe_msg = $_GET['tipe']    ?? '';
+
+$query_notif_pemasangan = mysqli_query($koneksi, "
+    SELECT COUNT(*) AS total
+    FROM tb_pemasangan
+    WHERE status_pemasangan = 'menunggu'
+");
+$total_notif_pemasangan = mysqli_fetch_assoc($query_notif_pemasangan)['total'];
+
+$query_notif_transaksi = mysqli_query($koneksi, "
+    SELECT COUNT(*) AS total
+    FROM tb_transaksi
+    WHERE status_pembayaran = 'menunggu_verifikasi'
+");
+$total_notif_transaksi = mysqli_fetch_assoc($query_notif_transaksi)['total'] ?? 0;
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -48,6 +62,20 @@ $tipe_msg = $_GET['tipe']    ?? '';
     <link rel="stylesheet"  href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <script src="../../assets/js/script.js" defer></script>
     <style>
+        .notif-badge {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 20px; height: 20px; border-radius: 50%;
+            background: #ef4444; color: #fff;
+            font-size: 11px; font-weight: 800;
+            margin-left: auto; flex-shrink: 0;
+            animation: pulse-badge 1.8s ease-in-out infinite;
+        }
+
+@keyframes pulseNotif {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
         .det-card {
             background: #fff; border-radius: 16px;
             border: 1px solid #e4e4e7; margin-bottom: 20px;
@@ -182,8 +210,24 @@ $tipe_msg = $_GET['tipe']    ?? '';
             <li><a href="../index.php"><i class="bi bi-grid"></i> Dashboard</a></li>
             <li><a href="../paket/index.php"><i class="bi bi-wifi"></i> Kelola Paket</a></li>
             <li><a href="../customer/index.php"><i class="bi bi-people"></i> Data Pelanggan</a></li>
-            <li><a href="../pemasangan/index.php"><i class="bi bi-tools"></i><span>Kelola Pemasangan</span></a></li>
-            <li><a href="index.php" class="active"><i class="bi bi-credit-card"></i> Data Transaksi</a></li>
+            <li><a href="../pemasangan/index.php">
+                <i class="bi bi-tools"></i>
+                <span>Kelola Pemasangan</span>
+                <?php if ($total_notif_pemasangan > 0): ?>
+                    <span class="notif-badge">
+                        <?= $total_notif_pemasangan; ?>
+                    </span>
+                <?php endif; ?>
+                </a>
+            </li>
+            <li>
+                <a href="../transaksi/index.php">
+                    <i class="bi bi-credit-card"></i> <span>Data Transaksi</span>
+                    <?php if ($total_notif_transaksi > 0): ?>
+                        <span class="notif-badge"><?= $total_notif_transaksi; ?></span>
+                    <?php endif; ?>
+                </a>
+            </li>
             <li><a href="../laporan_keuangan/index.php"><i class="bi bi-bar-chart-line"></i> Laporan Keuangan</a></li>
             <li><a href="../admin_user/list_admin.php"><i class="bi bi-person-gear"></i> Kelola Admin</a></li>
             <li><a href="#" onclick="openLogoutModal()"><i class="bi bi-box-arrow-right"></i> Logout</a></li>

@@ -56,14 +56,16 @@ if ($aksi === 'terima') {
             $update_langganan = mysqli_query($koneksi, "
                 UPDATE tb_langganan 
                 SET id_paket = '$id_paket_baru', 
-                    status_langganan = 'aktif', 
+                    status_langganan = 'aktif',
+                    tanggal_mulai = '$tanggal_bayar', 
                     tanggal_selesai = '$tgl_selesai_baru' 
                 WHERE id_langganan = '$id_langganan'
             ");
         } else {
             $update_langganan = mysqli_query($koneksi, "
                 UPDATE tb_langganan 
-                SET status_langganan = 'aktif', 
+                SET status_langganan = 'aktif',
+                    tanggal_mulai = '$tanggal_bayar', 
                     tanggal_selesai = '$tgl_selesai_baru' 
                 WHERE id_langganan = '$id_langganan'
             ");

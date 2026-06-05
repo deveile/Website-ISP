@@ -34,6 +34,22 @@ $query = mysqli_query($koneksi, $sql);
 $q_menunggu  = mysqli_fetch_assoc(mysqli_query($koneksi,
     "SELECT COUNT(*) AS total FROM tb_transaksi WHERE status_pembayaran = 'menunggu_verifikasi'"));
 $jml_menunggu = (int)$q_menunggu['total'];
+
+$query_notif_pemasangan = mysqli_query($koneksi, "
+    SELECT COUNT(*) AS total
+    FROM tb_pemasangan
+    WHERE status_pemasangan = 'menunggu'
+");
+$total_notif_pemasangan = mysqli_fetch_assoc($query_notif_pemasangan)['total'];
+
+$query_notif_transaksi = mysqli_query($koneksi, "
+    SELECT COUNT(*) AS total
+    FROM tb_transaksi
+    WHERE status_pembayaran = 'menunggu_verifikasi'
+");
+$total_notif_transaksi = mysqli_fetch_assoc($query_notif_transaksi)['total'] ?? 0;
+
+$total_notif = $total_notif_transaksi + $total_notif_pemasangan;
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -245,7 +261,17 @@ $jml_menunggu = (int)$q_menunggu['total'];
             <li><a href="../index.php"><i class="bi bi-grid"></i> <span>Dashboard</span></a></li>
             <li><a href="../paket/index.php"><i class="bi bi-wifi"></i> <span>Kelola Paket</span></a></li>
             <li><a href="../customer/index.php"><i class="bi bi-people"></i> <span>Data Pelanggan</span></a></li>
-            <li><a href="../pemasangan/index.php"><i class="bi bi-tools"></i> <span>Kelola Pemasangan</span></a></li>
+            <li><a href="../pemasangan/index.php">
+                <i class="bi bi-tools"></i>
+                <span>Kelola Pemasangan</span>
+
+                <?php if ($total_notif_pemasangan > 0): ?>
+                    <span class="notif-badge">
+                        <?= $total_notif_pemasangan; ?>
+                    </span>
+                <?php endif; ?>
+                </a>
+            </li>
             <li>
                 <a href="index.php" class="active">
                     <i class="bi bi-credit-card"></i> <span>Data Transaksi</span>
