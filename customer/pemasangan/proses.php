@@ -89,8 +89,8 @@ mysqli_query($koneksi, "
         metode_pembayaran, bukti_pembayaran, status_pembayaran
     ) VALUES (
         '$id_customer', '$id_paket', '$alamat', 
-        NOW(), '$catatan', 'Menunggu Konfirmasi', 
-        '$metode', '$bukti', 'Menunggu Konfirmasi'
+        NOW(), '$catatan', 'menunggu', 
+        '$metode', '$bukti', 'menunggu_konfimasi'
     )
 ");
 
