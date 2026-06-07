@@ -25,6 +25,9 @@
 
             <button type="submit">Login</button>
 
+            <div class="auth-link" style="margin-top: 15px;">
+                <a href="lupa_password.php" style="color: #ff7a00; text-decoration: none;">Lupa Password?</a>
+            </div>
             <div class="auth-link">
                 Belum punya akun? <a href="register.php">Register</a>
             </div>
