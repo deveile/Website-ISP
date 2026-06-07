@@ -175,5 +175,15 @@ $paket = mysqli_query($koneksi, "SELECT * FROM tb_paket where status='aktif' ORD
         });
     });
 </script>
+    <script>
+    const navLinks = document.querySelectorAll('#navMenu a');
+
+    navLinks.forEach(link => {
+        link.addEventListener('click', function() {
+            navLinks.forEach(item => item.classList.remove('active'));
+            this.classList.add('active');
+        });
+    });
+    </script>
 </body>
 </html>

@@ -350,9 +350,11 @@ function tgl_indo($tanggal) {
                                         <a href="detail.php?id=<?= $data['id_pemasangan']; ?>" class="btn-edit">
                                             Detail
                                         </a>
-                                        <a href="hapus.php?id=<?= $data['id_pemasangan']; ?>" class="btn-delete" onclick="return confirm('Hapus data pemasangan ini?')">
-                                            Hapus
-                                        </a>
+                                        <a href="hapus.php?id=<?= $data['id_pemasangan']; ?>"
+   class="btn-delete"
+   onclick="return confirm('Hapus data pemasangan ini?')">
+    Hapus
+</a>
                                     </div>
                                 </td>
                             </tr>
