@@ -267,7 +267,7 @@ $total_pendapatan = $pendapatan['total_pendapatan'] ?? 0;
                     <i class="bi bi-people"></i> <span>Data Pelanggan</span>
                 </a>
             </li>
-            <li><a href="../pemasangan/index.php">
+            <li><a href="pemasangan/index.php">
                 <i class="bi bi-tools"></i>
                 <span>Kelola Pemasangan</span>
 
