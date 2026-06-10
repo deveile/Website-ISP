@@ -128,13 +128,11 @@ function tgl_indo($tanggal) {
         .sidebar-toggle:hover { background: #e0e0e0; }
         .sidebar-toggle span { display: block; width: 20px; height: 2.5px; background-color: #333; border-radius: 2px; }
 
-        /* Detail Layout Grid System */
         .detail-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-top: 20px; width: 100%; }
         .detail-info-table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
         .detail-info-table td { padding: 14px 10px; border-bottom: 1px solid #f1f5f9; font-size: 14px; vertical-align: top; }
         .detail-info-table td.label { font-weight: 600; color: #64748b; width: 30%; }
-        
-        /* Tombol Kembali Model Custom Red dari image_d8105f.png */
+
         .card-footer-action {
             display: flex;
             justify-content: flex-end;
@@ -171,6 +169,105 @@ function tgl_indo($tanggal) {
         .btn-action:hover { opacity: 0.9; transform: translateY(-1px); }
         .panel-locked { text-align: center; padding: 15px; background: #f8fafc; border-radius: 8px; border: 1px dashed #cbd5e1; color: #64748b; font-size: 13px; }
 
+        .table-card{
+            background: #ffffff;
+            border-radius: 16px;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 4px 20px rgba(15, 23, 42, 0.08);
+            overflow: hidden;
+        }
+
+        .table-header{
+            background: linear-gradient(135deg, #ff6600);
+            padding: 18px 24px;
+            border-bottom: none;
+        }
+
+        .table-header h3{
+            color: #fff;
+            margin: 0;
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .detail-info-table{
+            margin: 0;
+        }
+
+        .detail-info-table tr:hover{
+            background: #f8fafc;
+        }
+
+        .detail-info-table td{
+            padding: 16px;
+            font-size: 14px;
+        }
+
+        .detail-info-table td.label{
+            width: 220px;
+            font-weight: 600;
+            color: #475569;
+            background: #f8fafc;
+        }
+
+        .detail-info-table td:last-child{
+            color: #0f172a;
+        }
+
+
+        .action-panel{
+            padding: 10px;
+        }
+
+        .btn-action{
+            border-radius: 12px;
+            min-height: 50px;
+            font-size: 14px;
+            box-shadow: 0 2px 8px rgba(0,0,0,.08);
+        }
+
+        .btn-action-process{
+            background: linear-gradient(135deg,#3b82f6,#2563eb);
+        }
+
+        .btn-action-success{
+            background: linear-gradient(135deg,#22c55e,#16a34a);
+        }
+
+        .btn-action-cancel{
+            background: linear-gradient(135deg,#ef4444,#dc2626);
+        }
+
+        .btn-action:hover{
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0,0,0,.12);
+        }
+
+
+        .status-active,
+        .status-pending,
+        .status-nonactive{
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 120px;
+            text-align: center;
+        }
+
+        .panel-locked{
+            padding: 20px;
+            border-radius: 12px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+        }
+
+        .panel-locked i{
+            font-size: 28px;
+            color: #64748b;
+            margin-bottom: 8px;
+            display: block;
+        }
+
         @media (min-width: 992px) {
             .sidebar { position: fixed !important; top: 0 !important; left: 0 !important; height: 100vh !important; z-index: 1000 !important; overflow-y: auto !important; width: 260px !important; min-width: 260px !important; max-width: 260px !important; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important; }
             .dashboard-content { flex-grow: 1 !important; margin-left: 260px !important; width: calc(100% - 260px) !important; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important; }
@@ -183,16 +280,49 @@ function tgl_indo($tanggal) {
             .sidebar.collapsed ul li a i { margin: 0 !important; font-size: 20px !important; }
         }
 
-        /* Responsive Mobile Breakpoint */
         @media (max-width: 991px) {
             .dashboard-layout { flex-direction: column !important; }
             .sidebar { position: fixed !important; top: 0; left: 0; width: 260px !important; min-width: 260px !important; height: 100vh !important; background: #ffffff !important; z-index: 9999 !important; box-shadow: 4px 0 15px rgba(0,0,0,0.1); transform: translateX(-100%); transition: transform 0.3s ease-in-out; padding: 24px !important; overflow-y: auto; }
             .sidebar.active { transform: translateX(0); }
             .dashboard-content { width: 100% !important; padding: 20px !important; }
             .topbar { display: flex !important; align-items: center !important; justify-content: flex-start !important; margin-bottom: 24px; }
-            .detail-grid { grid-template-columns: 1fr; } /* Layout berubah jadi 1 kolom bertumpuk di HP */
-            .detail-info-table td.label { width: 40%; }
+            .detail-grid { grid-template-columns: 1fr; } 
+            .detail-info-table td.label{width: 35%;}
+
+        @media (max-width: 768px){
+            .detail-grid{
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            .table-header{
+                padding: 14px 16px;
+            }
+
+            .detail-info-table td{
+                padding: 12px;
+                font-size: 13px;
+            }
+
+            .detail-info-table td.label{
+                width: 42%;
+            }
+
+            .btn-action{
+                font-size: 13px;
+                min-height: 48px;
+            }
+
+            .card-footer-action{
+                justify-content: center;
+            }
+
+            .btn-kembali-red{
+                width: 100%;
+                text-align: center;
+            }
         }
+    }
     </style>
 </head>
 <body>

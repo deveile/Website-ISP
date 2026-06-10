@@ -77,7 +77,7 @@ function tgl_indo($tanggal) {
                 </a>
             </li>
             <li><a href="../laporan_keuangan/index.php"><i class="bi bi-bar-chart-line"></i> <span>Laporan Keuangan</span></a></li>
-            <li><a href="list_admin.php" class="active"><i class="bi bi-person-gear"></i> <span>Kelola Admin</span></a></li>
+            <li><a href="list_admin.php"><i class="bi bi-person-gear"></i> <span>Kelola Admin</span></a></li>
             <li>
                 <a href="../../auth/logout.php" onclick="return confirm('Apakah Anda yakin ingin logout?')">
                     <i class="bi bi-box-arrow-right"></i> Logout

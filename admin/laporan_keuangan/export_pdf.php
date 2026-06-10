@@ -111,7 +111,6 @@ $jam      = date('H:i');
     body { background: #fff; }
   }
 
-  /* Print button */
   .print-bar {
     position: fixed; bottom: 20px; right: 20px;
     display: flex; gap: 10px; z-index: 99;

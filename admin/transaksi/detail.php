@@ -221,7 +221,7 @@ $total_notif_transaksi = mysqli_fetch_assoc($query_notif_transaksi)['total'] ?? 
                 </a>
             </li>
             <li>
-                <a href="../transaksi/index.php">
+                <a href="../transaksi/index.php" class="active">
                     <i class="bi bi-credit-card"></i> <span>Data Transaksi</span>
                     <?php if ($total_notif_transaksi > 0): ?>
                         <span class="notif-badge"><?= $total_notif_transaksi; ?></span>
