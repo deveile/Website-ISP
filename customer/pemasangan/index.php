@@ -27,14 +27,15 @@ if (isset($_POST['submit'])) {
             tanggal_pasang, 
             alamat_pasang, 
             status_pemasangan, 
-            catatan, created_at
+            catatan, 
+            created_at
         ) VALUES (
             '".$customer['id_customer']."', 
             '$id_paket', 
             CURDATE(), 
             NULL, 
             '$alamat', 
-            'Pending', 
+            'menunggu', 
             '$catatan',
              NOW()
         )
@@ -45,20 +46,20 @@ if (isset($_POST['submit'])) {
     }
 
     mysqli_query($koneksi, "
-        INSERT INTO tb_langganan (
-            id_customer, 
-            id_paket, 
-            tanggal_mulai, 
-            tanggal_selesai, 
-            status_langganan
-        ) VALUES (
-            '" . $customer['id_customer'] . "', 
-            '$id_paket', CURDATE(), 
-            DATE_ADD(CURDATE(), 
-            INTERVAL 30 DAY), 
-            'Pending'
-        )
-    ");
+    INSERT INTO tb_langganan (
+        id_customer, 
+        id_paket, 
+        tanggal_mulai, 
+        tanggal_selesai, 
+        status_langganan
+    ) VALUES (
+        '" . $customer['id_customer'] . "', 
+        '$id_paket', 
+        NULL, 
+        NULL, 
+        'Pending'
+    )
+");
 
     $id_langganan = mysqli_insert_id($koneksi);
 
@@ -100,6 +101,118 @@ if (isset($_POST['submit'])) {
     <link rel="icon" type="image/png" href="../../assets/images/logo.png">
     <link rel="stylesheet" href="../../assets/css/style.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+<style>
+html, body {
+    height: 100%;
+    margin: 0;
+}
+
+.dashboard-layout {
+    display: flex;
+    width: 100%;
+    min-height: 100vh;
+}
+
+.sidebar {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    width: 260px;
+    min-width: 260px;
+    max-width: 260px;
+    transition: all 0.3s ease;
+    background: #fff;
+    overflow: hidden;
+}
+
+.sidebar-toggle {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    background: #f0f0f0;
+    border: none;
+    padding: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.sidebar-toggle span {
+    width: 20px;
+    height: 2.5px;
+    background: #333;
+    border-radius: 2px;
+}
+
+@media (min-width: 992px) {
+
+    .sidebar.collapsed {
+        width: 70px !important;
+        min-width: 70px !important;
+        max-width: 70px !important;
+        padding: 24px 8px !important;
+    }
+
+    .sidebar.collapsed ul li a span,
+    .sidebar.collapsed .sidebar-logo h2,
+    .sidebar.collapsed .notif-badge {
+        display: none;
+    }
+
+    .sidebar.collapsed ul li a {
+        justify-content: center;
+    }
+
+    .sidebar.collapsed ul li a i {
+         margin: 0 !important;
+        font-size: 20px !important;
+    }
+
+    .dashboard-content {
+        flex: 1;
+        transition: all 0.3s ease;
+    }
+}
+
+@media (max-width: 991px) {
+
+    .dashboard-layout {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        transform: translateX(-100%);
+        z-index: 9999;
+        box-shadow: 4px 0 15px rgba(0,0,0,0.1);
+    }
+
+    .sidebar.active {
+        transform: translateX(0);
+    }
+
+    .dashboard-content {
+        width: 100%;
+        padding: 20px;
+    }
+}
+
+.notif-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #ef4444;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 800;
+    margin-left: auto;
+}
+</style>
 </head>
 <body>
 

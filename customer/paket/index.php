@@ -33,6 +33,139 @@ $data = mysqli_query($koneksi, "SELECT * FROM tb_paket WHERE status='aktif' ORDE
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <script src="../../assets/js/script.js" defer></script>
     <style>
+
+        /* =========================
+   BASE LAYOUT FIX
+========================= */
+html, body {
+    height: 100%;
+    margin: 0;
+}
+
+.dashboard-layout {
+    display: flex;
+    width: 100%;
+    min-height: 100vh;
+}
+
+/* =========================
+   SIDEBAR 
+========================= */
+.sidebar {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    width: 260px;
+    min-width: 260px;
+    max-width: 260px;
+    transition: all 0.3s ease;
+    background: #fff;
+    overflow: hidden;
+}
+
+
+
+
+
+/* =========================
+   TOGGLE BUTTON
+========================= */
+.sidebar-toggle {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    background: #f0f0f0;
+    border: none;
+    padding: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.sidebar-toggle span {
+    width: 20px;
+    height: 2.5px;
+    background: #333;
+    border-radius: 2px;
+}
+
+/* =========================
+   DESKTOP COLLAPSE
+========================= */
+@media (min-width: 992px) {
+
+    .sidebar.collapsed {
+        width: 70px !important;
+        min-width: 70px !important;
+        max-width: 70px !important;
+        padding: 24px 8px !important;
+    }
+
+    .sidebar.collapsed ul li a span,
+    .sidebar.collapsed .sidebar-logo h2,
+    .sidebar.collapsed .notif-badge {
+        display: none;
+    }
+
+    .sidebar.collapsed ul li a {
+        justify-content: center;
+    }
+
+    .sidebar.collapsed ul li a i {
+         margin: 0 !important;
+        font-size: 20px !important;
+    }
+
+    .dashboard-content {
+        flex: 1;
+        transition: all 0.3s ease;
+    }
+}
+
+/* =========================
+   MOBILE SIDEBAR
+========================= */
+@media (max-width: 991px) {
+
+    .dashboard-layout {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        transform: translateX(-100%);
+        z-index: 9999;
+        box-shadow: 4px 0 15px rgba(0,0,0,0.1);
+    }
+
+    .sidebar.active {
+        transform: translateX(0);
+    }
+
+    .dashboard-content {
+        width: 100%;
+        padding: 20px;
+    }
+}
+
+/* =========================
+   NOTIF BADGE
+========================= */
+.notif-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #ef4444;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 800;
+    margin-left: auto;
+}
+
         /* Style agar tombol paket yang sedang aktif berubah abu-abu manis */
         .btn-disabled {
             display: inline-block;
@@ -53,22 +186,59 @@ $data = mysqli_query($koneksi, "SELECT * FROM tb_paket WHERE status='aktif' ORDE
 
 <div class="dashboard-layout">
     <div class="sidebar">
-        <div class="sidebar-logo">
-            <img src="../../assets/images/logo.png">
-            <h2>Anuwani</h2>
-        </div>
-        <ul>
-            <li><a href="../index.php"><i class="bi bi-grid"></i> Dashboard</a></li>
-            <li><a href="../tagihan/index.php"><i class="bi bi-receipt"></i> Tagihan Saya</a></li>
-            <li><a href="index.php" class="active"><i class="bi bi-wifi"></i> Paket Internet</a></li>
-            <li><a href="../profile/index.php"><i class="bi bi-person"></i> Profile</a></li>
-            <li><a href="#" onclick="openLogoutModal()"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
-        </ul>
+    <div class="sidebar-logo">
+        <img src="../../assets/images/logo.png">
+        <h2>Anuwani</h2>
     </div>
+           <ul class="sidebar-menu">
+    <li>
+        <a href="../index.php">
+            <i class="bi bi-grid"></i>
+            <span>Dashboard</span>
+        </a>
+    </li>
 
-    <div class="dashboard-content">
-        <div class="topbar">
-            <div>
+    <li>
+        <a href="../tagihan/index.php">
+            <i class="bi bi-receipt"></i>
+            <span>Tagihan Saya</span>
+        </a>
+    </li>
+
+    <li>
+        <a href="../paket/index.php" class="active">
+            <i class="bi bi-wifi"></i>
+            <span>Paket Internet</span>
+        </a>
+    </li>
+
+    <li>
+        <a href="../profile/index.php">
+            <i class="bi bi-person"></i>
+            <span>Profile</span>
+        </a>
+    </li>
+
+    <li>
+    <a href="#" onclick="openLogoutModal()">
+        <i class="bi bi-box-arrow-right"></i>
+        <span>Logout</span>
+    </a>
+    </li>   
+</ul>
+
+        </div>
+
+         <div class="dashboard-content">
+
+            <div class="topbar">
+                <button class="sidebar-toggle" id="sidebarToggle">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+
+    <div>
                 <h1>Paket Internet</h1>
                 <p>Pilih paket terbaik untuk kebutuhan Anda</p>
             </div>
@@ -111,5 +281,30 @@ $data = mysqli_query($koneksi, "SELECT * FROM tb_paket WHERE status='aktif' ORDE
     </div>
 </div>
 
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const sidebar = document.querySelector('.sidebar');
+
+        if (sidebarToggle && sidebar) {
+            sidebarToggle.addEventListener('click', function(e) {
+                if (window.innerWidth >= 992) {
+                    sidebar.classList.toggle('collapsed');
+                } else {
+                    sidebar.classList.toggle('active');
+                }
+                e.stopPropagation();
+            });
+
+            document.addEventListener('click', function(e) {
+                if (window.innerWidth < 991) {
+                    if (!sidebar.contains(e.target) && sidebar.classList.contains('active')) {
+                        sidebar.classList.remove('active');
+                    }
+                }
+            });
+        }
+    });
+</script>
 </body>
 </html>

@@ -1,15 +1,29 @@
 <?php
 require_once __DIR__ . '/../../auth/cek_login.php';
 require_once __DIR__ . '/../../koneksi.php';
+
+if ($_SESSION['role'] != 'admin') {
+    header("Location: ../../auth/login.php");
+    exit;
+}
+
 $data = mysqli_query($koneksi, "SELECT * FROM tb_paket ORDER BY id_paket DESC");
 
-$query_notif = mysqli_query($koneksi, "
-    SELECT COUNT(*) AS total_notif
+$query_notif_pemasangan = mysqli_query($koneksi, "
+    SELECT COUNT(*) AS total
+    FROM tb_pemasangan
+    WHERE status_pemasangan = 'menunggu'
+");
+$total_notif_pemasangan = mysqli_fetch_assoc($query_notif_pemasangan)['total'] ?? 0;
+
+$query_notif_transaksi = mysqli_query($koneksi, "
+    SELECT COUNT(*) AS total
     FROM tb_transaksi
     WHERE status_pembayaran = 'menunggu_verifikasi'
 ");
+$total_notif_transaksi = mysqli_fetch_assoc($query_notif_transaksi)['total'] ?? 0;
 
-$total_notif = mysqli_fetch_assoc($query_notif)['total_notif'];
+$total_notif = $total_notif_transaksi;
 ?>
 
 <!DOCTYPE html>
@@ -75,7 +89,6 @@ $total_notif = mysqli_fetch_assoc($query_notif)['total_notif'];
                 height: 100vh !important;
                 z-index: 1000 !important;
                 overflow-y: auto !important;
-                
                 width: 260px !important;
                 min-width: 260px !important;
                 max-width: 260px !important;
@@ -175,7 +188,14 @@ $total_notif = mysqli_fetch_assoc($query_notif)['total_notif'];
             <li><a href="../index.php"><i class="bi bi-grid"></i> <span>Dashboard</span></a></li>
             <li><a href="index.php" class="active"><i class="bi bi-wifi"></i> <span>Kelola Paket</span></a></li>
             <li><a href="../customer/index.php"><i class="bi bi-people"></i> <span>Data Pelanggan</span></a></li>
-            <li><a href="../pemasangan/index.php"><i class="bi bi-tools"></i> <span>Kelola Pemasangan</span></a></li>
+            <li><a href="../pemasangan/index.php">
+                <i class="bi bi-tools"></i>
+                <span>Kelola Pemasangan</span>
+                <?php if ($total_notif_pemasangan > 0): ?>
+                    <span class="notif-badge"><?= $total_notif_pemasangan; ?></span>
+                <?php endif; ?>
+                </a>
+            </li>
             <li>
                 <a href="../transaksi/index.php">
                     <i class="bi bi-credit-card"></i> <span>Data Transaksi</span>
@@ -217,10 +237,10 @@ $total_notif = mysqli_fetch_assoc($query_notif)['total_notif'];
             <div class="paket-grid">
                 <?php while ($p = mysqli_fetch_assoc($data)) : ?>
                     <div class="paket-admin-card">
-                        <h3><?= $p['nama_paket']; ?></h3>
-                        <h1><?= $p['kecepatan']; ?></h1>
+                        <h3><?= htmlspecialchars($p['nama_paket']); ?></h3>
+                        <h1><?= htmlspecialchars($p['kecepatan']); ?></h1>
                         <h2>Rp <?= number_format($p['harga']); ?></h2>
-                        <p><?= nl2br($p['deskripsi']); ?></p>
+                        <p><?= nl2br(htmlspecialchars($p['deskripsi'])); ?></p>
                         <div class="paket-action">
                             <a href="edit.php?id=<?= $p['id_paket']; ?>" class="btn-edit">Edit</a>
                             <?php if ($p['status'] == 'aktif') : ?>
@@ -331,6 +351,44 @@ $total_notif = mysqli_fetch_assoc($query_notif)['total_notif'];
             });
         }
     });
+
+    function openLogoutModal() {
+        document.getElementById('logoutModal').style.display = 'flex';
+    }
+    function closeLogoutModal() {
+        document.getElementById('logoutModal').style.display = 'none';
+    }
+
+    function openTambahModal() {
+        const form = document.getElementById('formPaket');
+        if (form.checkValidity()) {
+            document.getElementById('tambahModal').style.display = 'flex';
+        } else {
+            form.reportValidity();
+        }
+    }
+    function closeTambahModal() {
+        document.getElementById('tambahModal').style.display = 'none';
+    }
+    function submitTambahPaket() {
+        document.getElementById('formPaket').submit();
+    }
+
+    function openNonaktifModal(id) {
+        document.getElementById('btnNonaktif').href = 'status.php?action=nonaktif&id=' + id;
+        document.getElementById('nonaktifModal').style.display = 'flex';
+    }
+    function closeNonaktifModal() {
+        document.getElementById('nonaktifModal').style.display = 'none';
+    }
+
+    function openAktifModal(id) {
+        document.getElementById('btnAktif').href = 'status.php?action=aktif&id=' + id;
+        document.getElementById('aktifModal').style.display = 'flex';
+    }
+    function closeAktifModal() {
+        document.getElementById('aktifModal').style.display = 'none';
+    }
 </script>
 </body>
 </html>

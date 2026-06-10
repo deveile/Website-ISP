@@ -24,7 +24,7 @@ if (isset($_POST['submit'])) {
         UPDATE tb_pemasangan SET 
             metode_pembayaran = '$metode', 
             bukti_pembayaran = '$nama_bukti', 
-            status_pembayaran = 'Menunggu Konfirmasi' 
+            status_pembayaran = 'menunggu_konfirmasi' 
         WHERE id_pemasangan = '$id_pemasangan'
     ");
 
@@ -63,7 +63,9 @@ if (isset($_POST['submit'])) {
                     </div>
                     <div class="payment-summary-item">
                         <span>Status</span>
-                        <strong class="status-belum">Belum Bayar</strong>
+                        <strong class="status-belum">
+                            <?= $data['status_pembayaran']; ?>
+                        </strong>
                     </div>
                 </div>
             </div>
