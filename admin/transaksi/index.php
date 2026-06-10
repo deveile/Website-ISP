@@ -8,6 +8,11 @@ if ($_SESSION['role'] != 'admin') {
     exit;
 }
 
+$batas = 10; 
+$halaman = isset($_GET['halaman']) ? (int)$_GET['halaman'] : 1;
+if ($halaman < 1) { $halaman = 1; }
+$halaman_awal = ($halaman > 1) ? ($halaman * $batas) - $batas : 0;
+
 $where = "WHERE 1=1";
 
 if (isset($_GET['periode']) && $_GET['periode'] != '') {
@@ -22,12 +27,22 @@ if (isset($_GET['status']) && $_GET['status'] != '') {
     $where  .= " AND tb_transaksi.status_pembayaran='$status'";
 }
 
+$sql_total = "SELECT COUNT(*) AS total 
+              FROM tb_transaksi
+              INNER JOIN tb_langganan ON tb_transaksi.id_langganan = tb_langganan.id_langganan
+              INNER JOIN tb_customer  ON tb_langganan.id_customer  = tb_customer.id_customer
+              $where";
+$query_total = mysqli_query($koneksi, $sql_total);
+$total_data = mysqli_fetch_assoc($query_total)['total'];
+$total_halaman = ceil($total_data / $batas);
+
 $sql = "SELECT tb_transaksi.*, tb_customer.nama_customer
         FROM tb_transaksi
         INNER JOIN tb_langganan ON tb_transaksi.id_langganan = tb_langganan.id_langganan
         INNER JOIN tb_customer  ON tb_langganan.id_customer  = tb_customer.id_customer
         $where
-        ORDER BY tb_transaksi.id_transaksi DESC";
+        ORDER BY tb_transaksi.id_transaksi DESC
+        LIMIT $halaman_awal, $batas";
 
 $query = mysqli_query($koneksi, $sql);
 
@@ -96,22 +111,80 @@ $total_notif = $total_notif_transaksi + $total_notif_pemasangan;
         .alert-menunggu p  { font-size: 13px; color: #b45309; margin: 0; }
         .alert-menunggu a  { margin-left: auto; white-space: nowrap; }
 
+        .table-card {
+            background: #ffffff !important;
+            border-radius: 16px !important;
+            padding: 24px !important; 
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02) !important;
+        }
+
+        .table-header {
+            display: flex !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+            margin-bottom: 20px !important;
+            flex-wrap: wrap !important;
+            gap: 15px !important;
+        }
+
+        table {
+            width: 100% !important;
+            border-collapse: separate !important;
+            border-spacing: 0 !important;
+            border: 1px solid #e4e4e7 !important;
+            border-radius: 8px !important;
+            overflow: hidden !important;
+        }
+
+        table th {
+            background: #ff6600 !important;
+            color: #ffffff !important;
+            text-transform: uppercase !important;
+            font-size: 12px !important;
+            font-weight: 700 !important;
+            letter-spacing: 0.5px;
+            padding: 14px 12px !important;
+            border-bottom: 1px solid #e4e4e7 !important;
+            border-right: 1px solid rgba(255, 255, 255, 0.15) !important;
+        }
+        table th:last-child {
+            border-right: none !important;
+        }
+        
+        table td {
+            padding: 12px 14px !important;
+            border-bottom: 1px solid #e4e4e7 !important;
+            border-right: 1px solid #e4e4e7 !important;
+            color: #27272a !important;
+            font-weight: 400;
+            vertical-align: middle;
+        }
+        table td:last-child {
+            border-right: none !important;
+        }
+        table tr:last-child td {
+            border-bottom: none !important;
+        }
+
         .badge-lunas    { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; gap: 5px; }
         .badge-menunggu { background: #fffbeb; color: #d97706; border: 1px solid #fde68a; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; gap: 5px; }
         .badge-belum    { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; gap: 5px; }
 
         .btn-detail-tr {
-            display: inline-flex; align-items: center; gap: 5px;
-            padding: 7px 14px; border-radius: 8px; font-size: 13px; font-weight: 600;
-            border: 1.5px solid #e4e4e7; background: #fafafa; color: #52525b;
-            text-decoration: none; transition: all .2s; cursor: pointer;
+            display: inline-flex; align-items: center; justify-content: center;
+            padding: 6px 16px; border-radius: 6px; font-size: 13px; font-weight: 600;
+            background: #0091ff; color: #ffffff !important;
+            border: none; text-decoration: none; transition: all .2s; cursor: pointer;
         }
-        .btn-detail-tr:hover { background: #6366f1; color: #fff; border-color: #6366f1; }
+        .btn-detail-tr:hover { 
+            background: #0077dd; 
+            transform: translateY(-1px);
+        }
 
         .btn-verify-tr {
             display: inline-flex; align-items: center; gap: 5px;
-            padding: 7px 14px; border-radius: 8px; font-size: 13px; font-weight: 700;
-            border: none; background: #22c55e; color: #fff;
+            padding: 6px 14px; border-radius: 6px; font-size: 13px; font-weight: 700;
+            border: none; background: #22c55e; color: #fff !important;
             text-decoration: none; transition: all .2s; cursor: pointer;
             box-shadow: 0 2px 8px rgba(34,197,94,.3);
         }
@@ -155,6 +228,14 @@ $total_notif = $total_notif_transaksi + $total_notif_pemasangan;
             background-color: #333;
             border-radius: 2px;
         }
+
+        .pagination-container { display: flex; align-items: center; justify-content: space-between; margin-top: 20px; padding-top: 20px; border-top: 1px solid #e4e4e7; flex-wrap: wrap; gap: 10px; }
+        .pagination-info { font-size: 13px; color: #71717a; }
+        .pagination-list { display: flex; gap: 5px; list-style: none; padding: 0; margin: 0; }
+        .pagination-list a { display: inline-flex; align-items: center; justify-content: center; min-width: 32px; height: 32px; padding: 0 8px; font-size: 13px; font-weight: 600; text-decoration: none; border-radius: 8px; border: 1.5px solid #e4e4e7; background: #fff; color: #27272a; transition: all 0.2s; }
+        .pagination-list a:hover { background: #f4f4f5; }
+        .pagination-list .active-page a { background: #ff6600; color: #fff; border-color: #ff6600; pointer-events: none; }
+        .pagination-list .disabled-page a { color: #a1a1aa; background: #fafafa; border-color: #e4e4e7; pointer-events: none; }
 
         @media (min-width: 992px) {
             .sidebar {
@@ -264,11 +345,8 @@ $total_notif = $total_notif_transaksi + $total_notif_pemasangan;
             <li><a href="../pemasangan/index.php">
                 <i class="bi bi-tools"></i>
                 <span>Kelola Pemasangan</span>
-
                 <?php if ($total_notif_pemasangan > 0): ?>
-                    <span class="notif-badge">
-                        <?= $total_notif_pemasangan; ?>
-                    </span>
+                    <span class="notif-badge"><?= $total_notif_pemasangan; ?></span>
                 <?php endif; ?>
                 </a>
             </li>
@@ -287,7 +365,6 @@ $total_notif = $total_notif_transaksi + $total_notif_pemasangan;
     </div>
 
     <div class="dashboard-content">
-
         <div class="topbar">
             <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle Sidebar">
                 <span></span>
@@ -323,18 +400,9 @@ $total_notif = $total_notif_transaksi + $total_notif_pemasangan;
 
                     <select name="status">
                         <option value="">Semua Status</option>
-                        <option value="belum_bayar"
-                            <?= (isset($_GET['status']) && $_GET['status']=='belum_bayar') ? 'selected' : '' ?>>
-                            Belum Bayar
-                        </option>
-                        <option value="menunggu_verifikasi"
-                            <?= (isset($_GET['status']) && $_GET['status']=='menunggu_verifikasi') ? 'selected' : '' ?>>
-                            Menunggu Verifikasi
-                        </option>
-                        <option value="lunas"
-                            <?= (isset($_GET['status']) && $_GET['status']=='lunas') ? 'selected' : '' ?>>
-                            Lunas
-                        </option>
+                        <option value="belum_bayar" <?= (isset($_GET['status']) && $_GET['status']=='belum_bayar') ? 'selected' : '' ?>>Belum Bayar</option>
+                        <option value="menunggu_verifikasi" <?= (isset($_GET['status']) && $_GET['status']=='menunggu_verifikasi') ? 'selected' : '' ?>>Menunggu Verifikasi</option>
+                        <option value="lunas" <?= (isset($_GET['status']) && $_GET['status']=='lunas') ? 'selected' : '' ?>>Lunas</option>
                     </select>
 
                     <button type="submit" class="btn-orange">
@@ -351,7 +419,7 @@ $total_notif = $total_notif_transaksi + $total_notif_pemasangan;
                 </form>
             </div>
 
-            <div style="overflow-x:auto;">
+            <div style="overflow-x:auto; width: 100%; border-radius: 8px;">
                 <table>
                     <thead>
                         <tr>
@@ -367,58 +435,36 @@ $total_notif = $total_notif_transaksi + $total_notif_pemasangan;
                     </thead>
                     <tbody>
                     <?php
-                    $no = 1;
+                    $no = $halaman_awal + 1;
                     if (mysqli_num_rows($query) > 0):
                         while ($data = mysqli_fetch_assoc($query)):
                             $st = strtolower($data['status_pembayaran']);
                     ?>
                     <tr class="<?= $st === 'menunggu_verifikasi' ? 'row-menunggu' : '' ?>">
                         <td><?= $no++ ?></td>
-
-                        <td>
-                            <span class="invoice-code"><?= htmlspecialchars($data['kode_invoice']) ?></span>
-                        </td>
-
+                        <td><span class="invoice-code"><?= htmlspecialchars($data['kode_invoice']) ?></span></td>
                         <td><?= htmlspecialchars($data['nama_customer']) ?></td>
-
-                        <td>
-                            <?= date('M Y', mktime(0,0,0, $data['bulan_tagihan'], 1, $data['tahun_tagihan'])) ?>
-                        </td>
-
-                        <td style="font-weight:600;">
-                            Rp <?= number_format($data['jumlah_bayar'], 0, ',', '.') ?>
-                        </td>
-
+                        <td><?= date('M Y', mktime(0,0,0, $data['bulan_tagihan'], 1, $data['tahun_tagihan'])) ?></td>
+                        <td style="font-weight:600;">Rp <?= number_format($data['jumlah_bayar'], 0, ',', '.') ?></td>
                         <td>
                             <?php if ($st === 'lunas'): ?>
-                                <span class="badge-lunas">
-                                    <i class="bi bi-check-circle-fill"></i> Lunas
-                                </span>
+                                <span class="badge-lunas"><i class="bi bi-check-circle-fill"></i> Lunas</span>
                             <?php elseif ($st === 'menunggu_verifikasi'): ?>
-                                <span class="badge-menunggu">
-                                    <i class="bi bi-hourglass-split"></i> Menunggu Verifikasi
-                                </span>
+                                <span class="badge-menunggu"><i class="bi bi-hourglass-split"></i> Menunggu Verifikasi</span>
                             <?php else: ?>
-                                <span class="badge-belum">
-                                    <i class="bi bi-x-circle-fill"></i> Belum Bayar
-                                </span>
+                                <span class="badge-belum"><i class="bi bi-x-circle-fill"></i> Belum Bayar</span>
                             <?php endif; ?>
                         </td>
-
                         <td style="color:#a1a1aa;font-size:13px;">
                             <?= !empty($data['tanggal_bayar']) ? date('d/m/Y', strtotime($data['tanggal_bayar'])) : '—' ?>
                         </td>
-
                         <td>
                             <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;">
-                                <a href="detail.php?id=<?= $data['id_transaksi'] ?>"
-                                   class="btn-detail-tr" title="Lihat Detail">
-                                    <i class="bi bi-eye"></i> Detail
+                                <a href="detail.php?id=<?= $data['id_transaksi'] ?>" class="btn-detail-tr" title="Lihat Detail">
+                                    Detail
                                 </a>
-
                                 <?php if ($st === 'menunggu_verifikasi'): ?>
-                                <a href="detail.php?id=<?= $data['id_transaksi'] ?>"
-                                   class="btn-verify-tr" title="Verifikasi Pembayaran">
+                                <a href="detail.php?id=<?= $data['id_transaksi'] ?>" class="btn-verify-tr" title="Verifikasi Pembayaran">
                                     <i class="bi bi-shield-check"></i> Verifikasi
                                 </a>
                                 <?php endif; ?>
@@ -439,6 +485,30 @@ $total_notif = $total_notif_transaksi + $total_notif_pemasangan;
                     </tbody>
                 </table>
             </div>
+
+            <?php if ($total_halaman > 1): ?>
+            <div class="pagination-container">
+                <div class="pagination-info">
+                    Menampilkan data ke-<?= $halaman_awal + 1 ?> sampai <?= min($halaman_awal + $batas, $total_data) ?> dari total <strong><?= $total_data ?></strong> data
+                </div>
+                <ul class="pagination-list">
+                    <li class="<?= ($halaman <= 1) ? 'disabled-page' : '' ?>">
+                        <a href="?halaman=<?= $halaman - 1 ?><?= isset($_GET['periode']) ? '&periode='.$_GET['periode'] : '' ?><?= isset($_GET['status']) ? '&status='.$_GET['status'] : '' ?>"><i class="bi bi-chevron-left"></i></a>
+                    </li>
+                    
+                    <?php for($x=1; $x<=$total_halaman; $x++): ?>
+                        <li class="<?= ($halaman == $x) ? 'active-page' : '' ?>">
+                            <a href="?halaman=<?= $x ?><?= isset($_GET['periode']) ? '&periode='.$_GET['periode'] : '' ?><?= isset($_GET['status']) ? '&status='.$_GET['status'] : '' ?>"><?= $x ?></a>
+                        </li>
+                    <?php endfor; ?>
+
+                    <li class="<?= ($halaman >= $total_halaman) ? 'disabled-page' : '' ?>">
+                        <a href="?halaman=<?= $halaman + 1 ?><?= isset($_GET['periode']) ? '&periode='.$_GET['periode'] : '' ?><?= isset($_GET['status']) ? '&status='.$_GET['status'] : '' ?>"><i class="bi bi-chevron-right"></i></a>
+                    </li>
+                </ul>
+            </div>
+            <?php endif; ?>
+
         </div>
     </div>
 </div>
