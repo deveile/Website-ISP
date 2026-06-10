@@ -272,7 +272,7 @@ html, body {
         
         <div class="customer-hero-card">
             <div class="hero-left">
-                <?php if (strtolower($data['status_langganan']) == 'suspend') : ?>
+                <?php if (strtolower($data['status_langganan'] ?? '') == 'suspend') : ?>
                     <span class="hero-label" style="background-color: #ef4444; color: white;">Paket Suspend </span>
                 <?php else : ?>
                     <span class="hero-label" style="background-color: #b29786; color: white;">Paket Aktif</span>
