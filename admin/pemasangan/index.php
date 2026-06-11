@@ -15,11 +15,13 @@ $query_total = mysqli_query($koneksi, "SELECT COUNT(*) AS total FROM tb_pemasang
 $totalData = mysqli_fetch_assoc($query_total)['total'] ?? 0;
 $jumlahHalaman = ceil($totalData / $limit);
 
+// DISESUAIKAN: Menambahkan LEFT JOIN ke tb_teknisi untuk mengambil nama teknisi
 $query = mysqli_query($koneksi, "
-    SELECT p.id_pemasangan, c.nama_customer, pk.nama_paket, p.tanggal_pengajuan, p.tanggal_pasang, p.alamat_pasang, p.status_pemasangan, p.catatan
+    SELECT p.id_pemasangan, c.nama_customer, pk.nama_paket, p.tanggal_pengajuan, p.tanggal_pasang, p.alamat_pasang, p.status_pemasangan, p.catatan, t.nama_teknisi
     FROM tb_pemasangan p
     LEFT JOIN tb_customer c ON p.id_customer = c.id_customer
     LEFT JOIN tb_paket pk ON p.id_paket = pk.id_paket
+    LEFT JOIN tb_teknisi t ON p.id_teknisi = t.id_teknisi
     ORDER BY p.id_pemasangan DESC
     LIMIT $awalData, $limit
 ");
@@ -346,6 +348,7 @@ function tgl_indo($tanggal) {
                             <th style="width: 60px; text-align: center;">No</th>
                             <th>Nama</th>
                             <th>Paket</th>
+                            <th>Teknisi</th>
                             <th>Tgl Pengajuan</th>
                             <th>Tgl Pasang</th>
                             <th>Alamat Pasang</th>
@@ -365,6 +368,13 @@ function tgl_indo($tanggal) {
                             <td style="text-align: center;"><?= $no++; ?></td>
                             <td><?= htmlspecialchars($data['nama_customer'] ?? ''); ?></td>
                             <td><?= htmlspecialchars($data['nama_paket'] ?? '—'); ?></td>
+                            <td>
+                                <?php if(!empty($data['nama_teknisi'])): ?>
+                                    <span style="font-weight: 600; color: #374151;"><i class="bi bi-person-badge"></i> <?= htmlspecialchars($data['nama_teknisi']); ?></span>
+                                <?php else: ?>
+                                    <span style="color: #9ca3af; font-style: italic;">Belum Diplot</span>
+                                <?php endif; ?>
+                            </td>
                             <td><?= tgl_indo($data['tanggal_pengajuan']); ?></td>
                             <td><?= tgl_indo($data['tanggal_pasang']); ?></td>
                             <td><?= htmlspecialchars($data['alamat_pasang'] ?? ''); ?></td>
@@ -395,7 +405,7 @@ function tgl_indo($tanggal) {
                         else :
                         ?>
                         <tr>
-                            <td colspan="9" style="text-align:center; padding:40px; color:#a1a1aa;">
+                            <td colspan="10" style="text-align:center; padding:40px; color:#a1a1aa;">
                                 <i class="bi bi-inbox" style="font-size:32px; display:block; margin-bottom:10px;"></i>
                                 Belum ada data pemasangan.
                             </td>

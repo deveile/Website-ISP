@@ -27,11 +27,25 @@ if ($data && password_verify($password, $data['password'])) {
         $_SESSION['nama']     = $adm['nama_admin'] ?? 'Admin';
         $_SESSION['id_admin'] = $adm['id_admin'] ?? null;
 
+        // Otomatis generate tagihan saat admin login
         generate_tagihan_jatuh_tempo($koneksi);
 
         $text = 'Selamat datang Admin';
         $redirect = '/website-isp/admin/index.php';
+        
+    } elseif ($data['role'] === 'teknisi') {
+        // AMBIL DATA DARI TB_TEKNISI JIKA ROLE ADALAH TEKNISI
+        $tek = mysqli_fetch_assoc(mysqli_query($koneksi, "
+            SELECT * FROM tb_teknisi WHERE id_user = {$data['id_user']} LIMIT 1
+        "));
+        $_SESSION['nama']       = $tek['nama_teknisi'] ?? 'Teknisi';
+        $_SESSION['id_teknisi'] = $tek['id_teknisi'] ?? null;
+
+        $text = 'Selamat datang Teknisi';
+        $redirect = '/website-isp/teknisi/index.php'; // Sesuaikan dengan folder dashboard teknisimu
+        
     } else {
+        // JIKA BUKAN ADMIN/TEKNISI, MAKA ROLE ADALAH CUSTOMER
         $cust = mysqli_fetch_assoc(mysqli_query($koneksi, "
             SELECT * FROM tb_customer WHERE id_user = {$data['id_user']} LIMIT 1
         "));

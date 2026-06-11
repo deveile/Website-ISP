@@ -21,6 +21,7 @@ if (isset($_POST['ubah_status'])) {
     $status_baru = mysqli_real_escape_string($koneksi, $_POST['status_pemasangan']);
     $tanggal_sekarang = date('Y-m-d');
 
+    // Menggunakan standar status 'terpasang'
     if ($status_baru == 'terpasang') {
         $query_update = "UPDATE tb_pemasangan SET 
                             status_pemasangan = '$status_baru', 
@@ -41,21 +42,13 @@ if (isset($_POST['ubah_status'])) {
     }
 }
 
+// Query Detail Pemasangan
 $query_detail = mysqli_query($koneksi, "
     SELECT 
-        p.id_pemasangan,
-        p.id_customer,
-        p.id_paket,
-        p.tanggal_pengajuan,
-        p.tanggal_pasang,
-        p.alamat_pasang,
-        p.status_pemasangan,
-        p.catatan,
-        c.nama_customer,
-        c.telepon_customer,
-        c.email_customer,
-        pk.nama_paket,
-        pk.kecepatan
+        p.id_pemasangan, p.id_customer, p.id_paket, p.tanggal_pengajuan,
+        p.tanggal_pasang, p.alamat_pasang, p.status_pemasangan, p.catatan,
+        c.nama_customer, c.telepon_customer, c.email_customer,
+        pk.nama_paket, pk.kecepatan
     FROM tb_pemasangan p
     LEFT JOIN tb_customer c ON p.id_customer = c.id_customer
     LEFT JOIN tb_paket pk ON p.id_paket = pk.id_paket
@@ -68,17 +61,15 @@ if (!$data) {
     exit;
 }
 
+// Notifikasi Transaksi
 $query_notif_transaksi = mysqli_query($koneksi, "
-    SELECT COUNT(*) AS total
-    FROM tb_transaksi
-    WHERE status_pembayaran = 'menunggu_verifikasi'
+    SELECT COUNT(*) AS total FROM tb_transaksi WHERE status_pembayaran = 'menunggu_verifikasi'
 ");
 $total_notif_transaksi = mysqli_fetch_assoc($query_notif_transaksi)['total'];
 
+// Perbaikan Query Notifikasi Pemasangan (Disamakan menjadi huruf kecil semua)
 $query_notif_pemasangan = mysqli_query($koneksi, "
-    SELECT COUNT(*) AS total
-    FROM tb_pemasangan
-    WHERE status_pemasangan = 'menunggu' OR status_pemasangan = 'Pending'
+    SELECT COUNT(*) AS total FROM tb_pemasangan WHERE status_pemasangan = 'menunggu' OR status_pemasangan = 'pending'
 ");
 $total_notif_pemasangan = mysqli_fetch_assoc($query_notif_pemasangan)['total'];
 
@@ -134,139 +125,39 @@ function tgl_indo($tanggal) {
         .detail-info-table td.label { font-weight: 600; color: #64748b; width: 30%; }
 
         .card-footer-action {
-            display: flex;
-            justify-content: flex-end;
-            margin-top: 15px;
-            padding-top: 15px;
-            border-top: 1px solid #f1f5f9;
+            display: flex; justify-content: flex-end; margin-top: 15px; padding-top: 15px; border-top: 1px solid #f1f5f9;
         }
         .btn-kembali-red {
-            background-color: #e11d48;
-            color: #ffffff !important;
-            padding: 8px 20px;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 500;
-            text-decoration: none !important;
-            display: inline-block;
-            transition: background 0.2s;
-            border: none;
-            cursor: pointer;
+            background-color: #e11d48; color: #ffffff !important; padding: 8px 20px; border-radius: 6px;
+            font-size: 14px; font-weight: 500; text-decoration: none !important; display: inline-block;
+            transition: background 0.2s; border: none; cursor: pointer;
         }
-        .btn-kembali-red:hover {
-            background-color: #be123c;
-        }
+        .btn-kembali-red:hover { background-color: #be123c; }
 
-        .action-panel { display: flex; flex-direction: column; gap: 12px; }
+        .action-panel { display: flex; flex-direction: column; gap: 12px; padding: 10px; }
         .btn-action { 
             display: flex; align-items: center; justify-content: center; gap: 8px;
-            width: 100%; padding: 12px; border: none; border-radius: 8px; 
+            width: 100%; padding: 12px; border: none; border-radius: 12px; 
             font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s;
+            min-height: 50px; box-shadow: 0 2px 8px rgba(0,0,0,.08);
         }
-        .btn-action-process { background-color: #3b82f6; color: white; }
-        .btn-action-success { background-color: #22c55e; color: white; }
-        .btn-action-cancel { background-color: #ef4444; color: white; }
-        .btn-action:hover { opacity: 0.9; transform: translateY(-1px); }
-        .panel-locked { text-align: center; padding: 15px; background: #f8fafc; border-radius: 8px; border: 1px dashed #cbd5e1; color: #64748b; font-size: 13px; }
+        .btn-action-process { background: linear-gradient(135deg,#3b82f6,#2563eb); color: white; }
+        .btn-action-success { background: linear-gradient(135deg,#22c55e,#16a34a); color: white; }
+        .btn-action-cancel { background: linear-gradient(135deg,#ef4444,#dc2626); color: white; }
+        .btn-action:hover { opacity: 0.9; transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,.12); }
+        
+        .panel-locked { text-align: center; padding: 20px; background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0; color: #64748b; font-size: 13px; }
+        .panel-locked i { font-size: 28px; color: #64748b; margin-bottom: 8px; display: block; }
 
-        .table-card{
-            background: #ffffff;
-            border-radius: 16px;
-            border: 1px solid #e5e7eb;
-            box-shadow: 0 4px 20px rgba(15, 23, 42, 0.08);
-            overflow: hidden;
-        }
-
-        .table-header{
-            background: linear-gradient(135deg, #ff6600);
-            padding: 18px 24px;
-            border-bottom: none;
-        }
-
-        .table-header h3{
-            color: #fff;
-            margin: 0;
-            font-size: 18px;
-            font-weight: 700;
-        }
-
-        .detail-info-table{
-            margin: 0;
-        }
-
-        .detail-info-table tr:hover{
-            background: #f8fafc;
-        }
-
-        .detail-info-table td{
-            padding: 16px;
-            font-size: 14px;
-        }
-
-        .detail-info-table td.label{
-            width: 220px;
-            font-weight: 600;
-            color: #475569;
-            background: #f8fafc;
-        }
-
-        .detail-info-table td:last-child{
-            color: #0f172a;
-        }
-
-
-        .action-panel{
-            padding: 10px;
-        }
-
-        .btn-action{
-            border-radius: 12px;
-            min-height: 50px;
-            font-size: 14px;
-            box-shadow: 0 2px 8px rgba(0,0,0,.08);
-        }
-
-        .btn-action-process{
-            background: linear-gradient(135deg,#3b82f6,#2563eb);
-        }
-
-        .btn-action-success{
-            background: linear-gradient(135deg,#22c55e,#16a34a);
-        }
-
-        .btn-action-cancel{
-            background: linear-gradient(135deg,#ef4444,#dc2626);
-        }
-
-        .btn-action:hover{
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(0,0,0,.12);
-        }
-
-
-        .status-active,
-        .status-pending,
-        .status-nonactive{
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            min-width: 120px;
-            text-align: center;
-        }
-
-        .panel-locked{
-            padding: 20px;
-            border-radius: 12px;
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-        }
-
-        .panel-locked i{
-            font-size: 28px;
-            color: #64748b;
-            margin-bottom: 8px;
-            display: block;
-        }
+        .table-card { background: #ffffff; border-radius: 16px; border: 1px solid #e5e7eb; box-shadow: 0 4px 20px rgba(15, 23, 42, 0.08); overflow: hidden; }
+        .table-header { background: linear-gradient(135deg, #ff6600); padding: 18px 24px; border-bottom: none; }
+        .table-header h3 { color: #fff; margin: 0; font-size: 18px; font-weight: 700; }
+        .detail-info-table tr:hover { background: #f8fafc; }
+        .detail-info-table td { padding: 16px; font-size: 14px; }
+        .detail-info-table td.label { width: 220px; font-weight: 600; color: #475569; background: #f8fafc; }
+        .detail-info-table td:last-child { color: #0f172a; }
+        
+        .status-active, .status-pending, .status-nonactive { display: inline-flex; align-items: center; justify-content: center; min-width: 120px; text-align: center; }
 
         @media (min-width: 992px) {
             .sidebar { position: fixed !important; top: 0 !important; left: 0 !important; height: 100vh !important; z-index: 1000 !important; overflow-y: auto !important; width: 260px !important; min-width: 260px !important; max-width: 260px !important; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important; }
@@ -287,42 +178,18 @@ function tgl_indo($tanggal) {
             .dashboard-content { width: 100% !important; padding: 20px !important; }
             .topbar { display: flex !important; align-items: center !important; justify-content: flex-start !important; margin-bottom: 24px; }
             .detail-grid { grid-template-columns: 1fr; } 
-            .detail-info-table td.label{width: 35%;}
+            .detail-info-table td.label { width: 35%; }
+        }
 
         @media (max-width: 768px){
-            .detail-grid{
-                grid-template-columns: 1fr;
-                gap: 16px;
-            }
-
-            .table-header{
-                padding: 14px 16px;
-            }
-
-            .detail-info-table td{
-                padding: 12px;
-                font-size: 13px;
-            }
-
-            .detail-info-table td.label{
-                width: 42%;
-            }
-
-            .btn-action{
-                font-size: 13px;
-                min-height: 48px;
-            }
-
-            .card-footer-action{
-                justify-content: center;
-            }
-
-            .btn-kembali-red{
-                width: 100%;
-                text-align: center;
-            }
+            .detail-grid { grid-template-columns: 1fr; gap: 16px; }
+            .table-header { padding: 14px 16px; }
+            .detail-info-table td { padding: 12px; font-size: 13px; }
+            .detail-info-table td.label { width: 42%; }
+            .btn-action { font-size: 13px; min-height: 48px; }
+            .card-footer-action { justify-content: center; }
+            .btn-kembali-red { width: 100%; text-align: center; }
         }
-    }
     </style>
 </head>
 <body>
@@ -374,7 +241,7 @@ function tgl_indo($tanggal) {
         </div>
 
         <div class="detail-grid">
-            <div class="table-card" style="margin-top: 0;">
+            <div class="table-card">
                 <div class="table-header">
                     <h3>Data Pemasangan</h3>
                 </div>
@@ -409,9 +276,9 @@ function tgl_indo($tanggal) {
                         <td>: 
                             <?php
                             $status = strtolower(trim($data['status_pemasangan']));
-                            if ($status == 'selesai' || $status == 'terpasang') {
+                            if ($status == 'terpasang' || $status == 'selesai') {
                                 echo '<span class="status-active">Selesai / Terpasang</span>';
-                            } elseif ($status == 'pending' || $status == 'menunggu') {
+                            } elseif ($status == 'menunggu' || $status == 'pending') {
                                 echo '<span class="status-pending">Menunggu</span>';
                             } elseif ($status == 'proses' || $status == 'diproses') {
                                 echo '<span class="status-pending" style="background:#dbeafe; color:#1e40af;">Diproses</span>';
@@ -432,7 +299,7 @@ function tgl_indo($tanggal) {
                 </div>
             </div>
 
-            <div class="table-card" style="margin-top: 0; height: fit-content;">
+            <div class="table-card" style="height: fit-content;">
                 <div class="table-header">
                     <h3>Panel Informasi Pemasangan</h3>
                 </div>
@@ -534,10 +401,11 @@ function tgl_indo($tanggal) {
         });
     }
 
+    /* Perbaikan Celah XSS & Format Menggunakan json_encode */
     <?php if ($success_alert): ?>
         Swal.fire({
             title: 'Berhasil!',
-            text: 'Status pengerjaan berhasil diupdate menjadi: <?= $msg; ?>',
+            text: 'Status pengerjaan berhasil diupdate menjadi: ' + <?= json_encode($msg); ?>,
             icon: 'success',
             confirmButtonColor: '#3b82f6'
         });
@@ -546,7 +414,7 @@ function tgl_indo($tanggal) {
     <?php if ($error_alert): ?>
         Swal.fire({
             title: 'Sistem Error!',
-            text: 'Pembaruan gagal dilakukan: <?= $msg; ?>',
+            text: 'Pembaruan gagal dilakukan: ' + <?= json_encode($msg); ?>,
             icon: 'error',
             confirmButtonColor: '#ef4444'
         });
