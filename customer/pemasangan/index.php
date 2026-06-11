@@ -16,6 +16,21 @@ $data_customer = mysqli_query($koneksi, "SELECT * FROM tb_customer WHERE id_user
 $customer = mysqli_fetch_assoc($data_customer);
 
 if (isset($_POST['submit'])) {
+    $id_customer_cek = $customer['id_customer'];
+
+    // === VALIDASI ANTI-DUPLIKASI (MENCEGAH DATA MENUMPUK) ===
+    $cek_pemasangan = mysqli_query($koneksi, "SELECT id_pemasangan FROM tb_pemasangan WHERE id_customer = '$id_customer_cek' AND status_pemasangan = 'menunggu' LIMIT 1");
+    $cek_langganan  = mysqli_query($koneksi, "SELECT id_langganan FROM tb_langganan WHERE id_customer = '$id_customer_cek' AND status_langganan = 'menunggu_verifikasi' LIMIT 1");
+
+    if (mysqli_num_rows($cek_pemasangan) > 0 || mysqli_num_rows($cek_langganan) > 0) {
+        echo "<script>
+                alert('Anda sudah melakukan pengajuan pemasangan sebelumnya. Silakan selesaikan pembayaran atau tunggu verifikasi admin.');
+                window.location.href = '../index.php';
+              </script>";
+        exit;
+    }
+    // ========================================================
+
     $alamat  = htmlspecialchars($_POST['alamat']);
     $catatan = htmlspecialchars($_POST['catatan']);
 
@@ -46,20 +61,20 @@ if (isset($_POST['submit'])) {
     }
 
     mysqli_query($koneksi, "
-    INSERT INTO tb_langganan (
-        id_customer, 
-        id_paket, 
-        tanggal_mulai, 
-        tanggal_selesai, 
-        status_langganan
-    ) VALUES (
-        '" . $customer['id_customer'] . "', 
-        '$id_paket', 
-        NULL, 
-        NULL, 
-        'Pending'
-    )
-");
+        INSERT INTO tb_langganan (
+            id_customer, 
+            id_paket, 
+            tanggal_mulai, 
+            tanggal_selesai, 
+            status_langganan
+        ) VALUES (
+            '" . $customer['id_customer'] . "', 
+            '$id_paket', 
+            NULL, 
+            NULL, 
+            'menunggu_verifikasi'
+        )
+    ");
 
     $id_langganan = mysqli_insert_id($koneksi);
 
@@ -82,7 +97,7 @@ if (isset($_POST['submit'])) {
             '$bulan', 
             '$tahun', 
             '" . $paket['harga'] . "', 
-            'Belum', NOW()
+            'belum_bayar', NOW()
         )
     ");
 

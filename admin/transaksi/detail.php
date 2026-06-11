@@ -11,22 +11,45 @@ $id = (int)($_GET['id'] ?? 0);
 if (!$id) { header("Location: index.php"); exit; }
 
 $sql = "
-    SELECT
-        tb_transaksi.*,
-        tb_customer.nama_customer,
-        tb_customer.telepon_customer,
-        tb_customer.email_customer,
-        tb_customer.alamat_customer,
-        tb_paket.nama_paket,
-        tb_paket.kecepatan,
-        tb_langganan.id_customer
-    FROM tb_transaksi
-    INNER JOIN tb_langganan ON tb_transaksi.id_langganan = tb_langganan.id_langganan
-    INNER JOIN tb_customer  ON tb_langganan.id_customer  = tb_customer.id_customer
-    INNER JOIN tb_paket     ON tb_langganan.id_paket     = tb_paket.id_paket
-    WHERE tb_transaksi.id_transaksi = $id
-    LIMIT 1
+SELECT
+    tb_transaksi.*,
+    tb_customer.nama_customer,
+    tb_customer.telepon_customer,
+    tb_customer.email_customer,
+    tb_customer.alamat_customer,
+
+    CASE
+        WHEN tb_transaksi.jenis_transaksi = 'upgrade'
+        THEN paket_baru.nama_paket
+        ELSE paket_lama.nama_paket
+    END AS nama_paket,
+
+    CASE
+        WHEN tb_transaksi.jenis_transaksi = 'upgrade'
+        THEN paket_baru.kecepatan
+        ELSE paket_lama.kecepatan
+    END AS kecepatan,
+
+    tb_langganan.id_customer
+
+FROM tb_transaksi
+
+INNER JOIN tb_langganan
+    ON tb_transaksi.id_langganan = tb_langganan.id_langganan
+
+INNER JOIN tb_customer
+    ON tb_langganan.id_customer = tb_customer.id_customer
+
+LEFT JOIN tb_paket paket_lama
+    ON tb_langganan.id_paket = paket_lama.id_paket
+
+LEFT JOIN tb_paket paket_baru
+    ON tb_transaksi.id_paket_baru = paket_baru.id_paket
+
+WHERE tb_transaksi.id_transaksi = $id
+LIMIT 1
 ";
+
 $data = mysqli_fetch_assoc(mysqli_query($koneksi, $sql));
 if (!$data) { header("Location: index.php"); exit; }
 

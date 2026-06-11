@@ -51,7 +51,7 @@ if ($aksi === 'terima') {
             strtotime('+1 month', strtotime($tanggal_bayar))
         );
 
-        if ($trx['jenis_transaksi'] == 'upgrade') {
+        if ($trx['jenis_transaksi'] == 'upgrade' && !empty($trx['id_paket_baru'])) {
             $id_paket_baru = (int)$trx['id_paket_baru'];
             $update_langganan = mysqli_query($koneksi, "
                 UPDATE tb_langganan 

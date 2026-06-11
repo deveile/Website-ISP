@@ -67,42 +67,9 @@ $result = mysqli_query($koneksi,
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <script src="../../assets/js/script.js" defer></script>
     <style>
-        .btn-hapus {
-            cursor: pointer !important;
-        }
-        .btn-hapus {
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            background-color: #e53935 !important;
-            color: #ffffff !important;
-            border: none !important;
-            border-radius: 6px;
-            padding: 6px 14px;
-            font-size: 13px;
-            font-weight: 600;
-            transition: background-color 0.2s ease;
-        }
-        .btn-hapus:hover {
-            background-color: #b71c1c !important;
-            color: #ffffff !important;
-            cursor: pointer !important;
-        }
-
-        .btn-kembali {
-            cursor: pointer;
-        }
-        .notif-badge {
-            display: inline-flex; align-items: center; justify-content: center;
-            width: 20px; height: 20px; border-radius: 50%;
-            background: #ef4444; color: #fff;
-            font-size: 11px; font-weight: 800;
-            margin-left: auto; flex-shrink: 0;
-            animation: pulse-badge 1.8s ease-in-out infinite;
-        }
-        @keyframes pulse-badge {
-            0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239,68,68,.4); }
-            50%       { transform: scale(1.1); box-shadow: 0 0 0 5px rgba(239,68,68,0); }
+        html, body {
+            height: 100%;
+            margin: 0;
         }
 
         .dashboard-layout {
@@ -110,6 +77,18 @@ $result = mysqli_query($koneksi,
             width: 100%;
             min-height: 100vh;
             overflow-x: hidden;
+        }
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            width: 260px;
+            min-width: 260px;
+            max-width: 260px;
+            transition: all 0.3s ease;
+            background: #fff;
+            overflow: hidden;
         }
 
         .sidebar-toggle {
@@ -135,11 +114,136 @@ $result = mysqli_query($koneksi,
             border-radius: 2px;
         }
 
+        /* --- TABLE STYLES MATCHED TO REFERENCED LAYOUT --- */
+        .table-card {
+            background: #ffffff !important;
+            border-radius: 16px !important;
+            padding: 24px !important; 
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02) !important;
+        }
+
+        .table-header {
+            display: flex !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+            margin-bottom: 20px !important;
+            flex-wrap: wrap !important;
+            gap: 15px !important;
+        }
+
+        table {
+            width: 100% !important;
+            border-collapse: separate !important;
+            border-spacing: 0 !important;
+            border: 1px solid #e4e4e7 !important;
+            border-radius: 8px !important;
+            overflow: hidden !important;
+        }
+
+        table th {
+            background: #ff6600 !important;
+            color: #ffffff !important;
+            text-transform: uppercase !important;
+            font-size: 12px !important;
+            font-weight: 700 !important;
+            letter-spacing: 0.5px;
+            padding: 14px 12px !important;
+            border-bottom: 1px solid #e4e4e7 !important;
+            border-right: 1px solid rgba(255, 255, 255, 0.15) !important;
+        }
+        table th:last-child {
+            border-right: none !important;
+        }
+        
+        table td {
+            padding: 12px 14px !important;
+            border-bottom: 1px solid #e4e4e7 !important;
+            border-right: 1px solid #e4e4e7 !important;
+            color: #27272a !important;
+            font-weight: 400;
+            vertical-align: middle;
+        }
+        table td:last-child {
+            border-right: none !important;
+        }
+        table tr:last-child td {
+            border-bottom: none !important;
+        }
+
+        .btn-hapus {
+            cursor: pointer !important;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background-color: #e53935 !important;
+            color: #ffffff !important;
+            border: none !important;
+            border-radius: 6px;
+            padding: 6px 14px;
+            font-size: 13px;
+            font-weight: 600;
+            transition: background-color 0.2s ease;
+        }
+        .btn-hapus:hover {
+            background-color: #b71c1c !important;
+            color: #ffffff !important;
+        }
+
+        .btn-kembali {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 1.5px solid #e4e4e7;
+            color: #52525b;
+            font-size: 13px;
+            font-weight: 600;
+            text-decoration: none;
+            background: #fafafa;
+            transition: background 0.2s;
+            cursor: pointer;
+        }
+        .btn-kembali:hover {
+            background: #f4f4f5;
+        }
+
+        .table-footer-action {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e4e4e7;
+        }
+
+        .notif-badge {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 20px; height: 20px; border-radius: 50%;
+            background: #ef4444; color: #fff;
+            font-size: 11px; font-weight: 800;
+            margin-left: auto; flex-shrink: 0;
+            animation: pulse-badge 1.8s ease-in-out infinite;
+        }
+        @keyframes pulse-badge {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239,68,68,.4); }
+            50%       { transform: scale(1.1); box-shadow: 0 0 0 5px rgba(239,68,68,0); }
+        }
+
+        .logout-modal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 10000;
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .logout-modal.show {
+            opacity: 1; pointer-events: auto;
+        }
+
         @media (min-width: 992px) {
             .sidebar {
                 position: fixed !important;
-                top: 0 !important;
-                left: 0 !important;
+                top: 0 !important; left: 0 !important;
                 height: 100vh !important;
                 z-index: 1000 !important;
                 overflow-y: auto !important;
@@ -278,9 +382,9 @@ $result = mysqli_query($koneksi,
             </div>
         </div>
 
-        <div class="table-container-admin">
-            <div class="table-header-action">
-                <h2>Data Administrator</h2>
+        <div class="table-card">
+            <div class="table-header">
+                <h3>Data Administrator</h3>
             </div>
 
             <?php if ($pesan_error): ?>
@@ -297,66 +401,68 @@ $result = mysqli_query($koneksi,
                 </div>
             <?php endif; ?>
 
-            <table class="admin-table">
-                <thead>
-                    <tr>
-                        <th width="60" class="text-center">No</th>
-                        <th>Nama Lengkap</th>
-                        <th>Username</th>
-                        <th>Email</th>
-                        <th width="140" class="text-center">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody>
-                <?php
-                $no = 1;
-                if (mysqli_num_rows($result) > 0):
-                    while ($row = mysqli_fetch_assoc($result)):
-                        $is_me = ((int)$row['id_user'] === (int)$_SESSION['id_user']);
-                ?>
-                    <tr>
-                        <td class="text-center"><?= $no++ ?></td>
-                        <td>
-                            <strong><?= htmlspecialchars($row['nama_admin']) ?></strong>
-                            <?php if ($is_me): ?>
-                                <span style="background:#e3f2fd;color:#1565c0;font-size:11px;
-                                             padding:2px 8px;border-radius:20px;
-                                             margin-left:6px;font-weight:600;">
-                                    Anda
-                                </span>
-                            <?php endif; ?>
-                        </td>
-                        <td><?= htmlspecialchars($row['username']) ?></td>
-                        <td>
-                            <?= $row['email_admin']
-                                ? htmlspecialchars($row['email_admin'])
-                                : '<span class="text-muted">- Tidak ada -</span>' ?>
-                        </td>
-                        <td class="text-center">
-                            <?php if (!$is_me): ?>
-                                <button class="btn-hapus"
-                                    data-id="<?= (int)$row['id_user'] ?>"
-                                    data-nama="<?= htmlspecialchars($row['nama_admin'], ENT_QUOTES) ?>"
-                                    onclick="openDeleteConfirm(this)">
-                                    <i class="bi bi-trash"></i> Hapus
-                                </button>
-                            <?php else: ?>
-                                <span style="color:#aaa;font-size:13px;">—</span>
-                            <?php endif; ?>
-                        </td>
-                    </tr>
-                <?php
-                    endwhile;
-                else:
-                ?>
-                    <tr>
-                        <td colspan="5" class="text-center text-muted" style="padding:30px;">
-                            Belum ada data admin yang terdaftar.
-                        </td>
-                    </tr>
-                <?php endif; ?>
-                </tbody>
-            </table>
+            <div style="overflow-x:auto; width: 100%; border-radius: 8px;">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th width="60" style="text-align:center;">No</th>
+                            <th>Nama Lengkap</th>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th width="140" style="text-align:center;">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <?php
+                    $no = 1;
+                    if (mysqli_num_rows($result) > 0):
+                        while ($row = mysqli_fetch_assoc($result)):
+                            $is_me = ((int)$row['id_user'] === (int)$_SESSION['id_user']);
+                    ?>
+                        <tr>
+                            <td style="text-align:center;"><?= $no++ ?></td>
+                            <td>
+                                <strong><?= htmlspecialchars($row['nama_admin']) ?></strong>
+                                <?php if ($is_me): ?>
+                                    <span style="background:#e3f2fd;color:#1565c0;font-size:11px;
+                                                 padding:2px 8px;border-radius:20px;
+                                                 margin-left:6px;font-weight:600;">
+                                        Anda
+                                    </span>
+                                <?php endif; ?>
+                            </td>
+                            <td><?= htmlspecialchars($row['username']) ?></td>
+                            <td>
+                                <?= $row['email_admin']
+                                    ? htmlspecialchars($row['email_admin'])
+                                    : '<span class="text-muted">- Tidak ada -</span>' ?>
+                            </td>
+                            <td style="text-align:center;">
+                                <?php if (!$is_me): ?>
+                                    <button class="btn-hapus"
+                                        data-id="<?= (int)$row['id_user'] ?>"
+                                        data-nama="<?= htmlspecialchars($row['nama_admin'], ENT_QUOTES) ?>"
+                                        onclick="openDeleteConfirm(this)">
+                                        <i class="bi bi-trash"></i> Hapus
+                                    </button>
+                                <?php else: ?>
+                                    <span style="color:#aaa;font-size:13px;">—</span>
+                                <?php endif; ?>
+                            </td>
+                        </tr>
+                    <?php
+                        endwhile;
+                    else:
+                    ?>
+                        <tr>
+                            <td colspan="5" style="text-align:center; color:#a1a1aa; padding:30px;">
+                                Belum ada data admin yang terdaftar.
+                            </td>
+                        </tr>
+                    <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
 
             <div class="table-footer-action">
                 <a href="index.php" class="btn-kembali">
@@ -400,7 +506,6 @@ $result = mysqli_query($koneksi,
 </div>
 
 <script>
-    // --- JAVASCRIPT SYSTEM COMPATIBILITY LOGIC ---
     document.addEventListener('DOMContentLoaded', function() {
         const sidebarToggle = document.getElementById('sidebarToggle');
         const sidebar = document.querySelector('.sidebar');
@@ -444,7 +549,14 @@ $result = mysqli_query($koneksi,
         }
     }
 
-    // Modal click backdrop logic handling
+    function openLogoutModal() {
+        document.getElementById('logoutModal').classList.add('show');
+    }
+
+    function closeLogoutModal() {
+        document.getElementById('logoutModal').classList.remove('show');
+    }
+
     document.querySelectorAll('.logout-modal').forEach(function(m) {
         m.addEventListener('click', function(e) {
             if (e.target === this) this.classList.remove('show');

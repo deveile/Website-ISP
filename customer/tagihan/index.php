@@ -32,9 +32,11 @@ if ($langganan) {
     
     if ($periode != '') {
         $split = explode('-', $periode);
-        $tahun = (int)$split[0];
-        $bulan = (int)$split[1];
-        $where .= " AND bulan_tagihan = '$bulan' AND tahun_tagihan = '$tahun'";
+        if (count($split) === 2) {
+            $tahun = (int)$split[0];
+            $bulan = (int)$split[1];
+            $where .= " AND bulan_tagihan = '$bulan' AND tahun_tagihan = '$tahun'";
+        }
     }
     if ($status != '') {
         $status_clean = mysqli_real_escape_string($koneksi, $status);
@@ -49,6 +51,13 @@ $total_halaman = ceil($total_data / $batas);
 
 $sql_main = "SELECT * FROM tb_transaksi $where ORDER BY id_transaksi DESC LIMIT $halaman_awal, $batas";
 $query = mysqli_query($koneksi, $sql_main);
+
+$bulan_indo = [
+    1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+    5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+    9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+];
+
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -407,7 +416,9 @@ $query = mysqli_query($koneksi, $sql_main);
                     if ($query && mysqli_num_rows($query) > 0) : 
                         while ($t = mysqli_fetch_assoc($query)) : 
                             $status_pay = strtolower($t['status_pembayaran']);
-                            $periode_tagihan = date('M Y', mktime(0, 0, 0, $t['bulan_tagihan'], 1, $t['tahun_tagihan']));
+                            $bln = (int)$t['bulan_tagihan'];
+                            $nama_bulan = $bulan_indo[$bln] ?? date('F', mktime(0, 0, 0, $bln, 1));
+                            $periode_tagihan = $nama_bulan . ' ' . $t['tahun_tagihan'];
                         ?>
                         <tr>
                             <td><?= $no++ ?></td>
@@ -429,7 +440,8 @@ $query = mysqli_query($koneksi, $sql_main);
                             <td style="text-align:center;">
                                 <?php if ($status_pay == 'belum_bayar') : ?>
                                     <a href="bayar.php?id=<?= $t['id_transaksi']; ?>" class="btn-bayar-cust">Bayar</a>
-                                <?php else : ?>
+                                <?php // Perbaikan pengecekan status tunggu/lunas secara eksplisit jika perlu, atau default detail
+                                      else : ?>
                                     <a href="detail.php?id=<?= $t['id_transaksi']; ?>" class="btn-detail-cust">Detail</a>
                                 <?php endif; ?>
                             </td>
@@ -451,19 +463,19 @@ $query = mysqli_query($koneksi, $sql_main);
                 </div>
                 <ul class="pagination-list">
                     <?php if ($halaman > 1) : ?>
-                        <li><a href="?halaman=<?= $halaman - 1 ?>&periode=<?= $periode ?>&status=<?= $status ?>"><i class="bi bi-chevron-left"></i></a></li>
+                        <li><a href="?halaman=<?= $halaman - 1 ?>&periode=<?= urlencode($periode) ?>&status=<?= urlencode($status) ?>"><i class="bi bi-chevron-left"></i></a></li>
                     <?php else : ?>
                         <li class="disabled-page"><a><i class="bi bi-chevron-left"></i></a></li>
                     <?php endif; ?>
 
                     <?php for ($x = 1; $x <= $total_halaman; $x++) : ?>
                         <li class="<?= ($x == $halaman) ? 'active-page' : '' ?>">
-                            <a href="?halaman=<?= $x ?>&periode=<?= $periode ?>&status=<?= $status ?>"><?= $x ?></a>
+                            <a href="?halaman=<?= $x ?>&periode=<?= urlencode($periode) ?>&status=<?= urlencode($status) ?>"><?= $x ?></a>
                         </li>
                     <?php endfor; ?>
 
                     <?php if ($halaman < $total_halaman) : ?>
-                        <li><a href="?halaman=<?= $halaman + 1 ?>&periode=<?= $periode ?>&status=<?= $status ?>"><i class="bi bi-chevron-right"></i></a></li>
+                        <li><a href="?halaman=<?= $halaman + 1 ?>&periode=<?= urlencode($periode) ?>&status=<?= urlencode($status) ?>"><i class="bi bi-chevron-right"></i></a></li>
                     <?php else : ?>
                         <li class="disabled-page"><a><i class="bi bi-chevron-right"></i></a></li>
                     <?php endif; ?>

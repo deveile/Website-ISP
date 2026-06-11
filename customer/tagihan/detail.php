@@ -15,6 +15,25 @@ $query = mysqli_query($koneksi, "
 ");
 $data = mysqli_fetch_assoc($query);
 
+if ($data &&
+    $data['jenis_transaksi'] == 'upgrade' &&
+    !empty($data['id_paket_baru'])
+) {
+    $qPaketBaru = mysqli_query($koneksi,"
+        SELECT nama_paket, kecepatan, harga
+        FROM tb_paket
+        WHERE id_paket = '".$data['id_paket_baru']."'
+        LIMIT 1
+    ");
+
+    if(mysqli_num_rows($qPaketBaru) > 0){
+        $paketBaru = mysqli_fetch_assoc($qPaketBaru);
+        $data['nama_paket'] = $paketBaru['nama_paket'];
+        $data['kecepatan'] = $paketBaru['kecepatan'];
+        $data['harga'] = $paketBaru['harga'];
+    }
+}
+
 if (!$data) {
     echo "<script>alert('Data transaksi tidak ditemukan!'); window.location.href='index.php';</script>";
     exit;
