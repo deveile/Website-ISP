@@ -17,15 +17,24 @@ $success_alert = false;
 $error_alert = false;
 $msg = "";
 
+// PROSES UPDATE STATUS & PLOT TEKNISI
 if (isset($_POST['ubah_status'])) {
     $status_baru = mysqli_real_escape_string($koneksi, $_POST['status_pemasangan']);
     $tanggal_sekarang = date('Y-m-d');
+    
+    // Ambil input id_teknisi jika ada
+    $id_teknisi = isset($_POST['id_teknisi']) ? mysqli_real_escape_string($koneksi, $_POST['id_teknisi']) : '';
 
-    // Menggunakan standar status 'terpasang'
     if ($status_baru == 'terpasang') {
         $query_update = "UPDATE tb_pemasangan SET 
                             status_pemasangan = '$status_baru', 
                             tanggal_pasang = '$tanggal_sekarang' 
+                         WHERE id_pemasangan = '$id_pemasangan'";
+    } elseif ($status_baru == 'diproses' || $status_baru == 'proses') {
+        // Jika status diproses, simpan juga id_teknisi yang dipilih admin
+        $query_update = "UPDATE tb_pemasangan SET 
+                            status_pemasangan = '$status_baru',
+                            id_teknisi = '$id_teknisi'
                          WHERE id_pemasangan = '$id_pemasangan'";
     } else {
         $query_update = "UPDATE tb_pemasangan SET 
@@ -42,16 +51,25 @@ if (isset($_POST['ubah_status'])) {
     }
 }
 
-// Query Detail Pemasangan
+// Ambil daftar teknisi untuk keperluan Dropdown di SweetAlert2 nanti
+// Mengambil langsung dari tb_teknisi
+$list_teknisi = [];
+$query_teknisi = mysqli_query($koneksi, "SELECT id_teknisi, nama_teknisi FROM tb_teknisi ORDER BY nama_teknisi ASC");
+while ($t = mysqli_fetch_assoc($query_teknisi)) {
+    $list_teknisi[] = $t;
+}
+
 $query_detail = mysqli_query($koneksi, "
     SELECT 
         p.id_pemasangan, p.id_customer, p.id_paket, p.tanggal_pengajuan,
-        p.tanggal_pasang, p.alamat_pasang, p.status_pemasangan, p.catatan,
+        p.tanggal_pasang, p.alamat_pasang, p.status_pemasangan, p.catatan, p.id_teknisi,
         c.nama_customer, c.telepon_customer, c.email_customer,
-        pk.nama_paket, pk.kecepatan
+        pk.nama_paket, pk.kecepatan,
+        t.nama_teknisi AS nama_teknisi_bertugas -- Ambil dari tb_teknisi
     FROM tb_pemasangan p
     LEFT JOIN tb_customer c ON p.id_customer = c.id_customer
     LEFT JOIN tb_paket pk ON p.id_paket = pk.id_paket
+    LEFT JOIN tb_teknisi t ON p.id_teknisi = t.id_teknisi -- Join ke tb_teknisi
     WHERE p.id_pemasangan = '$id_pemasangan'
 ");
 $data = mysqli_fetch_assoc($query_detail);
@@ -67,7 +85,7 @@ $query_notif_transaksi = mysqli_query($koneksi, "
 ");
 $total_notif_transaksi = mysqli_fetch_assoc($query_notif_transaksi)['total'];
 
-// Perbaikan Query Notifikasi Pemasangan (Disamakan menjadi huruf kecil semua)
+// Perbaikan Query Notifikasi Pemasangan
 $query_notif_pemasangan = mysqli_query($koneksi, "
     SELECT COUNT(*) AS total FROM tb_pemasangan WHERE status_pemasangan = 'menunggu' OR status_pemasangan = 'pending'
 ");
@@ -150,7 +168,7 @@ function tgl_indo($tanggal) {
         .panel-locked i { font-size: 28px; color: #64748b; margin-bottom: 8px; display: block; }
 
         .table-card { background: #ffffff; border-radius: 16px; border: 1px solid #e5e7eb; box-shadow: 0 4px 20px rgba(15, 23, 42, 0.08); overflow: hidden; }
-        .table-header { background: linear-gradient(135deg, #ff6600); padding: 18px 24px; border-bottom: none; }
+        .table-header { background: linear-gradient(135deg, #ff6600, #ff8533); padding: 18px 24px; border-bottom: none; }
         .table-header h3 { color: #fff; margin: 0; font-size: 18px; font-weight: 700; }
         .detail-info-table tr:hover { background: #f8fafc; }
         .detail-info-table td { padding: 16px; font-size: 14px; }
@@ -158,6 +176,12 @@ function tgl_indo($tanggal) {
         .detail-info-table td:last-child { color: #0f172a; }
         
         .status-active, .status-pending, .status-nonactive { display: inline-flex; align-items: center; justify-content: center; min-width: 120px; text-align: center; }
+
+        /* Style tambahan khusus form pilihan teknisi di modal */
+        .swal2-select-custom {
+            width: 80%; max-width: 320px; padding: 10px; border-radius: 8px; 
+            border: 1px solid #cbd5e1; font-size: 14px; color: #334155; margin-top: 10px;
+        }
 
         @media (min-width: 992px) {
             .sidebar { position: fixed !important; top: 0 !important; left: 0 !important; height: 100vh !important; z-index: 1000 !important; overflow-y: auto !important; width: 260px !important; min-width: 260px !important; max-width: 260px !important; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important; }
@@ -223,6 +247,7 @@ function tgl_indo($tanggal) {
             </li>
             <li><a href="../laporan_keuangan/index.php"><i class="bi bi-bar-chart-line"></i> <span>Laporan Keuangan</span></a></li>
             <li><a href="../admin_user/index.php"><i class="bi bi-person-plus"></i> <span>Kelola Admin</span></a></li>
+            <li><a href="../teknisi_user/index.php"><i class="bi bi-person-plus"></i> <span>Kelola Teknisi</span></a></li>
             <li><a href="#" onclick="openLogoutModal()"><i class="bi bi-box-arrow-right"></i> <span>Logout</span></a></li>
         </ul>
     </div>
@@ -272,6 +297,10 @@ function tgl_indo($tanggal) {
                         <td>: <?= htmlspecialchars($data['alamat_pasang']); ?></td>
                     </tr>
                     <tr>
+                        <td class="label">Teknisi Bertugas</td>
+                        <td>: <strong><?= !empty($data['nama_teknisi']) ? htmlspecialchars($data['nama_teknisi']) : '<span style="color:#ef4444; font-style:italic;">Belum diplot teknisi</span>'; ?></strong></td>
+                    </tr>
+                    <tr>
                         <td class="label">Status</td>
                         <td>: 
                             <?php
@@ -307,11 +336,12 @@ function tgl_indo($tanggal) {
                 <div style="padding: 10px 0;">
                     <form id="form_update_status" action="" method="POST">
                         <input type="hidden" name="status_pemasangan" id="input_status_hidden" value="">
+                        <input type="hidden" name="id_teknisi" id="input_teknisi_hidden" value="">
                         <input type="hidden" name="ubah_status" value="1">
 
                         <div class="action-panel">
                             <?php if ($status == 'menunggu' || $status == 'pending') : ?>
-                                <button type="button" class="btn-action btn-action-process" onclick="mintaKonfirmasi('diproses', 'Proses Pemasangan?', 'Ubah status ke proses pengerjaan lapangan.', 'info')">
+                                <button type="button" class="btn-action btn-action-process" onclick="pilihTeknisiLaluProses()">
                                     <i class="bi bi-gear-fill"></i> Mulai Proses Lapangan
                                 </button>
                             <?php endif; ?>
@@ -342,9 +372,7 @@ function tgl_indo($tanggal) {
 
 <div class="logout-modal" id="logoutModal">
     <div class="logout-modal-content">
-        <div class="logout-icon">
-            <i class="bi bi-box-arrow-right"></i>
-        </div>
+        <div class="logout-icon"><i class="bi bi-box-arrow-right"></i></div>
         <h2>Konfirmasi Logout</h2>
         <p>Apakah Anda yakin ingin keluar?</p>
         <div class="logout-modal-action">
@@ -382,6 +410,49 @@ function tgl_indo($tanggal) {
     function openLogoutModal() { document.getElementById('logoutModal').style.display = 'flex'; }
     function closeLogoutModal() { document.getElementById('logoutModal').style.display = 'none'; }
 
+    // FUNGSI KHUSUS: Membuka Modal SweetAlert dengan Dropdown Daftar Teknisi
+function pilihTeknisiLaluProses() {
+    const dataTeknisi = <?= json_encode($list_teknisi); ?>;
+    
+    if(dataTeknisi.length === 0) {
+        Swal.fire('Perhatian', 'Tidak ada data teknisi di tabel tb_teknisi.', 'warning');
+        return;
+    }
+
+    let opsiHtml = '<select id="swal_select_teknisi" class="swal2-select-custom">';
+    opsiHtml += '<option value="">-- Pilih Teknisi Lapangan --</option>';
+    dataTeknisi.forEach(teknisi => {
+        // Menggunakan properti id_teknisi dan nama_teknisi sesuai tabel tb_teknisi
+        opsiHtml += `<option value="${teknisi.id_teknisi}">${teknisi.nama_teknisi}</option>`;
+    });
+    opsiHtml += '</select>';
+
+    Swal.fire({
+        title: 'Tunjuk Teknisi Lapangan',
+        html: '<p>Silakan tentukan teknisi yang bertanggung jawab untuk pemasangan ini:</p>' + opsiHtml,
+        icon: 'info',
+        showCancelButton: true,
+        confirmButtonColor: '#3b82f6',
+        cancelButtonColor: '#94a3b8',
+        confirmButtonText: 'Tugaskan & Proses',
+        cancelButtonText: 'Batal',
+        reverseButtons: true,
+        preConfirm: () => {
+            const idTeknisiTerpilih = document.getElementById('swal_select_teknisi').value;
+            if (!idTeknisiTerpilih) {
+                Swal.showValidationMessage('Anda wajib memilih salah satu teknisi!');
+            }
+            return idTeknisiTerpilih;
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            document.getElementById('input_status_hidden').value = 'diproses';
+            document.getElementById('input_teknisi_hidden').value = result.value;
+            document.getElementById('form_update_status').submit();
+        }
+    });
+}
+
     function mintaKonfirmasi(status, judul, deskripsi, tipeIcon) {
         Swal.fire({
             title: judul,
@@ -401,7 +472,6 @@ function tgl_indo($tanggal) {
         });
     }
 
-    /* Perbaikan Celah XSS & Format Menggunakan json_encode */
     <?php if ($success_alert): ?>
         Swal.fire({
             title: 'Berhasil!',

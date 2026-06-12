@@ -17,8 +17,8 @@ $data_tek = mysqli_fetch_assoc($query_tek);
 
 $show_error = (!$data_tek);
 
-// 2. Hitung statistik tugas untuk counter card (Menghitung semua tugas lapangan yang tersedia)
-$q_proses = mysqli_query($koneksi, "SELECT COUNT(*) as total FROM tb_pemasangan WHERE status_pemasangan IN ('proses', 'diproses', 'menunggu')");
+// 2. Hitung statistik tugas milik teknisi ini sendiri (Sesuai plot dari Admin)
+$q_proses = mysqli_query($koneksi, "SELECT COUNT(*) as total FROM tb_pemasangan WHERE id_teknisi = '$id_teknisi' AND status_pemasangan IN ('proses', 'diproses')");
 $d_proses = mysqli_fetch_assoc($q_proses);
 $total_proses = $d_proses['total'] ?? 0;
 
@@ -26,12 +26,12 @@ $q_selesai = mysqli_query($koneksi, "SELECT COUNT(*) as total FROM tb_pemasangan
 $d_selesai = mysqli_fetch_assoc($q_selesai);
 $total_selesai = $d_selesai['total'] ?? 0;
 
-// 3. Ambil daftar agenda pemasangan terdekat (Sistem Rebutan: Tampilkan yang siap dipasang)
+// 3. Tampilkan agenda yang ditugaskan khusus ke teknisi ini
 $sql_jadwal = "SELECT tp.*, tc.nama_customer, tc.telepon_customer, pk.nama_paket 
                FROM tb_pemasangan tp
                INNER JOIN tb_customer tc ON tp.id_customer = tc.id_customer
                INNER JOIN tb_paket pk ON tp.id_paket = pk.id_paket
-               WHERE tp.status_pemasangan IN ('proses', 'diproses', 'menunggu')
+               WHERE tp.id_teknisi = '$id_teknisi'
                ORDER BY tp.status_pemasangan ASC, tp.tanggal_pasang ASC LIMIT 3";
 $riwayat_tugas = mysqli_query($koneksi, $sql_jadwal);
 
@@ -448,12 +448,12 @@ function tgl_indo($tgl) {
             <div class="hero-right">
                 <div style="width: 100%;">
                     <?php if($total_proses > 0) : ?>
-                        <a href="jadwal/pemasangan.php" class="hero-button" style="background:#fff; color:#ea580c; font-weight:600; display: inline-block; padding: 12px 0; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
-                            Ambil Tugas (<?= $total_proses; ?> Tersedia)
+                        <a href="jadwal/pemasangan.php" class="hero-button" style="background:#fff; color:#ea580c; font-weight:600; display: inline-block; padding: 12px 0; border-radius: 10px;">
+                            Lihat Tugas Kerja (<?= $total_proses; ?> Aktif)
                         </a> 
                     <?php else : ?>
-                        <button class="hero-button disabled-btn" style="background: rgba(255,255,255,0.2); color: rgba(255,255,255,0.6); border: 1px dashed rgba(255,255,255,0.4); padding: 12px 0; border-radius: 10px; font-weight: 600;" disabled>
-                            Tidak Ada Tugas Lapangan
+                        <button class="hero-button disabled-btn" style="background: rgba(255,255,255,0.2); color: rgba(255,255,255,0.6); border: 1px dashed rgba(255,255,255,0.4); padding: 12px 0; border-radius: 10px;" disabled>
+                            Tidak Ada Tugas Hari Ini
                         </button>
                     <?php endif; ?>
                 </div>

@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 5.2.0
+-- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Host: localhost:3306
--- Generation Time: Jun 11, 2026 at 06:18 AM
--- Server version: 8.0.30
--- PHP Version: 8.1.10
+-- Host: 127.0.0.1
+-- Waktu pembuatan: 12 Jun 2026 pada 03.05
+-- Versi server: 10.4.32-MariaDB
+-- Versi PHP: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -24,18 +24,18 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
--- Table structure for table `tb_admin`
+-- Struktur dari tabel `tb_admin`
 --
 
 CREATE TABLE `tb_admin` (
-  `id_admin` int NOT NULL,
-  `id_user` int NOT NULL,
-  `nama_admin` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
-  `email_admin` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL
+  `id_admin` int(11) NOT NULL,
+  `id_user` int(11) NOT NULL,
+  `nama_admin` varchar(100) NOT NULL,
+  `email_admin` varchar(100) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `tb_admin`
+-- Dumping data untuk tabel `tb_admin`
 --
 
 INSERT INTO `tb_admin` (`id_admin`, `id_user`, `nama_admin`, `email_admin`) VALUES
@@ -45,23 +45,23 @@ INSERT INTO `tb_admin` (`id_admin`, `id_user`, `nama_admin`, `email_admin`) VALU
 -- --------------------------------------------------------
 
 --
--- Table structure for table `tb_customer`
+-- Struktur dari tabel `tb_customer`
 --
 
 CREATE TABLE `tb_customer` (
-  `id_customer` int NOT NULL,
-  `id_user` int NOT NULL,
-  `nama_customer` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
-  `alamat_customer` text COLLATE utf8mb4_general_ci NOT NULL,
-  `telepon_customer` varchar(20) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `email_customer` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `sumber_customer` enum('online','offline') COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `status_customer` enum('aktif','pending','nonaktif') COLLATE utf8mb4_general_ci DEFAULT 'pending',
-  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+  `id_customer` int(11) NOT NULL,
+  `id_user` int(11) NOT NULL,
+  `nama_customer` varchar(100) NOT NULL,
+  `alamat_customer` text NOT NULL,
+  `telepon_customer` varchar(20) DEFAULT NULL,
+  `email_customer` varchar(100) DEFAULT NULL,
+  `sumber_customer` enum('online','offline') DEFAULT NULL,
+  `status_customer` enum('aktif','pending','nonaktif') DEFAULT 'pending',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `tb_customer`
+-- Dumping data untuk tabel `tb_customer`
 --
 
 INSERT INTO `tb_customer` (`id_customer`, `id_user`, `nama_customer`, `alamat_customer`, `telepon_customer`, `email_customer`, `sumber_customer`, `status_customer`, `created_at`) VALUES
@@ -116,25 +116,26 @@ INSERT INTO `tb_customer` (`id_customer`, `id_user`, `nama_customer`, `alamat_cu
 (78, 90, 'Guntur Lestari', 'No. 35 Cibogo', '08131792714', 'test_71549@gmail.com', 'online', 'aktif', '2026-06-10 13:14:31'),
 (79, 91, 'Rian Aminah', 'No. 17 Cibogo', '08135842459', 'test_32450@gmail.com', 'online', 'aktif', '2026-06-10 13:14:31'),
 (80, 92, 'raysal gena', 'Subang, Jawabarat', '085312347864', 'limitgaming586@gmail.com', 'online', 'nonaktif', '2026-06-10 13:22:49'),
-(81, 93, 'gena saputra', 'Subang', '085312123457', 'raysalraysal28@gmail.com', 'online', 'aktif', '2026-06-11 05:18:16');
+(81, 93, 'gena saputra', 'Subang', '085312123457', 'raysalraysal28@gmail.com', 'online', 'aktif', '2026-06-11 05:18:16'),
+(82, 95, 'Deva Nur Mauluddiah', 'Cibogo', '083829355184', 'devanur414@gmail.com', 'online', 'aktif', '2026-06-11 16:05:06');
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `tb_langganan`
+-- Struktur dari tabel `tb_langganan`
 --
 
 CREATE TABLE `tb_langganan` (
-  `id_langganan` int NOT NULL,
-  `id_customer` int NOT NULL,
-  `id_paket` int NOT NULL,
+  `id_langganan` int(11) NOT NULL,
+  `id_customer` int(11) NOT NULL,
+  `id_paket` int(11) NOT NULL,
   `tanggal_mulai` date DEFAULT NULL,
   `tanggal_selesai` date DEFAULT NULL,
-  `status_langganan` enum('aktif','suspend','berhenti','menunggu_verifikasi') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT 'aktif'
+  `status_langganan` enum('aktif','suspend','berhenti','menunggu_verifikasi','dicabut') NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `tb_langganan`
+-- Dumping data untuk tabel `tb_langganan`
 --
 
 INSERT INTO `tb_langganan` (`id_langganan`, `id_customer`, `id_paket`, `tanggal_mulai`, `tanggal_selesai`, `status_langganan`) VALUES
@@ -191,25 +192,26 @@ INSERT INTO `tb_langganan` (`id_langganan`, `id_customer`, `id_paket`, `tanggal_
 (82, 80, 3, NULL, NULL, 'menunggu_verifikasi'),
 (83, 80, 3, NULL, NULL, 'menunggu_verifikasi'),
 (84, 80, 3, '2026-06-11', '2026-06-11', 'berhenti'),
-(85, 81, 2, '2026-06-11', '2026-07-11', 'aktif');
+(85, 81, 2, '2026-06-11', '2026-07-11', 'aktif'),
+(86, 82, 13, '2026-06-11', '2026-07-11', 'aktif');
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `tb_paket`
+-- Struktur dari tabel `tb_paket`
 --
 
 CREATE TABLE `tb_paket` (
-  `id_paket` int NOT NULL,
-  `nama_paket` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
-  `harga` int NOT NULL,
-  `kecepatan` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
-  `deskripsi` text COLLATE utf8mb4_general_ci,
-  `status` enum('aktif','nonaktif') COLLATE utf8mb4_general_ci DEFAULT 'aktif'
+  `id_paket` int(11) NOT NULL,
+  `nama_paket` varchar(100) NOT NULL,
+  `harga` int(11) NOT NULL,
+  `kecepatan` varchar(50) NOT NULL,
+  `deskripsi` text DEFAULT NULL,
+  `status` enum('aktif','nonaktif') DEFAULT 'aktif'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `tb_paket`
+-- Dumping data untuk tabel `tb_paket`
 --
 
 INSERT INTO `tb_paket` (`id_paket`, `nama_paket`, `harga`, `kecepatan`, `deskripsi`, `status`) VALUES
@@ -226,107 +228,130 @@ INSERT INTO `tb_paket` (`id_paket`, `nama_paket`, `harga`, `kecepatan`, `deskrip
 -- --------------------------------------------------------
 
 --
--- Table structure for table `tb_pemasangan`
+-- Struktur dari tabel `tb_pemasangan`
 --
 
 CREATE TABLE `tb_pemasangan` (
-  `id_pemasangan` int NOT NULL,
-  `id_customer` int NOT NULL,
-  `id_paket` int NOT NULL,
+  `id_pemasangan` int(11) NOT NULL,
+  `id_customer` int(11) NOT NULL,
+  `id_paket` int(11) NOT NULL,
+  `id_teknisi` int(11) DEFAULT NULL,
   `tanggal_pengajuan` date DEFAULT NULL,
   `tanggal_pasang` date DEFAULT NULL,
-  `alamat_pasang` text COLLATE utf8mb4_general_ci NOT NULL,
-  `status_pemasangan` enum('menunggu','diproses','terpasang','dibatalkan') COLLATE utf8mb4_general_ci DEFAULT 'menunggu',
-  `catatan` text COLLATE utf8mb4_general_ci,
-  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+  `alamat_pasang` text NOT NULL,
+  `status_pemasangan` enum('menunggu','diproses','terpasang','dibatalkan') DEFAULT 'menunggu',
+  `bukti_foto` varchar(255) DEFAULT NULL,
+  `catatan` text DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `tb_pemasangan`
+-- Dumping data untuk tabel `tb_pemasangan`
 --
 
-INSERT INTO `tb_pemasangan` (`id_pemasangan`, `id_customer`, `id_paket`, `tanggal_pengajuan`, `tanggal_pasang`, `alamat_pasang`, `status_pemasangan`, `catatan`, `created_at`) VALUES
-(1, 30, 5, '2026-06-01', '2026-06-02', 'No. 73 Buana Subang Raya', 'terpasang', 'Pemasangan Dummy', '2026-06-10 13:14:27'),
-(2, 31, 1, '2026-06-01', '2026-06-02', 'No. 96 Cibogo', 'terpasang', 'Pemasangan Dummy', '2026-06-10 13:14:27'),
-(3, 32, 5, '2026-06-01', '2026-06-02', 'No. 88 Permata Hijau', 'terpasang', 'Pemasangan Dummy', '2026-06-10 13:14:27'),
-(4, 33, 6, '2026-06-01', '2026-06-02', 'No. 80 Sukamaju', 'terpasang', 'Pemasangan Dummy', '2026-06-10 13:14:27'),
-(5, 34, 2, '2026-06-01', '2026-06-02', 'No. 50 Permata Hijau', 'terpasang', 'Pemasangan Dummy', '2026-06-10 13:14:27'),
-(6, 35, 12, '2026-06-01', '2026-06-02', 'No. 61 Permata Hijau', 'terpasang', 'Pemasangan Dummy', '2026-06-10 13:14:27'),
-(7, 36, 13, '2026-06-01', '2026-06-02', 'No. 19 Cibogo', 'terpasang', 'Pemasangan Dummy', '2026-06-10 13:14:27'),
-(8, 37, 11, '2026-06-01', '2026-06-02', 'No. 14 Cibogo', 'terpasang', 'Pemasangan Dummy', '2026-06-10 13:14:27'),
-(9, 38, 12, '2026-06-01', '2026-06-02', 'No. 21 Permata Hijau', 'terpasang', 'Pemasangan Dummy', '2026-06-10 13:14:27'),
-(10, 39, 13, '2026-06-01', '2026-06-02', 'No. 50 Cibogo', 'terpasang', 'Pemasangan Dummy', '2026-06-10 13:14:28'),
-(11, 40, 3, '2026-06-01', '2026-06-02', 'No. 43 Cibogo', 'terpasang', 'Pemasangan Dummy', '2026-06-10 13:14:28'),
-(12, 41, 11, '2026-06-01', '2026-06-02', 'No. 96 Cibogo', 'terpasang', 'Pemasangan Dummy', '2026-06-10 13:14:28'),
-(13, 42, 5, '2026-06-01', '2026-06-02', 'No. 42 Cibogo', 'terpasang', 'Pemasangan Dummy', '2026-06-10 13:14:28'),
-(14, 43, 5, '2026-06-01', '2026-06-02', 'No. 55 Permata Hijau', 'terpasang', 'Pemasangan Dummy', '2026-06-10 13:14:28'),
-(15, 44, 13, '2026-06-01', '2026-06-02', 'No. 6 Sukamaju', 'terpasang', 'Pemasangan Dummy', '2026-06-10 13:14:28'),
-(16, 45, 13, '2026-06-01', '2026-06-02', 'No. 35 Permata Hijau', 'terpasang', 'Pemasangan Dummy', '2026-06-10 13:14:28'),
-(17, 46, 13, '2026-06-01', '2026-06-02', 'No. 65 Sukamaju', 'terpasang', 'Pemasangan Dummy', '2026-06-10 13:14:28'),
-(18, 47, 3, '2026-06-01', '2026-06-02', 'No. 73 Cibogo', 'terpasang', 'Pemasangan Dummy', '2026-06-10 13:14:28'),
-(19, 48, 4, '2026-06-01', '2026-06-02', 'No. 90 Cibogo', 'terpasang', 'Pemasangan Dummy', '2026-06-10 13:14:28'),
-(20, 49, 5, '2026-06-01', '2026-06-02', 'No. 88 Cibogo', 'terpasang', 'Pemasangan Dummy', '2026-06-10 13:14:28'),
-(21, 50, 11, '2026-06-01', '2026-06-02', 'No. 10 Sukamaju', 'terpasang', 'Pemasangan Dummy', '2026-06-10 13:14:28'),
-(22, 51, 6, '2026-06-01', '2026-06-02', 'No. 24 Sukamaju', 'terpasang', 'Pemasangan Dummy', '2026-06-10 13:14:28'),
-(23, 52, 12, '2026-06-01', '2026-06-02', 'No. 26 Cibogo', 'terpasang', 'Pemasangan Dummy', '2026-06-10 13:14:29'),
-(24, 53, 4, '2026-06-01', '2026-06-02', 'No. 16 Permata Hijau', 'terpasang', 'Pemasangan Dummy', '2026-06-10 13:14:29'),
-(25, 54, 4, '2026-06-01', '2026-06-02', 'No. 97 Buana Subang Raya', 'terpasang', 'Pemasangan Dummy', '2026-06-10 13:14:29'),
-(26, 55, 6, '2026-06-01', '2026-06-02', 'No. 78 Permata Hijau', 'terpasang', 'Pemasangan Dummy', '2026-06-10 13:14:29'),
-(27, 56, 6, '2026-06-01', '2026-06-02', 'No. 77 Cibogo', 'terpasang', 'Pemasangan Dummy', '2026-06-10 13:14:29'),
-(28, 57, 3, '2026-06-01', '2026-06-02', 'No. 19 Cibogo', 'terpasang', 'Pemasangan Dummy', '2026-06-10 13:14:29'),
-(29, 58, 1, '2026-06-01', '2026-06-02', 'No. 39 Cibogo', 'terpasang', 'Pemasangan Dummy', '2026-06-10 13:14:29'),
-(30, 59, 2, '2026-06-01', '2026-06-02', 'No. 75 Permata Hijau', 'terpasang', 'Pemasangan Dummy', '2026-06-10 13:14:29'),
-(31, 60, 12, '2026-06-01', '2026-06-02', 'No. 14 Permata Hijau', 'terpasang', 'Pemasangan Dummy', '2026-06-10 13:14:29'),
-(32, 61, 13, '2026-06-01', '2026-06-02', 'No. 54 Buana Subang Raya', 'terpasang', 'Pemasangan Dummy', '2026-06-10 13:14:29'),
-(33, 62, 13, '2026-06-01', '2026-06-02', 'No. 97 Cibogo', 'terpasang', 'Pemasangan Dummy', '2026-06-10 13:14:29'),
-(34, 63, 6, '2026-06-01', '2026-06-02', 'No. 93 Buana Subang Raya', 'terpasang', 'Pemasangan Dummy', '2026-06-10 13:14:29'),
-(35, 64, 1, '2026-06-01', '2026-06-02', 'No. 50 Sukamaju', 'terpasang', 'Pemasangan Dummy', '2026-06-10 13:14:30'),
-(36, 65, 3, '2026-06-01', '2026-06-02', 'No. 59 Cibogo', 'terpasang', 'Pemasangan Dummy', '2026-06-10 13:14:30'),
-(37, 66, 1, '2026-06-01', '2026-06-02', 'No. 90 Sukamaju', 'terpasang', 'Pemasangan Dummy', '2026-06-10 13:14:30'),
-(38, 67, 5, '2026-06-01', '2026-06-02', 'No. 37 Sukamaju', 'terpasang', 'Pemasangan Dummy', '2026-06-10 13:14:30'),
-(39, 68, 2, '2026-06-01', '2026-06-02', 'No. 58 Buana Subang Raya', 'terpasang', 'Pemasangan Dummy', '2026-06-10 13:14:30'),
-(40, 69, 1, '2026-06-01', '2026-06-02', 'No. 88 Cibogo', 'terpasang', 'Pemasangan Dummy', '2026-06-10 13:14:30'),
-(41, 70, 4, '2026-06-01', '2026-06-02', 'No. 80 Cibogo', 'terpasang', 'Pemasangan Dummy', '2026-06-10 13:14:30'),
-(42, 71, 2, '2026-06-01', '2026-06-02', 'No. 82 Cibogo', 'terpasang', 'Pemasangan Dummy', '2026-06-10 13:14:30'),
-(43, 72, 13, '2026-06-01', '2026-06-02', 'No. 29 Permata Hijau', 'terpasang', 'Pemasangan Dummy', '2026-06-10 13:14:30'),
-(44, 73, 2, '2026-06-01', '2026-06-02', 'No. 2 Buana Subang Raya', 'terpasang', 'Pemasangan Dummy', '2026-06-10 13:14:30'),
-(45, 74, 4, '2026-06-01', '2026-06-02', 'No. 28 Buana Subang Raya', 'terpasang', 'Pemasangan Dummy', '2026-06-10 13:14:30'),
-(46, 75, 3, '2026-06-01', '2026-06-02', 'No. 10 Buana Subang Raya', 'terpasang', 'Pemasangan Dummy', '2026-06-10 13:14:30'),
-(47, 76, 12, '2026-06-01', '2026-06-02', 'No. 86 Cibogo', 'terpasang', 'Pemasangan Dummy', '2026-06-10 13:14:31'),
-(48, 77, 13, '2026-06-01', '2026-06-02', 'No. 45 Cibogo', 'terpasang', 'Pemasangan Dummy', '2026-06-10 13:14:31'),
-(49, 78, 6, '2026-06-01', '2026-06-02', 'No. 35 Cibogo', 'terpasang', 'Pemasangan Dummy', '2026-06-10 13:14:31'),
-(50, 79, 2, '2026-06-01', '2026-06-02', 'No. 17 Cibogo', 'terpasang', 'Pemasangan Dummy', '2026-06-10 13:14:31'),
-(51, 80, 3, '2026-06-11', NULL, 'Subang, Jawabarat', 'menunggu', 'hari senin ya dipasangnya jam 3 sore, untuk informasi lebih lanjut chat whatsapp', '2026-06-11 03:02:54'),
-(52, 80, 3, '2026-06-11', NULL, 'Subang, Jawabarat', 'menunggu', 'hari senin ya dipasangnya jam 3 sore, untuk informasi lebih lanjut chat whatsapp', '2026-06-11 03:03:01'),
-(53, 80, 3, '2026-06-11', NULL, 'Subang, Jawabarat', 'menunggu', 'hari senin ya dipasangnya jam 3 sore, untuk informasi lebih lanjut chat whatsapp', '2026-06-11 03:09:59'),
-(54, 80, 3, '2026-06-11', NULL, 'Subang, Jawabarat', 'menunggu', 'hari senin ya dipasangnya jam 3 sore, untuk informasi lebih lanjut chat whatsapp', '2026-06-11 03:10:07'),
-(55, 80, 3, '2026-06-11', NULL, 'Subang, Jawabarat', 'menunggu', 'hari senin ya dipasangnya jam 3 sore, untuk informasi lebih lanjut chat whatsapp', '2026-06-11 03:12:40'),
-(56, 81, 12, '2026-06-11', '2026-06-11', 'Subang', 'terpasang', 'hari minggu ya pasangnya, untukinfo lebih lanjut japri wa', '2026-06-11 05:19:29');
+INSERT INTO `tb_pemasangan` (`id_pemasangan`, `id_customer`, `id_paket`, `id_teknisi`, `tanggal_pengajuan`, `tanggal_pasang`, `alamat_pasang`, `status_pemasangan`, `bukti_foto`, `catatan`, `created_at`) VALUES
+(1, 30, 5, NULL, '2026-06-01', '2026-06-02', 'No. 73 Buana Subang Raya', 'terpasang', NULL, 'Pemasangan Dummy', '2026-06-10 13:14:27'),
+(2, 31, 1, NULL, '2026-06-01', '2026-06-02', 'No. 96 Cibogo', 'terpasang', NULL, 'Pemasangan Dummy', '2026-06-10 13:14:27'),
+(3, 32, 5, NULL, '2026-06-01', '2026-06-02', 'No. 88 Permata Hijau', 'terpasang', NULL, 'Pemasangan Dummy', '2026-06-10 13:14:27'),
+(4, 33, 6, NULL, '2026-06-01', '2026-06-02', 'No. 80 Sukamaju', 'terpasang', NULL, 'Pemasangan Dummy', '2026-06-10 13:14:27'),
+(5, 34, 2, NULL, '2026-06-01', '2026-06-02', 'No. 50 Permata Hijau', 'terpasang', NULL, 'Pemasangan Dummy', '2026-06-10 13:14:27'),
+(6, 35, 12, NULL, '2026-06-01', '2026-06-02', 'No. 61 Permata Hijau', 'terpasang', NULL, 'Pemasangan Dummy', '2026-06-10 13:14:27'),
+(7, 36, 13, NULL, '2026-06-01', '2026-06-02', 'No. 19 Cibogo', 'terpasang', NULL, 'Pemasangan Dummy', '2026-06-10 13:14:27'),
+(8, 37, 11, NULL, '2026-06-01', '2026-06-02', 'No. 14 Cibogo', 'terpasang', NULL, 'Pemasangan Dummy', '2026-06-10 13:14:27'),
+(9, 38, 12, NULL, '2026-06-01', '2026-06-02', 'No. 21 Permata Hijau', 'terpasang', NULL, 'Pemasangan Dummy', '2026-06-10 13:14:27'),
+(10, 39, 13, NULL, '2026-06-01', '2026-06-02', 'No. 50 Cibogo', 'terpasang', NULL, 'Pemasangan Dummy', '2026-06-10 13:14:28'),
+(11, 40, 3, NULL, '2026-06-01', '2026-06-02', 'No. 43 Cibogo', 'terpasang', NULL, 'Pemasangan Dummy', '2026-06-10 13:14:28'),
+(12, 41, 11, NULL, '2026-06-01', '2026-06-02', 'No. 96 Cibogo', 'terpasang', NULL, 'Pemasangan Dummy', '2026-06-10 13:14:28'),
+(13, 42, 5, NULL, '2026-06-01', '2026-06-02', 'No. 42 Cibogo', 'terpasang', NULL, 'Pemasangan Dummy', '2026-06-10 13:14:28'),
+(14, 43, 5, NULL, '2026-06-01', '2026-06-02', 'No. 55 Permata Hijau', 'terpasang', NULL, 'Pemasangan Dummy', '2026-06-10 13:14:28'),
+(15, 44, 13, NULL, '2026-06-01', '2026-06-02', 'No. 6 Sukamaju', 'terpasang', NULL, 'Pemasangan Dummy', '2026-06-10 13:14:28'),
+(16, 45, 13, NULL, '2026-06-01', '2026-06-02', 'No. 35 Permata Hijau', 'terpasang', NULL, 'Pemasangan Dummy', '2026-06-10 13:14:28'),
+(17, 46, 13, NULL, '2026-06-01', '2026-06-02', 'No. 65 Sukamaju', 'terpasang', NULL, 'Pemasangan Dummy', '2026-06-10 13:14:28'),
+(18, 47, 3, NULL, '2026-06-01', '2026-06-02', 'No. 73 Cibogo', 'terpasang', NULL, 'Pemasangan Dummy', '2026-06-10 13:14:28'),
+(19, 48, 4, NULL, '2026-06-01', '2026-06-02', 'No. 90 Cibogo', 'terpasang', NULL, 'Pemasangan Dummy', '2026-06-10 13:14:28'),
+(20, 49, 5, NULL, '2026-06-01', '2026-06-02', 'No. 88 Cibogo', 'terpasang', NULL, 'Pemasangan Dummy', '2026-06-10 13:14:28'),
+(21, 50, 11, NULL, '2026-06-01', '2026-06-02', 'No. 10 Sukamaju', 'terpasang', NULL, 'Pemasangan Dummy', '2026-06-10 13:14:28'),
+(22, 51, 6, NULL, '2026-06-01', '2026-06-02', 'No. 24 Sukamaju', 'terpasang', NULL, 'Pemasangan Dummy', '2026-06-10 13:14:28'),
+(23, 52, 12, NULL, '2026-06-01', '2026-06-02', 'No. 26 Cibogo', 'terpasang', NULL, 'Pemasangan Dummy', '2026-06-10 13:14:29'),
+(24, 53, 4, NULL, '2026-06-01', '2026-06-02', 'No. 16 Permata Hijau', 'terpasang', NULL, 'Pemasangan Dummy', '2026-06-10 13:14:29'),
+(25, 54, 4, NULL, '2026-06-01', '2026-06-02', 'No. 97 Buana Subang Raya', 'terpasang', NULL, 'Pemasangan Dummy', '2026-06-10 13:14:29'),
+(26, 55, 6, NULL, '2026-06-01', '2026-06-02', 'No. 78 Permata Hijau', 'terpasang', NULL, 'Pemasangan Dummy', '2026-06-10 13:14:29'),
+(27, 56, 6, NULL, '2026-06-01', '2026-06-02', 'No. 77 Cibogo', 'terpasang', NULL, 'Pemasangan Dummy', '2026-06-10 13:14:29'),
+(28, 57, 3, NULL, '2026-06-01', '2026-06-02', 'No. 19 Cibogo', 'terpasang', NULL, 'Pemasangan Dummy', '2026-06-10 13:14:29'),
+(29, 58, 1, NULL, '2026-06-01', '2026-06-02', 'No. 39 Cibogo', 'terpasang', NULL, 'Pemasangan Dummy', '2026-06-10 13:14:29'),
+(30, 59, 2, NULL, '2026-06-01', '2026-06-02', 'No. 75 Permata Hijau', 'terpasang', NULL, 'Pemasangan Dummy', '2026-06-10 13:14:29'),
+(31, 60, 12, NULL, '2026-06-01', '2026-06-02', 'No. 14 Permata Hijau', 'terpasang', NULL, 'Pemasangan Dummy', '2026-06-10 13:14:29'),
+(32, 61, 13, NULL, '2026-06-01', '2026-06-02', 'No. 54 Buana Subang Raya', 'terpasang', NULL, 'Pemasangan Dummy', '2026-06-10 13:14:29'),
+(33, 62, 13, NULL, '2026-06-01', '2026-06-02', 'No. 97 Cibogo', 'terpasang', NULL, 'Pemasangan Dummy', '2026-06-10 13:14:29'),
+(34, 63, 6, NULL, '2026-06-01', '2026-06-02', 'No. 93 Buana Subang Raya', 'terpasang', NULL, 'Pemasangan Dummy', '2026-06-10 13:14:29'),
+(35, 64, 1, NULL, '2026-06-01', '2026-06-02', 'No. 50 Sukamaju', 'terpasang', NULL, 'Pemasangan Dummy', '2026-06-10 13:14:30'),
+(36, 65, 3, NULL, '2026-06-01', '2026-06-02', 'No. 59 Cibogo', 'terpasang', NULL, 'Pemasangan Dummy', '2026-06-10 13:14:30'),
+(37, 66, 1, NULL, '2026-06-01', '2026-06-02', 'No. 90 Sukamaju', 'terpasang', NULL, 'Pemasangan Dummy', '2026-06-10 13:14:30'),
+(38, 67, 5, NULL, '2026-06-01', '2026-06-02', 'No. 37 Sukamaju', 'terpasang', NULL, 'Pemasangan Dummy', '2026-06-10 13:14:30'),
+(39, 68, 2, NULL, '2026-06-01', '2026-06-02', 'No. 58 Buana Subang Raya', 'terpasang', NULL, 'Pemasangan Dummy', '2026-06-10 13:14:30'),
+(40, 69, 1, NULL, '2026-06-01', '2026-06-02', 'No. 88 Cibogo', 'terpasang', NULL, 'Pemasangan Dummy', '2026-06-10 13:14:30'),
+(41, 70, 4, NULL, '2026-06-01', '2026-06-02', 'No. 80 Cibogo', 'terpasang', NULL, 'Pemasangan Dummy', '2026-06-10 13:14:30'),
+(42, 71, 2, NULL, '2026-06-01', '2026-06-02', 'No. 82 Cibogo', 'terpasang', NULL, 'Pemasangan Dummy', '2026-06-10 13:14:30'),
+(43, 72, 13, NULL, '2026-06-01', '2026-06-02', 'No. 29 Permata Hijau', 'terpasang', NULL, 'Pemasangan Dummy', '2026-06-10 13:14:30'),
+(44, 73, 2, NULL, '2026-06-01', '2026-06-02', 'No. 2 Buana Subang Raya', 'terpasang', NULL, 'Pemasangan Dummy', '2026-06-10 13:14:30'),
+(45, 74, 4, NULL, '2026-06-01', '2026-06-02', 'No. 28 Buana Subang Raya', 'terpasang', NULL, 'Pemasangan Dummy', '2026-06-10 13:14:30'),
+(46, 75, 3, NULL, '2026-06-01', '2026-06-02', 'No. 10 Buana Subang Raya', 'terpasang', NULL, 'Pemasangan Dummy', '2026-06-10 13:14:30'),
+(47, 76, 12, NULL, '2026-06-01', '2026-06-02', 'No. 86 Cibogo', 'terpasang', NULL, 'Pemasangan Dummy', '2026-06-10 13:14:31'),
+(48, 77, 13, NULL, '2026-06-01', '2026-06-02', 'No. 45 Cibogo', 'terpasang', NULL, 'Pemasangan Dummy', '2026-06-10 13:14:31'),
+(49, 78, 6, NULL, '2026-06-01', '2026-06-02', 'No. 35 Cibogo', 'terpasang', NULL, 'Pemasangan Dummy', '2026-06-10 13:14:31'),
+(50, 79, 2, NULL, '2026-06-01', '2026-06-02', 'No. 17 Cibogo', 'terpasang', NULL, 'Pemasangan Dummy', '2026-06-10 13:14:31'),
+(51, 80, 3, NULL, '2026-06-11', NULL, 'Subang, Jawabarat', 'menunggu', NULL, 'hari senin ya dipasangnya jam 3 sore, untuk informasi lebih lanjut chat whatsapp', '2026-06-11 03:02:54'),
+(52, 80, 3, NULL, '2026-06-11', NULL, 'Subang, Jawabarat', 'menunggu', NULL, 'hari senin ya dipasangnya jam 3 sore, untuk informasi lebih lanjut chat whatsapp', '2026-06-11 03:03:01'),
+(53, 80, 3, NULL, '2026-06-11', NULL, 'Subang, Jawabarat', 'menunggu', NULL, 'hari senin ya dipasangnya jam 3 sore, untuk informasi lebih lanjut chat whatsapp', '2026-06-11 03:09:59'),
+(54, 80, 3, NULL, '2026-06-11', NULL, 'Subang, Jawabarat', 'menunggu', NULL, 'hari senin ya dipasangnya jam 3 sore, untuk informasi lebih lanjut chat whatsapp', '2026-06-11 03:10:07'),
+(55, 80, 3, NULL, '2026-06-11', NULL, 'Subang, Jawabarat', 'diproses', NULL, 'hari senin ya dipasangnya jam 3 sore, untuk informasi lebih lanjut chat whatsapp', '2026-06-11 03:12:40'),
+(56, 81, 12, NULL, '2026-06-11', '2026-06-11', 'Subang', 'terpasang', NULL, 'hari minggu ya pasangnya, untukinfo lebih lanjut japri wa', '2026-06-11 05:19:29'),
+(57, 82, 13, 1, '2026-06-11', '2026-06-11', 'Cibogo', 'terpasang', 'bukti_57_1781195995.jpg', '', '2026-06-11 16:06:30');
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `tb_transaksi`
+-- Struktur dari tabel `tb_teknisi`
 --
 
-CREATE TABLE `tb_transaksi` (
-  `id_transaksi` int NOT NULL,
-  `id_langganan` int NOT NULL,
-  `id_paket_baru` int DEFAULT NULL,
-  `kode_invoice` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `bulan_tagihan` int DEFAULT NULL,
-  `tahun_tagihan` int DEFAULT NULL,
-  `jumlah_bayar` int NOT NULL,
-  `metode_pembayaran` enum('transfer','qris','cash') COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `bukti_pembayaran` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `status_pembayaran` enum('belum_bayar','menunggu_verifikasi','lunas') COLLATE utf8mb4_general_ci DEFAULT 'belum_bayar',
-  `jenis_transaksi` enum('baru','perpanjang','upgrade') COLLATE utf8mb4_general_ci DEFAULT 'perpanjang',
-  `tanggal_bayar` date DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+CREATE TABLE `tb_teknisi` (
+  `id_teknisi` int(11) NOT NULL,
+  `id_user` int(11) NOT NULL,
+  `nama_teknisi` varchar(100) NOT NULL,
+  `telepon_teknisi` varchar(20) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `tb_transaksi`
+-- Dumping data untuk tabel `tb_teknisi`
+--
+
+INSERT INTO `tb_teknisi` (`id_teknisi`, `id_user`, `nama_teknisi`, `telepon_teknisi`) VALUES
+(1, 94, 'Fajriah Farzana', '083829355184');
+
+-- --------------------------------------------------------
+
+--
+-- Struktur dari tabel `tb_transaksi`
+--
+
+CREATE TABLE `tb_transaksi` (
+  `id_transaksi` int(11) NOT NULL,
+  `id_langganan` int(11) NOT NULL,
+  `id_paket_baru` int(11) DEFAULT NULL,
+  `kode_invoice` varchar(50) DEFAULT NULL,
+  `bulan_tagihan` int(11) DEFAULT NULL,
+  `tahun_tagihan` int(11) DEFAULT NULL,
+  `jumlah_bayar` int(11) NOT NULL,
+  `metode_pembayaran` enum('transfer','qris','cash') DEFAULT NULL,
+  `bukti_pembayaran` varchar(255) DEFAULT NULL,
+  `status_pembayaran` enum('belum_bayar','menunggu_verifikasi','lunas') DEFAULT 'belum_bayar',
+  `jenis_transaksi` enum('baru','perpanjang','upgrade') DEFAULT 'perpanjang',
+  `tanggal_bayar` date DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data untuk tabel `tb_transaksi`
 --
 
 INSERT INTO `tb_transaksi` (`id_transaksi`, `id_langganan`, `id_paket_baru`, `kode_invoice`, `bulan_tagihan`, `tahun_tagihan`, `jumlah_bayar`, `metode_pembayaran`, `bukti_pembayaran`, `status_pembayaran`, `jenis_transaksi`, `tanggal_bayar`, `created_at`) VALUES
@@ -382,24 +407,25 @@ INSERT INTO `tb_transaksi` (`id_transaksi`, `id_langganan`, `id_paket_baru`, `ko
 (50, 81, NULL, 'INV-202606-93923', 6, 2026, 220000, 'qris', 'bukti.png', 'lunas', 'baru', '2026-06-02', '2026-06-10 13:14:31'),
 (51, 84, NULL, 'INV-202606-195', 6, 2026, 100000, 'qris', 'BUKTI-INV-202606-195-1781147575.png', 'lunas', 'perpanjang', '2026-06-11', '2026-06-11 03:12:40'),
 (52, 85, NULL, 'INV-202606-765', 6, 2026, 115000, 'transfer', 'BUKTI-INV-202606-765-1781155176.png', 'lunas', 'perpanjang', '2026-06-11', '2026-06-11 05:19:29'),
-(53, 85, 2, 'INV-UPG-1781155845', 6, 2026, 220000, 'transfer', 'BUKTI-INV-UPG-1781155845-1781155857.png', 'lunas', 'upgrade', '2026-06-11', '2026-06-11 05:30:45');
+(53, 85, 2, 'INV-UPG-1781155845', 6, 2026, 220000, 'transfer', 'BUKTI-INV-UPG-1781155845-1781155857.png', 'lunas', 'upgrade', '2026-06-11', '2026-06-11 05:30:45'),
+(54, 86, NULL, 'INV-202606-795', 6, 2026, 240000, 'transfer', 'BUKTI-INV-202606-795-1781194030.jpg', 'lunas', 'perpanjang', '2026-06-11', '2026-06-11 16:06:31');
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `tb_user`
+-- Struktur dari tabel `tb_user`
 --
 
 CREATE TABLE `tb_user` (
-  `id_user` int NOT NULL,
-  `username` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
-  `password` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
-  `role` enum('admin','customer') COLLATE utf8mb4_general_ci NOT NULL,
-  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+  `id_user` int(11) NOT NULL,
+  `username` varchar(100) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `role` enum('admin','customer','teknisi') NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `tb_user`
+-- Dumping data untuk tabel `tb_user`
 --
 
 INSERT INTO `tb_user` (`id_user`, `username`, `password`, `role`, `created_at`) VALUES
@@ -456,28 +482,30 @@ INSERT INTO `tb_user` (`id_user`, `username`, `password`, `role`, `created_at`) 
 (90, 'user_test_936_49', '$2y$10$7btLSUqG.AoNqGE7QBVqvucKA0jwacOimsXUUqE7y7pMYAWOCuqT.', 'customer', '2026-06-10 13:14:31'),
 (91, 'user_test_868_50', '$2y$10$u4/Dtd2iBeZXdlELFbNNneKwG/d8co/7OnsYILphY5hPRO0D/Vtti', 'customer', '2026-06-10 13:14:31'),
 (92, 'raysal', '$2y$10$G3iThvbfPp7kRaGZsybdUureTrGPcrTtEiQeOfgS1VQ6dlv09cOQO', 'customer', '2026-06-10 13:22:49'),
-(93, 'gena', '$2y$10$ufcBy0r3Ki7A3fjkW8zSX.iA6TXzIenNPMepKKYqyj8dJ9wDvWqIS', 'customer', '2026-06-11 05:18:16');
+(93, 'gena', '$2y$10$ufcBy0r3Ki7A3fjkW8zSX.iA6TXzIenNPMepKKYqyj8dJ9wDvWqIS', 'customer', '2026-06-11 05:18:16'),
+(94, 'mpaj', '$2y$10$4S5KL5AbZorHQNXJXZUd/eZRiHIlj5yeT.j6gmFGrzMITCw43Ynw6', 'teknisi', '2026-06-11 15:39:34'),
+(95, 'devdev', '$2y$10$fjgD16yPfLCrqm3o7nPn9uQWCfBvkWDtCYIZ.OW77/wG2uuKgduP.', 'customer', '2026-06-11 16:05:06');
 
 --
 -- Indexes for dumped tables
 --
 
 --
--- Indexes for table `tb_admin`
+-- Indeks untuk tabel `tb_admin`
 --
 ALTER TABLE `tb_admin`
   ADD PRIMARY KEY (`id_admin`),
   ADD UNIQUE KEY `id_user` (`id_user`);
 
 --
--- Indexes for table `tb_customer`
+-- Indeks untuk tabel `tb_customer`
 --
 ALTER TABLE `tb_customer`
   ADD PRIMARY KEY (`id_customer`),
   ADD UNIQUE KEY `id_user` (`id_user`);
 
 --
--- Indexes for table `tb_langganan`
+-- Indeks untuk tabel `tb_langganan`
 --
 ALTER TABLE `tb_langganan`
   ADD PRIMARY KEY (`id_langganan`),
@@ -485,21 +513,29 @@ ALTER TABLE `tb_langganan`
   ADD KEY `id_paket` (`id_paket`);
 
 --
--- Indexes for table `tb_paket`
+-- Indeks untuk tabel `tb_paket`
 --
 ALTER TABLE `tb_paket`
   ADD PRIMARY KEY (`id_paket`);
 
 --
--- Indexes for table `tb_pemasangan`
+-- Indeks untuk tabel `tb_pemasangan`
 --
 ALTER TABLE `tb_pemasangan`
   ADD PRIMARY KEY (`id_pemasangan`),
   ADD KEY `id_customer` (`id_customer`),
-  ADD KEY `id_paket` (`id_paket`);
+  ADD KEY `id_paket` (`id_paket`),
+  ADD KEY `fk_pemasangan_teknisi` (`id_teknisi`);
 
 --
--- Indexes for table `tb_transaksi`
+-- Indeks untuk tabel `tb_teknisi`
+--
+ALTER TABLE `tb_teknisi`
+  ADD PRIMARY KEY (`id_teknisi`),
+  ADD KEY `fk_teknisi_user` (`id_user`);
+
+--
+-- Indeks untuk tabel `tb_transaksi`
 --
 ALTER TABLE `tb_transaksi`
   ADD PRIMARY KEY (`id_transaksi`),
@@ -507,90 +543,103 @@ ALTER TABLE `tb_transaksi`
   ADD KEY `id_langganan` (`id_langganan`);
 
 --
--- Indexes for table `tb_user`
+-- Indeks untuk tabel `tb_user`
 --
 ALTER TABLE `tb_user`
   ADD PRIMARY KEY (`id_user`),
   ADD UNIQUE KEY `username` (`username`);
 
 --
--- AUTO_INCREMENT for dumped tables
+-- AUTO_INCREMENT untuk tabel yang dibuang
 --
 
 --
--- AUTO_INCREMENT for table `tb_admin`
+-- AUTO_INCREMENT untuk tabel `tb_admin`
 --
 ALTER TABLE `tb_admin`
-  MODIFY `id_admin` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id_admin` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
--- AUTO_INCREMENT for table `tb_customer`
+-- AUTO_INCREMENT untuk tabel `tb_customer`
 --
 ALTER TABLE `tb_customer`
-  MODIFY `id_customer` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=82;
+  MODIFY `id_customer` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=83;
 
 --
--- AUTO_INCREMENT for table `tb_langganan`
+-- AUTO_INCREMENT untuk tabel `tb_langganan`
 --
 ALTER TABLE `tb_langganan`
-  MODIFY `id_langganan` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=86;
+  MODIFY `id_langganan` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=87;
 
 --
--- AUTO_INCREMENT for table `tb_paket`
+-- AUTO_INCREMENT untuk tabel `tb_paket`
 --
 ALTER TABLE `tb_paket`
-  MODIFY `id_paket` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id_paket` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
--- AUTO_INCREMENT for table `tb_pemasangan`
+-- AUTO_INCREMENT untuk tabel `tb_pemasangan`
 --
 ALTER TABLE `tb_pemasangan`
-  MODIFY `id_pemasangan` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=57;
+  MODIFY `id_pemasangan` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=58;
 
 --
--- AUTO_INCREMENT for table `tb_transaksi`
+-- AUTO_INCREMENT untuk tabel `tb_teknisi`
+--
+ALTER TABLE `tb_teknisi`
+  MODIFY `id_teknisi` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT untuk tabel `tb_transaksi`
 --
 ALTER TABLE `tb_transaksi`
-  MODIFY `id_transaksi` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=54;
+  MODIFY `id_transaksi` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=55;
 
 --
--- AUTO_INCREMENT for table `tb_user`
+-- AUTO_INCREMENT untuk tabel `tb_user`
 --
 ALTER TABLE `tb_user`
-  MODIFY `id_user` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=94;
+  MODIFY `id_user` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=96;
 
 --
--- Constraints for dumped tables
+-- Ketidakleluasaan untuk tabel pelimpahan (Dumped Tables)
 --
 
 --
--- Constraints for table `tb_admin`
+-- Ketidakleluasaan untuk tabel `tb_admin`
 --
 ALTER TABLE `tb_admin`
   ADD CONSTRAINT `tb_admin_ibfk_1` FOREIGN KEY (`id_user`) REFERENCES `tb_user` (`id_user`) ON DELETE CASCADE;
 
 --
--- Constraints for table `tb_customer`
+-- Ketidakleluasaan untuk tabel `tb_customer`
 --
 ALTER TABLE `tb_customer`
   ADD CONSTRAINT `tb_customer_ibfk_1` FOREIGN KEY (`id_user`) REFERENCES `tb_user` (`id_user`) ON DELETE CASCADE;
 
 --
--- Constraints for table `tb_langganan`
+-- Ketidakleluasaan untuk tabel `tb_langganan`
 --
 ALTER TABLE `tb_langganan`
   ADD CONSTRAINT `tb_langganan_ibfk_1` FOREIGN KEY (`id_customer`) REFERENCES `tb_customer` (`id_customer`),
   ADD CONSTRAINT `tb_langganan_ibfk_2` FOREIGN KEY (`id_paket`) REFERENCES `tb_paket` (`id_paket`);
 
 --
--- Constraints for table `tb_pemasangan`
+-- Ketidakleluasaan untuk tabel `tb_pemasangan`
 --
 ALTER TABLE `tb_pemasangan`
+  ADD CONSTRAINT `fk_pemasangan_teknisi` FOREIGN KEY (`id_teknisi`) REFERENCES `tb_teknisi` (`id_teknisi`) ON DELETE SET NULL ON UPDATE CASCADE,
   ADD CONSTRAINT `tb_pemasangan_ibfk_1` FOREIGN KEY (`id_customer`) REFERENCES `tb_customer` (`id_customer`) ON DELETE CASCADE,
   ADD CONSTRAINT `tb_pemasangan_ibfk_2` FOREIGN KEY (`id_paket`) REFERENCES `tb_paket` (`id_paket`);
 
 --
--- Constraints for table `tb_transaksi`
+-- Ketidakleluasaan untuk tabel `tb_teknisi`
+--
+ALTER TABLE `tb_teknisi`
+  ADD CONSTRAINT `fk_teknisi_user` FOREIGN KEY (`id_user`) REFERENCES `tb_user` (`id_user`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Ketidakleluasaan untuk tabel `tb_transaksi`
 --
 ALTER TABLE `tb_transaksi`
   ADD CONSTRAINT `tb_transaksi_ibfk_1` FOREIGN KEY (`id_langganan`) REFERENCES `tb_langganan` (`id_langganan`) ON DELETE CASCADE;

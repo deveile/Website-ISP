@@ -48,41 +48,33 @@ if (isset($_POST['ubah_status'])) {
     $tanggal_sekarang = date('Y-m-d');
     $catatan_teknis = mysqli_real_escape_string($koneksi, $_POST['catatan_teknis'] ?? '');
 
-    // Validasi pencegahan bypass: Teknisi dilarang mengubah ke status 'dibatalkan'
     if ($status_baru === 'dibatalkan') {
         $error_alert = true;
         $msg = "Teknisi tidak memiliki hak untuk membatalkan berkas pengajuan.";
     } else {
         
-        // JIKA STATUS DIUBAH MENJADI TERPASANG (SELESAI) -> WAJIB UPLOAD BUKTI FOTO
+        // JIKA STATUS DIUBAH MENJADI TERPASANG (SELESAI) -> WAJIB UPLOAD FOTO
         if ($status_baru == 'terpasang' || $status_baru == 'selesai') {
             if (isset($_FILES['bukti_foto']) && $_FILES['bukti_foto']['error'] === UPLOAD_ERR_OK) {
                 $file_tmp = $_FILES['bukti_foto']['tmp_name'];
                 $file_name = $_FILES['bukti_foto']['name'];
                 $file_ext = strtolower(pathinfo($file_name, PATHINFO_EXTENSION));
-                
-                // Batasi format file gambar saja
                 $ekstensi_diizinkan = ['jpg', 'jpeg', 'png'];
                 
                 if (in_array($file_ext, $ekstensi_diizinkan)) {
-                    // Generate nama file unik agar tidak bentrok
                     $nama_file_baru = "bukti_" . $id_pemasangan . "_" . time() . "." . $file_ext;
                     $folder_tujuan = "../../assets/images/bukti_pasang/";
                     
-                    // Buat folder otomatis jika belum tersedia
-                    if (!is_dir($folder_tujuan)) {
-                        mkdir($folder_tujuan, 0755, true);
-                    }
+                    if (!is_dir($folder_tujuan)) { mkdir($folder_tujuan, 0755, true); }
 
                     if (move_uploaded_file($file_tmp, $folder_tujuan . $nama_file_baru)) {
-                        // KOREKSI WHERE: Hapus pengecekan id_teknisi lama karena sekarang kita sekalian mengikat tugas ini ke ID session kamu
+                        // KUNCI AMAN: Update status dan tanggal pasang berdasarkan ID teknisi yang login
                         $query_update = "UPDATE tb_pemasangan SET 
                                             status_pemasangan = '$status_baru', 
                                             tanggal_pasang = '$tanggal_sekarang',
                                             catatan = '$catatan_teknis',
-                                            bukti_foto = '$nama_file_baru',
-                                            id_teknisi = '$id_teknisi_session' 
-                                         WHERE id_pemasangan = '$id_pemasangan'";
+                                            bukti_foto = '$nama_file_baru'
+                                         WHERE id_pemasangan = '$id_pemasangan' AND id_teknisi = '$id_teknisi_session'";
                     } else {
                         $error_alert = true;
                         $msg = "Gagal memindahkan file foto ke server data.";
@@ -93,25 +85,23 @@ if (isset($_POST['ubah_status'])) {
                 }
             } else {
                 $error_alert = true;
-                $msg = "Gagal menyelesaikan tugas! Teknisi wajib menyertakan foto bukti pemasangan lapangan.";
+                $msg = "Gagal menyelesaikan tugas! Teknisi wajib menyertakan foto bukti pemasangan.";
             }
         } else {
-            // JIKA STATUS DIUBAH MENJADI DIPROSES (MULAI KERJA)
-            // Di sini kita set id_teknisi = '$id_teknisi_session' agar tugas ini resmi menjadi milik kamu
+            // JIKA STATUS DIUBAH MENJADI DIPROSES
             $query_update = "UPDATE tb_pemasangan SET 
                                 status_pemasangan = '$status_baru',
-                                catatan = '$catatan_teknis',
-                                id_teknisi = '$id_teknisi_session'
-                             WHERE id_pemasangan = '$id_pemasangan'";
+                                catatan = '$catatan_teknis'
+                             WHERE id_pemasangan = '$id_pemasangan' AND id_teknisi = '$id_teknisi_session'";
         }
 
-        // Eksekusi Query jika tidak tersandung error upload sebelumnya
+        // Eksekusi Query
         if (!$error_alert) {
             if (mysqli_query($koneksi, $query_update)) {
                 $success_alert = true;
                 $msg = ucfirst($status_baru);
                 
-                // Refresh ulang variabel data agar tampilan HTML langsung berubah ter-update
+                // Fetch ulang data terbaru
                 $query_detail = mysqli_query($koneksi, "
                     SELECT p.*, c.nama_customer, c.telepon_customer, c.email_customer, pk.nama_paket, pk.kecepatan 
                     FROM tb_pemasangan p 

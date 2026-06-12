@@ -306,6 +306,7 @@ for ($i = 1; $i <= 12; $i++) {
             </li>
         <li><a href="index.php" class="active"><i class="bi bi-bar-chart-line"></i> <span>Laporan Keuangan</span></a></li>
         <li><a href="../admin_user/index.php"><i class="bi bi-person-gear"></i> <span>Kelola Admin</span></a></li>
+        <li><a href="../teknisi_user/index.php"><i class="bi bi-person-plus"></i> <span>Kelola Teknisi</span></a></li>
         <li><a href="#" onclick="openLogoutModal()"><i class="bi bi-box-arrow-right"></i> <span>Logout</span></a></li>
     </ul>
 </div>
