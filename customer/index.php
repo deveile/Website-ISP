@@ -2,8 +2,11 @@
 require_once __DIR__ . '/../auth/cek_login.php';
 require_once __DIR__ . '/../koneksi.php';
 
+// 1. Jalankan fungsi cek tenggat waktu (Mengembalikan status: aman, peringatan_suspend, atau dicabut)
+$analisis_langganan = cekMasaTenggatLangganan($koneksi, $_SESSION['id_customer']);
 $id_user = $_SESSION['id_user'];
 
+// 2. Ambil data terupdate dari database setelah statusnya disesuaikan oleh fungsi di atas
 $sql = "SELECT c.*, l.id_langganan, l.status_langganan, 
         l.tanggal_mulai, l.tanggal_selesai, 
         p.nama_paket, p.harga, p.kecepatan 
@@ -418,31 +421,31 @@ function tgl_indo($tgl) {
                     <i class="bi bi-grid"></i>
                     <span>Dashboard</span>
                 </a>
-            </li>
+            </td>
             <li>
                 <a href="tagihan/index.php">
                     <i class="bi bi-receipt"></i>
                     <span>Tagihan Saya</span>
                 </a>
-            </li>
+            </td>
             <li>
                 <a href="paket/index.php">
                     <i class="bi bi-wifi"></i>
                     <span>Paket Internet</span>
                 </a>
-            </li>
+            </td>
             <li>
                 <a href="profile/index.php">
                     <i class="bi bi-person"></i>
                     <span>Profile</span>
                 </a>
-            </li>
+            </td>
             <li>
                 <a href="#" onclick="openLogoutModal()">
                     <i class="bi bi-box-arrow-right"></i>
                     <span>Logout</span>
                 </a>
-            </li>   
+            </td>   
         </ul>
     </div>
 
@@ -454,7 +457,7 @@ function tgl_indo($tgl) {
                 <span></span>
             </button>
             <div>
-                <h1 style="margin:0; font-size: 20px; color:#1e293b;">Halo, <?= $data['nama_customer']; ?></h1>
+                <h1 style="margin:0; font-size: 20px; color:#1e293b;">Halo, <?= htmlspecialchars($data['nama_customer']); ?></h1>
                 <p style="margin:0; font-size: 14px; color:#64748b;">Selamat datang kembali</p>
             </div>
         </div>
@@ -465,8 +468,12 @@ function tgl_indo($tgl) {
             <div class="hero-left">
                 <?php 
                 $status_l = strtolower(trim($data['status_langganan'] ?? ''));
+                
+                // DISESUAIKAN: Menampilkan label status berdasarkan data database terbaru
                 if ($status_l == 'suspend') : ?>
-                    <span class="hero-label" style="background-color: #ef4444; color: white;">Paket Suspend</span>
+                    <span class="hero-label" style="background-color: #ef4444; color: white;">Paket Suspend (Ditangguhkan)</span>
+                <?php elseif ($status_l == 'dicabut') : ?>
+                    <span class="hero-label" style="background-color: #71717a; color: white;">Layanan Dicabut</span>
                 <?php elseif ($status_l == 'berhenti') : ?>
                     <span class="hero-label" style="background-color: #475569; color: white;">Akan Berhenti</span>
                 <?php elseif ($status_l == 'menunggu_verifikasi') : ?>
@@ -506,7 +513,7 @@ function tgl_indo($tgl) {
 
                     <?php if (empty($data['id_langganan']) || $status_l == 'menunggu_verifikasi' || $status_l == 'berhenti') : ?>
                         <button type="button" class="btn-outline-danger" disabled>Berhenti Langganan</button>
-                    <?php elseif ($status_l == 'aktif' || $status_l == 'suspend') : ?>
+                    <?php elseif ($status_l == 'aktif' || $status_l == 'suspend' || $status_l == 'dicabut') : ?>
                         <button type="button" class="btn-outline-danger" onclick="openBerhentiModal()">Berhenti Langganan</button>
                     <?php endif; ?>
                 </div>
@@ -589,6 +596,8 @@ function tgl_indo($tgl) {
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const sidebarToggle = document.getElementById('sidebarToggle');
@@ -612,6 +621,25 @@ function tgl_indo($tgl) {
                 }
             });
         }
+        
+       // DISESUAIKAN: Mengaktifkan SweetAlert jika statusnya 'peringatan_suspend' dengan fitur Close
+        <?php if (isset($analisis_langganan['status']) && $analisis_langganan['status'] == 'peringatan_suspend') : ?>
+            Swal.fire({
+                title: 'Masa Jatuh Tempo!',
+                text: 'Layanan internet Anda ditangguhkan (Suspend). Harap lakukan pembayaran. Anda memiliki waktu <?= $analisis_langganan['sisa_hari']; ?> hari sebelum layanan dicabut otomatis.',
+                icon: 'warning',
+                showCancelButton: true, // Menampilkan tombol close/batal
+                showCloseButton: true,  // Menampilkan tombol 'X' di pojok kanan atas
+                confirmButtonColor: '#ff6600',
+                cancelButtonColor: '#475569', // Warna abu-abu untuk tombol batal
+                confirmButtonText: 'Bayar Sekarang',
+                cancelButtonText: 'Nanti Saja'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = 'tagihan/index.php'; 
+                }
+            });
+        <?php endif; ?>
     });
 
     function openLogoutModal() { document.getElementById('logoutModal').classList.add('show'); }
@@ -620,5 +648,6 @@ function tgl_indo($tgl) {
     function openBerhentiModal() { document.getElementById('berhentiModal').classList.add('show'); }
     function closeBerhentiModal() { document.getElementById('berhentiModal').classList.remove('show'); }
 </script>
+
 </body>
 </html>

@@ -63,13 +63,14 @@ $query_detail = mysqli_query($koneksi, "
     SELECT 
         p.id_pemasangan, p.id_customer, p.id_paket, p.tanggal_pengajuan,
         p.tanggal_pasang, p.alamat_pasang, p.status_pemasangan, p.catatan, p.id_teknisi,
+        p.bukti_foto, -- Ambil kolom bukti foto dari tb_pemasangan
         c.nama_customer, c.telepon_customer, c.email_customer,
         pk.nama_paket, pk.kecepatan,
-        t.nama_teknisi AS nama_teknisi_bertugas -- Ambil dari tb_teknisi
+        t.nama_teknisi AS nama_teknisi_bertugas 
     FROM tb_pemasangan p
     LEFT JOIN tb_customer c ON p.id_customer = c.id_customer
     LEFT JOIN tb_paket pk ON p.id_paket = pk.id_paket
-    LEFT JOIN tb_teknisi t ON p.id_teknisi = t.id_teknisi -- Join ke tb_teknisi
+    LEFT JOIN tb_teknisi t ON p.id_teknisi = t.id_teknisi 
     WHERE p.id_pemasangan = '$id_pemasangan'
 ");
 $data = mysqli_fetch_assoc($query_detail);
@@ -298,7 +299,7 @@ function tgl_indo($tanggal) {
                     </tr>
                     <tr>
                         <td class="label">Teknisi Bertugas</td>
-                        <td>: <strong><?= !empty($data['nama_teknisi']) ? htmlspecialchars($data['nama_teknisi']) : '<span style="color:#ef4444; font-style:italic;">Belum diplot teknisi</span>'; ?></strong></td>
+<td>: <strong><?= !empty($data['nama_teknisi_bertugas']) ? htmlspecialchars($data['nama_teknisi_bertugas']) : '<span style="color:#ef4444; font-style:italic;">Belum diplot teknisi</span>'; ?></strong></td>
                     </tr>
                     <tr>
                         <td class="label">Status</td>
@@ -318,9 +319,26 @@ function tgl_indo($tanggal) {
                         </td>
                     </tr>
                     <tr>
-                        <td class="label">Catatan teknis</td>
+                        <td class="label">Catatan teknisi</td>
                         <td>: <em><?= !empty($data['catatan']) ? htmlspecialchars($data['catatan']) : '-'; ?></em></td>
                     </tr>
+                    
+                    <tr>
+                        <td class="label">Bukti Pemasangan</td>
+                        <td>: 
+                            <?php if (!empty($data['bukti_foto'])) : ?>
+                                <div style="margin-top: 5px;">
+                                    <img src="../../assets/images/bukti_pasang/<?= htmlspecialchars($data['bukti_foto']); ?>" 
+                                         alt="Bukti Pemasangan" 
+                                         style="max-width: 250px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.15); cursor: pointer; transition: transform 0.2s;"
+                                         onclick="lihatFotoFull('../../assets/images/bukti_pasang/<?= htmlspecialchars($data['bukti_foto']); ?>')">
+                                    <p style="font-size: 12px; color: #64748b; margin-top: 5px;"><i class="bi bi-info-circle"></i> Klik gambar untuk memperbesar</p>
+                                </div>
+                            <?php else : ?>
+                                <span style="color:#64748b; font-style:italic;">Belum ada foto bukti yang diupload oleh teknisi</span>
+                            <?php endif; ?>
+                        </td>
+                            </tr>
                 </table>
 
                 <div class="card-footer-action">
@@ -489,6 +507,21 @@ function pilihTeknisiLaluProses() {
             confirmButtonColor: '#ef4444'
         });
     <?php endif; ?>
+    function lihatFotoFull(urlFoto) {
+    Swal.fire({
+        title: 'Bukti Foto Pemasangan',
+        imageUrl: urlFoto,
+        imageAlt: 'Bukti Lapangan',
+        showConfirmButton: false,
+        showCloseButton: true,
+        width: 'auto',
+        maxWidth: '800px',
+        background: '#ffffff',
+        customClass: {
+            image: 'img-fluid rounded'
+        }
+    });
+}
 </script>
 </body>
 </html>
