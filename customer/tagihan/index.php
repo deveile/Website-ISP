@@ -2,6 +2,15 @@
 require_once __DIR__ . '/../../auth/cek_login.php';
 require_once __DIR__ . '/../../koneksi.php';
 
+if (isset($t['tanggal_selesai']) && $t['status_pembayaran'] == 'belum_bayar') {
+    $today = date('Y-m-d');
+    $batas_expired = date('Y-m-d', strtotime($t['tanggal_selesai'] . ' + 4 days'));
+    
+    if ($today > $batas_expired) {
+        $t['status_pembayaran'] = 'expired'; // Memaksa variabel menjadi expired
+    }
+}
+
 $id_user = $_SESSION['id_user'];
 
 $query_customer = mysqli_query($koneksi, "SELECT * FROM tb_customer WHERE id_user = '$id_user' LIMIT 1");
@@ -180,6 +189,7 @@ $bulan_indo = [
     .badge-lunas { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; gap: 5px; }
     .badge-menunggu { background: #fffbeb; color: #d97706; border: 1px solid #fde68a; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; gap: 5px; }
     .badge-belum { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; gap: 5px; }
+    .badge-expired { background: #f4f4f5; color: #71717a; border: 1px solid #d4d4d8; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; gap: 5px; }
 
     .invoice-code {
         font-family: 'Courier New', monospace;
@@ -430,6 +440,8 @@ $bulan_indo = [
                                     <span class="badge-lunas"><i class="bi bi-check-circle-fill"></i> Lunas</span>
                                 <?php elseif ($status_pay == 'menunggu_verifikasi') : ?>
                                     <span class="badge-menunggu"><i class="bi bi-hourglass-split"></i> Menunggu Verifikasi</span>
+                                <?php elseif ($status_pay == 'expired') : ?>
+                                    <span class="badge-expired"><i class="bi bi-x-octagon-fill"></i> Expired</span>
                                 <?php else : ?>
                                     <span class="badge-belum"><i class="bi bi-x-circle-fill"></i> Belum Bayar</span>
                                 <?php endif; ?>

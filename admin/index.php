@@ -292,7 +292,7 @@ $total_pendapatan = $pendapatan['total_pendapatan'] ?? 0;
                     <i class="bi bi-person-plus"></i> <span>Kelola Admin</span>
                 </a>
             </li>
-            <li><a href="../teknisi_user/index.php">
+            <li><a href="teknisi_user/index.php">
                 <i class="bi bi-person-plus"></i> <span>Kelola Teknisi</span>
             </a>
             </li>

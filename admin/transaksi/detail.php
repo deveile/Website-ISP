@@ -79,7 +79,7 @@ $total_notif_transaksi = mysqli_fetch_assoc($query_notif_transaksi)['total'] ?? 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Detail Transaksi <?= htmlspecialchars($data['kode_invoice']) ?> – Anuwani</title>
+    <title>Detail Transaksi <?= htmlspecialchars($data['kode_invoice']) ?></title>
     <link rel="icon"        type="image/png" href="../../assets/images/logo.png">
     <link rel="stylesheet"  href="../../assets/css/style.css">
     <link rel="stylesheet"  href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
@@ -146,6 +146,32 @@ $total_notif_transaksi = mysqli_fetch_assoc($query_notif_transaksi)['total'] ?? 
         .sp-lunas    { background: #f0fdf4; color: #16a34a; border: 1.5px solid #bbf7d0; }
         .sp-menunggu { background: #fffbeb; color: #d97706; border: 1.5px solid #fde68a; }
         .sp-belum    { background: #fef2f2; color: #dc2626; border: 1.5px solid #fecaca; }
+        .sp-expired {
+            background-color: #fee2e2; 
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+
+        .sp-dicabut {
+            background-color: #f1f5f9; 
+            color: #475569;
+            border: 1px solid #e2e8f0;
+        }
+
+        .sp-reaktivasi { background: #fffbeb; color: #b45309; border: 1px solid #fef3c7; }
+        .sp-upgrade    { background: #f3e8ff; color: #6b21a8; border: 1px solid #e9d5ff; }
+        .sp-perpanjang { background: #e8f0fe; color: #1a73e8; border: 1px solid #d2e3fc; }
+        .sp-baru       { background: #e6f4ea; color: #137333; border: 1px solid #ceead6; }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 50px;
+            font-size: 13px;
+            font-weight: 500;
+        }
 
         .bukti-wrap {
             background: #f9f9f9; border: 2px dashed #e4e4e7;
@@ -216,14 +242,171 @@ $total_notif_transaksi = mysqli_fetch_assoc($query_notif_transaksi)['total'] ?? 
             backdrop-filter: blur(8px);
         }
 
-        @media (max-width: 640px) {
-            .field-grid { grid-template-columns: 1fr; }
-        }
+        .sidebar-toggle {
+    background: #fff;
+    border: 1.5px solid #e4e4e7;
+    border-radius: 8px;
+    padding: 10px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    justify-content: center;
+    align-items: center;
+    width: 40px;
+    height: 40px;
+    transition: all 0.2s;
+    flex-shrink: 0;
+}
+
+.sidebar-toggle:hover {
+    background: #f4f4f5;
+}
+
+.sidebar-toggle span {
+    display: block;
+    width: 18px;
+    height: 2px;
+    background-color: #18181b;
+    border-radius: 1px;
+    transition: all 0.3s;
+}
+
+@media (max-width: 640px) {
+    .field-grid { grid-template-columns: 1fr; }
+}
+
+@media (min-width: 992px) {
+    .sidebar-toggle {
+        display: flex !important;
+        flex-direction: column;
+        gap: 4px;
+        background: #f0f0f0;
+        border: none;
+        padding: 10px;
+        border-radius: 8px;
+        cursor: pointer;
+        margin-right: 15px;
+        transition: background 0.2s;
+    }
+    .sidebar-toggle:hover {
+        background: #e0e0e0;
+    }
+    .sidebar-toggle span {
+        display: block;
+        width: 20px;
+        height: 2.5px;
+        background-color: #333;
+        border-radius: 2px;
+    }
+}
+
+.pagination-container { display: flex; align-items: center; justify-content: space-between; margin-top: 20px; padding-top: 20px; border-top: 1px solid #e4e4e7; flex-wrap: wrap; gap: 10px; }
+.pagination-info { font-size: 13px; color: #71717a; }
+.pagination-list { display: flex; gap: 5px; list-style: none; padding: 0; margin: 0; }
+.pagination-list a { display: inline-flex; align-items: center; justify-content: center; min-width: 32px; height: 32px; padding: 0 8px; font-size: 13px; font-weight: 600; text-decoration: none; border-radius: 8px; border: 1.5px solid #e4e4e7; background: #fff; color: #27272a; transition: all 0.2s; }
+.pagination-list a:hover { background: #f4f4f5; }
+.pagination-list .active-page a { background: #ff6600; color: #fff; border-color: #ff6600; pointer-events: none; }
+.pagination-list .disabled-page a { color: #a1a1aa; background: #fafafa; border-color: #e4e4e7; pointer-events: none; }
+
+@media (min-width: 992px) {
+    .sidebar {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        height: 100vh !important;
+        z-index: 1000 !important;
+        overflow-y: auto !important;
+        width: 260px !important;
+        min-width: 260px !important;
+        max-width: 260px !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    }
+    
+    .dashboard-content {
+        flex-grow: 1 !important;
+        margin-left: 260px !important; 
+        width: calc(100% - 260px) !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    }
+    
+    .topbar {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
+    }
+
+    .sidebar.collapsed {
+        width: 70px !important;
+        min-width: 70px !important;
+        max-width: 70px !important;
+        padding: 24px 8px !important;
+    }
+    
+    .sidebar.collapsed + .dashboard-content {
+        margin-left: 70px !important;
+        width: calc(100% - 70px) !important;
+    }
+
+    .sidebar.collapsed .sidebar-logo h2,
+    .sidebar.collapsed ul li a span,
+    .sidebar.collapsed .notif-badge {
+        display: none !important; 
+    }
+
+    .sidebar.collapsed .sidebar-logo {
+        justify-content: center !important;
+        padding: 0 !important;
+    }
+    
+    .sidebar.collapsed ul li a {
+        justify-content: center !important;
+        padding: 12px 0 !important;
+        font-size: 0 !important;
+    }
+    
+    .sidebar.collapsed ul li a i {
+        margin: 0 !important;
+        font-size: 20px !important; 
+    }
+}
+
+@media (max-width: 991px) {
+    .dashboard-layout {
+        flex-direction: column !important;
+    }
+    .sidebar {
+        position: fixed !important;
+        top: 0; left: 0;
+        width: 260px !important;
+        min-width: 260px !important;
+        height: 100vh !important;
+        background: #ffffff !important;
+        z-index: 9999 !important;
+        box-shadow: 4px 0 15px rgba(0,0,0,0.1);
+        transform: translateX(-100%);
+        transition: transform 0.3s ease-in-out;
+        padding: 24px !important;
+        overflow-y: auto;
+    }
+    .sidebar.active {
+        transform: translateX(0); 
+    }
+    .dashboard-content {
+        width: 100% !important;
+        padding: 20px !important;
+    }
+    .topbar {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
+        margin-bottom: 24px;
+    }
+}
     </style>
 </head>
 <body>
 <div class="dashboard-layout">
-
     <div class="sidebar">
         <div class="sidebar-logo">
             <img src="../../assets/images/logo.png" alt="Logo">
@@ -260,20 +443,29 @@ $total_notif_transaksi = mysqli_fetch_assoc($query_notif_transaksi)['total'] ?? 
 
     <div class="dashboard-content">
 
-        <div style="display:flex;align-items:center;gap:14px;margin-bottom:24px;flex-wrap:wrap;">
-            <a href="index.php" style="display:inline-flex;align-items:center;gap:6px;
-                padding:9px 16px;border-radius:8px;border:1.5px solid #e4e4e7;
-                background:#fff;color:#52525b;font-size:13px;font-weight:600;text-decoration:none;
-                transition:all .2s;" onmouseover="this.style.background='#f4f4f5'"
-                onmouseout="this.style.background='#fff'">
-                <i class="bi bi-arrow-left"></i> Kembali ke Daftar
-            </a>
-            <div>
-                <h1 style="font-size:22px;font-weight:800;margin:0;color:#18181b;">Detail Transaksi</h1>
-                <p style="color:#a1a1aa;font-size:13px;margin:0;">Invoice <?= htmlspecialchars($data['kode_invoice']) ?></p>
+        <div class="topbar" style="display: flex !important; align-items: center !important; justify-content: flex-start !important; gap: 15px; margin-bottom: 24px;">
+            
+            <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle Sidebar">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            
+            <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+                <a href="index.php" style="display:inline-flex;align-items:center;gap:6px;
+                    padding:9px 16px;border-radius:8px;border:1.5px solid #e4e4e7;
+                    background:#fff;color:#52525b;font-size:13px;font-weight:600;text-decoration:none;
+                    transition:all .2s;" onmouseover="this.style.background='#f4f4f5'"
+                    onmouseout="this.style.background='#fff'">
+                    <i class="bi bi-arrow-left"></i> Kembali ke Daftar
+                </a>
+                <div>
+                    <h1 style="font-size:22px;font-weight:800;margin:0;color:#18181b;">Detail Transaksi</h1>
+                    <p style="color:#a1a1aa;font-size:13px;margin:0;">Invoice <?= htmlspecialchars($data['kode_invoice']) ?></p>
+                </div>
             </div>
-        </div>
 
+        </div>
         <?php if ($pesan): ?>
         <div class="msg-box <?= $tipe_msg === 'sukses' ? 'msg-success' : 'msg-danger' ?>">
             <i class="bi bi-<?= $tipe_msg === 'sukses' ? 'check-circle-fill' : 'exclamation-triangle-fill' ?>"></i>
@@ -345,117 +537,133 @@ $total_notif_transaksi = mysqli_fetch_assoc($query_notif_transaksi)['total'] ?? 
             </div>
         </div>
 
-        <div class="det-card">
-            <div class="det-card-head">
-                <div class="head-icon" style="background:#fff4ee;color:#f4600c;">
-                    <i class="bi bi-wifi"></i>
-                </div>
-                <h4>Paket & Status Tagihan</h4>
-            </div>
-            <div class="det-card-body">
-                <div class="field-grid">
-                    <div class="field-item">
-                        <label>Produk / Paket Internet</label>
-                        <div class="field-value">
-                            <?= htmlspecialchars($data['nama_paket']) ?>
-                            <span style="font-size:12px;color:#a1a1aa;margin-left:8px;">
-                                (<?= htmlspecialchars($data['kecepatan']) ?>)
-                            </span>
-                        </div>
-                    </div>
-                    <div class="field-item">
-                        <label>Periode Tagihan</label>
-                        <div class="field-value">
-                            <?= $nama_bln[(int)$data['bulan_tagihan']] ?> <?= $data['tahun_tagihan'] ?>
-                        </div>
-                    </div>
-                    <div class="field-item">
-                        <label>Total Nominal Tagihan</label>
-                        <div class="field-value highlight">
-                            Rp <?= number_format($data['jumlah_bayar'], 0, ',', '.') ?>
-                        </div>
-                    </div>
-                    <div class="field-item">
-                        <label>Status Pembayaran</label>
-                        <div class="field-value" style="background:transparent;border:none;padding:0;">
-                            <?php if ($status === 'lunas'): ?>
-                                <span class="status-pill sp-lunas">
-                                    <i class="bi bi-check-circle-fill"></i> Lunas
-                                </span>
-                            <?php elseif ($status === 'menunggu_verifikasi'): ?>
-                                <span class="status-pill sp-menunggu">
-                                    <i class="bi bi-hourglass-split"></i> Menunggu Verifikasi
-                                </span>
-                            <?php else: ?>
-                                <span class="status-pill sp-belum">
-                                    <i class="bi bi-x-circle-fill"></i> Belum Dibayar
-                                </span>
-                            <?php endif; ?>
-                        </div>
-                    </div>
-
-                    <?php if ($data['metode_pembayaran']): ?>
-                    <div class="field-item">
-                        <label>Metode Pembayaran</label>
-                        <div class="field-value"><?= htmlspecialchars(ucfirst($data['metode_pembayaran'])) ?></div>
-                    </div>
-                    <?php endif; ?>
-
-                    <?php if ($data['tanggal_bayar']): ?>
-                    <div class="field-item">
-                        <label>Tanggal Pembayaran</label>
-                        <div class="field-value">
-                            <?= date('d F Y', strtotime($data['tanggal_bayar'])) ?>
-                        </div>
-                    </div>
-                    <?php endif; ?>
-                </div>
-            </div>
+       <div class="det-card">
+    <div class="det-card-head">
+        <div class="head-icon" style="background:#fff4ee;color:#f4600c;">
+            <i class="bi bi-wifi"></i>
         </div>
-
-        <div class="det-card">
-            <div class="det-card-head">
-                <div class="head-icon" style="background:#fef9c3;color:#ca8a04;">
-                    <i class="bi bi-image"></i>
+        <h4>Paket & Status Tagihan</h4>
+    </div>
+    <div class="det-card-body">
+        <div class="field-grid">
+            <div class="field-item">
+                <label>Jenis Transaksi</label>
+                <div class="field-value">
+                    <?php 
+                    $jenis = $data['jenis_transaksi'] ?? 'perpanjang'; 
+                    $badge = ['reaktivasi' => ['l' => 'Re-Aktivasi', 'c' => 'sp-reaktivasi', 'i' => 'bi-telephone-plus-fill'], 'upgrade' => ['l' => 'Upgrade Paket', 'c' => 'sp-upgrade', 'i' => 'bi-arrow-up-circle-fill'], 'baru' => ['l' => 'Pasang Baru', 'c' => 'sp-baru', 'i' => 'bi-person-plus-fill'], 'perpanjang' => ['l' => 'Perpanjang', 'c' => 'sp-perpanjang', 'i' => 'bi-arrow-repeat']];
+                    $b = $badge[$jenis] ?? $badge['perpanjang'];
+                    ?>
+                    <span class="status-pill <?= $b['c'] ?>"><i class="bi <?= $b['i'] ?>"></i> <?= $b['l'] ?></span>
                 </div>
-                <h4>Lampiran Bukti Pembayaran</h4>
             </div>
-            <div class="det-card-body">
-                <?php
-                $bukti_path = $data['bukti_pembayaran'] ?? '';
-                $bukti_full = __DIR__ . '/../../assets/uploads/bukti/' . $bukti_path;
-                $bukti_url  = '../../assets/uploads/bukti/' . $bukti_path;
-                $has_bukti  = !empty($bukti_path) && file_exists($bukti_full);
-                ?>
-                <?php if ($has_bukti): ?>
-                    <div class="bukti-wrap">
-                        <a href="<?= $bukti_url ?>" target="_blank" title="Buka resolusi penuh">
-                            <img src="<?= $bukti_url ?>" alt="Bukti Pembayaran">
-                        </a>
-                        <p class="bukti-hint">
-                            <i class="bi bi-info-circle"></i>
-                            Klik gambar untuk membuka di tab baru (Resolusi Penuh)
-                        </p>
-                    </div>
-                <?php elseif (!empty($bukti_path)): ?>
-                    <div class="bukti-wrap">
-                        <div class="no-bukti">
-                            <i class="bi bi-exclamation-triangle"></i>
-                            <p style="font-weight:600;color:#d97706;">File bukti tidak ditemukan di server</p>
-                            <p style="font-size:13px;">Path: <?= htmlspecialchars($bukti_path) ?></p>
-                        </div>
-                    </div>
-                <?php else: ?>
-                    <div class="bukti-wrap">
-                        <div class="no-bukti">
-                            <i class="bi bi-image-fill"></i>
-                            <p style="font-weight:600;">Belum ada bukti pembayaran dikirim</p>
-                            <p style="font-size:13px;">Pelanggan belum mengunggah foto bukti transfer.</p>
-                        </div>
-                    </div>
-                <?php endif; ?>
+            <div class="field-item">
+                <label>Produk / Paket Internet</label>
+                <div class="field-value">
+                    <?= htmlspecialchars($data['nama_paket']) ?>
+                    <span style="font-size:12px;color:#a1a1aa;margin-left:6px;">
+                        (<?= htmlspecialchars($data['kecepatan']) ?>)
+                    </span>
+                </div>
             </div>
+            <div class="field-item">
+                <label>Periode Tagihan</label>
+                <div class="field-value"><?= $nama_bln[(int)$data['bulan_tagihan']] ?> <?= $data['tahun_tagihan'] ?></div>
+            </div>
+            <div class="field-item">
+                <label>Total Nominal Tagihan</label>
+                <div class="field-value highlight">Rp <?= number_format($data['jumlah_bayar'], 0, ',', '.') ?></div>
+            </div>
+            
+            <?php 
+            $status_raw = $data['status'] ?? $data['status_pembayaran'] ?? $data['status_invoice'] ?? 'belum_bayar';
+            $status_db = strtolower(trim($status_raw)); 
+            $jatuh_tempo = $data['tanggal_jatuh_tempo'] ?? $data['tgl_jatuh_tempo'] ?? $data['jatuh_tempo'] ?? '';
+            $hari_ini = date('Y-m-d');
+
+            if ($status_db !== 'lunas' && $status_db !== 'menunggu_verifikasi' && !empty($jatuh_tempo) && $jatuh_tempo < $hari_ini) {
+                $status = 'expired';
+                $metode_pembayaran = '-';
+            } else {
+                $status = $status_db;
+                $metode_raw = $data['metode_pembayaran'] ?? $data['metode'] ?? '';
+                $metode_pembayaran = !empty($metode_raw) ? htmlspecialchars(ucfirst($metode_raw)) : '-';
+            }
+
+            switch ($status) {
+                case 'lunas':
+                    $status_class = 'sp-lunas';
+                    $status_icon  = 'bi-check-circle-fill';
+                    $status_label = 'Lunas';
+                    break;
+                case 'menunggu_verifikasi':
+                case 'menunggu':
+                    $status_class = 'sp-menunggu';
+                    $status_icon  = 'bi-hourglass-split';
+                    $status_label = 'Menunggu Verifikasi';
+                    break;
+                case 'expired':
+                    $status_class = 'sp-expired';
+                    $status_icon  = 'bi-x-circle-fill';
+                    $status_label = 'Expired';
+                    break;
+                case 'belum_bayar':
+                case 'belum':
+                default:
+                    $status_class = 'sp-belum';
+                    $status_icon  = 'bi-clock-fill';
+                    $status_label = 'Belum Bayar';
+                    break;
+            }
+            ?>
+
+            <div class="field-item">
+                <label>Status Pembayaran</label>
+                <div class="field-value">
+                    <span class="status-pill <?= $status_class ?>">
+                        <i class="bi <?= $status_icon ?>"></i> <?= $status_label ?>
+                    </span>
+                </div>
+            </div>
+
+            <div class="field-item">
+                <label>Metode Pembayaran</label>
+                <div class="field-value">
+                    <?= $metode_pembayaran ?>
+                </div>
+            </div>
+                    </div>
+                </div>
+            </div>
+
+<div class="det-card">
+    <div class="det-card-head">
+        <div class="head-icon" style="background:#fef9c3;color:#ca8a04;">
+            <i class="bi bi-image"></i>
         </div>
+        <h4>Lampiran Bukti Pembayaran</h4>
+    </div>
+    <div class="det-card-body">
+        <?php
+        $bukti_path = $data['bukti_pembayaran'] ?? '';
+        $bukti_url  = '../../assets/uploads/bukti/' . $bukti_path;
+        $has_bukti  = !empty($bukti_path) && file_exists(__DIR__ . '/../../assets/uploads/bukti/' . $bukti_path);
+        ?>
+        
+        <?php if ($has_bukti): ?>
+            <div class="bukti-wrap" style="text-align: center;">
+                <a href="<?= $bukti_url ?>" target="_blank">
+                    <img src="<?= $bukti_url ?>" alt="Bukti" style="max-width: 100%; max-height: 400px; border-radius: 8px; border: 1px solid #ddd;">
+                </a>
+            </div>
+        <?php else: ?>
+            <div class="no-bukti" style="padding: 20px; text-align: center; color: #666;">
+                <i class="bi bi-image-fill" style="font-size: 2rem;"></i>
+                <p>Belum ada bukti pembayaran dikirim</p>
+            </div>
+        <?php endif; ?>
+    </div>
+</div>
 
     </div>
 </div>
@@ -556,6 +764,41 @@ document.querySelectorAll('.logout-modal').forEach(function(m) {
     m.addEventListener('click', function(e) {
         if (e.target === this) this.classList.remove('show');
     });
+});
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const sidebar = document.querySelector('.sidebar');
+    const layout = document.querySelector('.dashboard-layout');
+
+    if (sidebarToggle && sidebar) {
+        sidebarToggle.addEventListener('click', function(e) {
+            e.stopPropagation();
+      
+            sidebar.classList.toggle('active');
+            sidebar.classList.toggle('collapsed');
+
+            if (layout) {
+                layout.classList.toggle('sidebar-toggled');
+                layout.classList.toggle('collapsed');
+            }
+        
+            document.body.classList.toggle('sidebar-toggled');
+            
+            console.log('Hamburger berhasil diklik! Class sidebar saat ini:', sidebar.className);
+        });
+
+        document.addEventListener('click', function(e) {
+            if (!sidebar.contains(e.target) && !sidebarToggle.contains(e.target)) {
+                sidebar.classList.remove('active');
+                if (layout) layout.classList.remove('sidebar-toggled');
+                document.body.classList.remove('sidebar-toggled');
+            }
+        });
+    } else {
+        console.error('PENTING: Tombol hamburger (#sidebarToggle) atau elemen (.sidebar) tidak ditemukan di halaman ini!');
+    }
 });
 </script>
 </body>

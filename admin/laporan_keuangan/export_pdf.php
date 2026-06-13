@@ -4,8 +4,12 @@ require_once __DIR__ . '/../../koneksi.php';
 
 if ($_SESSION['role'] != 'admin') { header("Location: ../../auth/login.php"); exit; }
 
-$filter_tahun = isset($_GET['tahun']) ? (int)$_GET['tahun'] : date('Y');
-$filter_tipe  = isset($_GET['tipe']) && $_GET['tipe'] === 'tahunan' ? 'tahunan' : 'bulanan';
+$filter_tipe          = $_GET['tipe'] ?? 'bulanan';
+$filter_tahun         = isset($_GET['tahun']) ? (int)$_GET['tahun'] : (int)date('Y');
+$filter_bulan         = isset($_GET['bulan']) ? (int)$_GET['bulan'] : 0;
+
+$filter_tahun_mulai   = !empty($_GET['tahun_mulai']) ? (int)$_GET['tahun_mulai'] : (int)date('Y') - 5; 
+$filter_tahun_selesai = !empty($_GET['tahun_selesai']) ? (int)$_GET['tahun_selesai'] : (int)date('Y');
 
 $nama_bulan = ['','Januari','Februari','Maret','April','Mei','Juni',
                'Juli','Agustus','September','Oktober','November','Desember'];
@@ -43,6 +47,7 @@ if ($filter_tipe === 'bulanan') {
                COUNT(CASE WHEN status_pembayaran='lunas' THEN 1 END) AS jml_lunas,
                COUNT(CASE WHEN status_pembayaran='belum_bayar' THEN 1 END) AS jml_belum
         FROM tb_transaksi
+        WHERE tahun_tagihan BETWEEN $filter_tahun_mulai AND $filter_tahun_selesai
         GROUP BY tahun_tagihan
         ORDER BY tahun_tagihan DESC
     ");
@@ -56,7 +61,7 @@ if ($filter_tipe === 'bulanan') {
 
 $judul    = $filter_tipe === 'bulanan'
     ? "Laporan Keuangan Bulanan – Tahun $filter_tahun"
-    : "Laporan Keuangan Tahunan – Semua Periode";
+    : "Laporan Keuangan Tahunan ($filter_tahun_mulai - $filter_tahun_selesai)";
 $tanggal  = date('d F Y');
 $jam      = date('H:i');
 ?>
@@ -72,10 +77,10 @@ $jam      = date('H:i');
   body { font-family: Arial, sans-serif; font-size: 12px; color: #222; background: #fff; }
 
   .pdf-header { display: flex; align-items: center; gap: 16px; margin-bottom: 10px; border-bottom: 3px solid #f4600c; padding-bottom: 10px; }
-  .pdf-logo   { width: 44px; height: 44px; object-fit: contain; }
-  .pdf-title  h1 { font-size: 18px; font-weight: 800; color: #18181b; }
-  .pdf-title  p  { font-size: 11px; color: #71717a; margin-top: 2px; }
-  .pdf-meta   { margin-left: auto; text-align: right; font-size: 11px; color: #71717a; line-height: 1.6; }
+  .pdf-logo { width: 44px; height: 44px; object-fit: contain; }
+  .pdf-title h1 { font-size: 18px; font-weight: 800; color: #18181b; }
+  .pdf-title p { font-size: 11px; color: #71717a; margin-top: 2px; }
+  .pdf-meta { margin-left: auto; text-align: right; font-size: 11px; color: #71717a; line-height: 1.6; }
 
   .summary { display: flex; gap: 12px; margin: 14px 0; }
   .sum-box {
@@ -85,8 +90,8 @@ $jam      = date('H:i');
   .sum-box small { font-size: 10px; color: #a1a1aa; text-transform: uppercase; letter-spacing: .5px; display: block; margin-bottom: 3px; }
   .sum-box strong { font-size: 15px; font-weight: 800; }
   .sum-green { border-left: 3px solid #22c55e; }
-  .sum-red   { border-left: 3px solid #ef4444; }
-  .sum-blue  { border-left: 3px solid #3b82f6; }
+  .sum-red { border-left: 3px solid #ef4444; }
+  .sum-blue { border-left: 3px solid #3b82f6; }
   .sum-orange{ border-left: 3px solid #f4600c; }
 
   table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 11.5px; }
@@ -242,25 +247,29 @@ $jam      = date('H:i');
         </tr>
     </thead>
     <tbody>
-    <?php $no=1; foreach ($rows as $r):
-        $pct = $r['total_tagihan']>0 ? round($r['pendapatan']/$r['total_tagihan']*100) : 0;
-        $col = $pct>=80?'#22c55e':($pct>=50?'#f59e0b':'#ef4444');
-    ?>
-        <tr>
-            <td><?= $no++ ?></td>
-            <td><strong><?= $r['tahun_tagihan'] ?></strong></td>
-            <td><?= (int)$r['total_transaksi'] ?></td>
-            <td><span class="chip chip-g"><?= (int)$r['jml_lunas'] ?></span></td>
-            <td><span class="chip chip-r"><?= (int)$r['jml_belum'] ?></span></td>
-            <td style="color:#16a34a;font-weight:700;"><?= rp($r['pendapatan']) ?></td>
-            <td style="color:#dc2626;"><?= rp($r['belum_bayar']) ?></td>
-            <td><?= rp($r['total_tagihan']) ?></td>
-            <td>
-                <span style="font-weight:700;color:<?= $col ?>"><?= $pct ?>%</span>
-                <span class="pct-bar"><span class="pct-fill" style="width:<?= $pct ?>%;background:<?= $col ?>;"></span></span>
-            </td>
-        </tr>
-    <?php endforeach; ?>
+    <?php if (empty($rows)): ?>
+        <tr><td colspan="9" style="text-align:center;color:#888;padding:20px;">Tidak ada data</td></tr>
+    <?php else: ?>
+        <?php $no=1; foreach ($rows as $r):
+            $pct = $r['total_tagihan']>0 ? round($r['pendapatan']/$r['total_tagihan']*100) : 0;
+            $col = $pct>=80?'#22c55e':($pct>=50?'#f59e0b':'#ef4444');
+        ?>
+            <tr>
+                <td><?= $no++ ?></td>
+                <td><strong><?= $r['tahun_tagihan'] ?></strong></td>
+                <td><?= (int)$r['total_transaksi'] ?></td>
+                <td><span class="chip chip-g"><?= (int)$r['jml_lunas'] ?></span></td>
+                <td><span class="chip chip-r"><?= (int)$r['jml_belum'] ?></span></td>
+                <td style="color:#16a34a;font-weight:700;"><?= rp($r['pendapatan']) ?></td>
+                <td style="color:#dc2626;"><?= rp($r['belum_bayar']) ?></td>
+                <td><?= rp($r['total_tagihan']) ?></td>
+                <td>
+                    <span style="font-weight:700;color:<?= $col ?>"><?= $pct ?>%</span>
+                    <span class="pct-bar"><span class="pct-fill" style="width:<?= $pct ?>%;background:<?= $col ?>;"></span></span>
+                </td>
+            </tr>
+        <?php endforeach; ?>
+    <?php endif; ?>
     </tbody>
     <tfoot>
         <tr>
@@ -282,11 +291,5 @@ $jam      = date('H:i');
     <?= $tanggal ?> • Halaman ini hanya untuk keperluan internal
 </div>
 
-<script>
-window.addEventListener('load', function() {
-    setTimeout(function() {
-    }, 500);
-});
-</script>
 </body>
 </html>

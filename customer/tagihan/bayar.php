@@ -3,6 +3,13 @@ require_once __DIR__ . '/../../auth/cek_login.php';
 require_once __DIR__ . '/../../koneksi.php';
 
 $id_transaksi = $_GET['id'] ?? '';
+$cek_status = mysqli_query($koneksi, "SELECT status_pembayaran FROM tb_transaksi WHERE id_transaksi = '$id_transaksi'");
+$data_cek = mysqli_fetch_assoc($cek_status);
+
+if ($data_cek['status_pembayaran'] == 'expired') {
+    echo "<script>alert('Akses ditolak: Tagihan sudah kadaluarsa dan tidak dapat dibayar.'); window.location.href='index.php';</script>";
+    exit;
+}
 
 $sql = "
 SELECT

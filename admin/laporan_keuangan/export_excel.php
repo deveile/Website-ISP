@@ -7,8 +7,12 @@ if ($_SESSION['role'] != 'admin') {
     exit;
 }
 
-$filter_tahun = isset($_GET['tahun']) ? (int)$_GET['tahun'] : date('Y');
-$filter_tipe  = isset($_GET['tipe']) && $_GET['tipe'] === 'tahunan' ? 'tahunan' : 'bulanan';
+$filter_tipe          = $_GET['tipe'] ?? 'bulanan';
+$filter_tahun         = isset($_GET['tahun']) ? (int)$_GET['tahun'] : (int)date('Y');
+$filter_bulan         = isset($_GET['bulan']) ? (int)$_GET['bulan'] : 0;
+
+$filter_tahun_mulai   = !empty($_GET['tahun_mulai']) ? (int)$_GET['tahun_mulai'] : (int)date('Y') - 5; 
+$filter_tahun_selesai = !empty($_GET['tahun_selesai']) ? (int)$_GET['tahun_selesai'] : (int)date('Y');
 
 $nama_bulan = [
     '', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
@@ -42,15 +46,15 @@ if ($filter_tipe === 'bulanan') {
                COUNT(CASE WHEN status_pembayaran='lunas' THEN 1 END) AS jml_lunas,
                COUNT(CASE WHEN status_pembayaran='belum_bayar' THEN 1 END) AS jml_belum
         FROM tb_transaksi
+        WHERE tahun_tagihan BETWEEN $filter_tahun_mulai AND $filter_tahun_selesai
         GROUP BY tahun_tagihan
         ORDER BY tahun_tagihan DESC
     ");
-    $filename = "Laporan_Keuangan_Tahunan_" . date('Y');
-    $judul    = "Laporan Keuangan Tahunan - Semua Periode";
+    $filename = "Laporan_Keuangan_Tahunan_{$filter_tahun_mulai}_ke_{$filter_tahun_selesai}";
+    $judul    = "Laporan Keuangan Tahunan ($filter_tahun_mulai - $filter_tahun_selesai)";
 }
 
 $rows = [];
-$tot  = [];
 while ($r = mysqli_fetch_assoc($q)) $rows[] = $r;
 
 function xe($v) {
@@ -58,17 +62,11 @@ function xe($v) {
 }
 
 function cellStr($v, $bold = false, $bg = '', $color = '') {
-    $style = 'font-family:Arial;font-size:11pt;';
-    if ($bold)   $style .= 'font-weight:bold;';
-    if ($bg)     $style .= "background:$bg;";
-    if ($color)  $style .= "color:$color;";
-    return '<Cell><Data ss:Type="String" ss:styleID=""><![CDATA[' . $v . ']]></Data></Cell>';
+    return '<Cell><Data ss:Type="String"><![CDATA[' . $v . ']]></Data></Cell>';
 }
-
 function cellNum($v) {
     return '<Cell><Data ss:Type="Number">' . xe((float)$v) . '</Data></Cell>';
 }
-
 
 $xml  = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
 $xml .= '<?mso-application progid="Excel.Sheet"?>' . "\n";
@@ -79,19 +77,15 @@ $xml .= '  xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"' . "\n";
 $xml .= '  xmlns:html="http://www.w3.org/TR/REC-html40">' . "\n";
 
 $xml .= '<Styles>
-
   <Style ss:ID="Default">
     <Font ss:FontName="Arial" ss:Size="11"/>
   </Style>
-
   <Style ss:ID="sTitle">
     <Font ss:FontName="Arial" ss:Size="14" ss:Bold="1" ss:Color="#f4600c"/>
   </Style>
-
   <Style ss:ID="sSub">
     <Font ss:FontName="Arial" ss:Size="10" ss:Color="#71717a"/>
   </Style>
-
   <Style ss:ID="sHeader">
     <Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/>
     <Font ss:FontName="Arial" ss:Size="11" ss:Bold="1" ss:Color="#FFFFFF"/>
@@ -101,7 +95,6 @@ $xml .= '<Styles>
       <Border ss:Position="Right"  ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#e4e4e7"/>
     </Borders>
   </Style>
-
   <Style ss:ID="sData">
     <Alignment ss:Vertical="Center"/>
     <Font ss:FontName="Arial" ss:Size="11"/>
@@ -110,7 +103,6 @@ $xml .= '<Styles>
       <Border ss:Position="Right"  ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#f0f0f0"/>
     </Borders>
   </Style>
-
   <Style ss:ID="sDataEven">
     <Alignment ss:Vertical="Center"/>
     <Font ss:FontName="Arial" ss:Size="11"/>
@@ -120,7 +112,6 @@ $xml .= '<Styles>
       <Border ss:Position="Right"  ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#f0f0f0"/>
     </Borders>
   </Style>
-
   <Style ss:ID="sNum">
     <Alignment ss:Horizontal="Right" ss:Vertical="Center"/>
     <Font ss:FontName="Arial" ss:Size="11"/>
@@ -130,7 +121,6 @@ $xml .= '<Styles>
       <Border ss:Position="Right"  ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#f0f0f0"/>
     </Borders>
   </Style>
-
   <Style ss:ID="sNumEven">
     <Alignment ss:Horizontal="Right" ss:Vertical="Center"/>
     <Font ss:FontName="Arial" ss:Size="11"/>
@@ -141,7 +131,6 @@ $xml .= '<Styles>
       <Border ss:Position="Right"  ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#f0f0f0"/>
     </Borders>
   </Style>
-
   <Style ss:ID="sGreen">
     <Alignment ss:Horizontal="Right" ss:Vertical="Center"/>
     <Font ss:FontName="Arial" ss:Size="11" ss:Bold="1" ss:Color="#16a34a"/>
@@ -150,7 +139,6 @@ $xml .= '<Styles>
       <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#f0f0f0"/>
     </Borders>
   </Style>
-
   <Style ss:ID="sRed">
     <Alignment ss:Horizontal="Right" ss:Vertical="Center"/>
     <Font ss:FontName="Arial" ss:Size="11" ss:Color="#dc2626"/>
@@ -159,7 +147,6 @@ $xml .= '<Styles>
       <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#f0f0f0"/>
     </Borders>
   </Style>
-
   <Style ss:ID="sTotal">
     <Alignment ss:Vertical="Center"/>
     <Font ss:FontName="Arial" ss:Size="11" ss:Bold="1"/>
@@ -169,7 +156,6 @@ $xml .= '<Styles>
       <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#f4600c"/>
     </Borders>
   </Style>
-
   <Style ss:ID="sTotalNum">
     <Alignment ss:Horizontal="Right" ss:Vertical="Center"/>
     <Font ss:FontName="Arial" ss:Size="11" ss:Bold="1"/>
@@ -180,7 +166,6 @@ $xml .= '<Styles>
       <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#f4600c"/>
     </Borders>
   </Style>
-
   <Style ss:ID="sTotalGreen">
     <Alignment ss:Horizontal="Right" ss:Vertical="Center"/>
     <Font ss:FontName="Arial" ss:Size="11" ss:Bold="1" ss:Color="#16a34a"/>
@@ -191,7 +176,6 @@ $xml .= '<Styles>
       <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#f4600c"/>
     </Borders>
   </Style>
-
   <Style ss:ID="sTotalRed">
     <Alignment ss:Horizontal="Right" ss:Vertical="Center"/>
     <Font ss:FontName="Arial" ss:Size="11" ss:Bold="1" ss:Color="#dc2626"/>
@@ -202,7 +186,6 @@ $xml .= '<Styles>
       <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#f4600c"/>
     </Borders>
   </Style>
-
 </Styles>' . "\n";
 
 $sheetName = xe($filter_tipe === 'bulanan' ? "Bulanan $filter_tahun" : "Tahunan");

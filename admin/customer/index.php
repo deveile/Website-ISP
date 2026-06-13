@@ -106,6 +106,16 @@ function tgl_indo($tanggal) {
         font-size: 12px;
         font-weight: 600;
     }
+
+    .status-dicabut {
+        background-color: #64748b; 
+        color: white;
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
     .dashboard-layout {
         display: flex !important;
         width: 100%;
@@ -478,13 +488,14 @@ function tgl_indo($tanggal) {
                             <td style="text-align: center;">
                                 <?php 
                                 $status = strtolower($data['status_langganan'] ?? '');
-                                if ($status == 'aktif') : 
-                                ?>
+                                if ($status == 'aktif') : ?>
                                     <span class="status-active">Aktif</span>
                                 <?php elseif ($status == 'suspend') : ?>
                                     <span class="status-pending">Suspend</span>
                                 <?php elseif ($status == 'berhenti') : ?>
                                     <span class="status-nonactive">Berhenti</span>
+                                <?php elseif ($status == 'dicabut') : ?>
+                                    <span class="status-dicabut">Dicabut</span>
                                 <?php else : ?>
                                     <span class="status-pending">Tidak Aktif</span>
                                 <?php endif; ?>

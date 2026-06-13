@@ -2,6 +2,15 @@
 require_once __DIR__ . '/../../auth/cek_login.php';
 require_once __DIR__ . '/../../koneksi.php';
 
+if (isset($t['tanggal_selesai']) && $t['status_pembayaran'] == 'belum_bayar') {
+    $today = date('Y-m-d');
+    $batas_expired = date('Y-m-d', strtotime($t['tanggal_selesai'] . ' + 4 days'));
+    
+    if ($today > $batas_expired) {
+        $t['status_pembayaran'] = 'expired'; 
+    }
+}
+
 $id = $_GET['id'] ?? '';
 $query = mysqli_query($koneksi, "
     SELECT tb_transaksi.*, tb_customer.nama_customer, tb_customer.email_customer, 
@@ -96,6 +105,8 @@ $status_pay = strtolower($data['status_pembayaran']);
                             <span class="badge-status badge-lunas"><i class="bi bi-check-circle-fill"></i> Terverifikasi Lunas</span>
                         <?php elseif ($status_pay == 'menunggu_verifikasi') : ?>
                             <span class="badge-status badge-menunggu"><i class="bi bi-hourglass-split"></i> Menunggu Konfirmasi Admin</span>
+                        <?php elseif ($status_pay == 'expired') : ?>
+                            <span class="badge-status badge-expired"><i class="bi bi-x-octagon-fill"></i> Tagihan Kadaluarsa</span>
                         <?php else : ?>
                             <span class="badge-status badge-belum"><i class="bi bi-exclamation-triangle-fill"></i> Belum Dibayar</span>
                         <?php endif; ?>
@@ -113,9 +124,9 @@ $status_pay = strtolower($data['status_pembayaran']);
                         </a>
                         <p style="margin-top: 10px; font-size: 0.85rem; color: #888;">* Klik gambar untuk membuka di tab baru (Resolusi Penuh)</p>
                     <?php else : ?>
-                        <div style="padding: 20px; color: #888;">
-                            <i class="bi bi-camera-video-off" style="font-size: 2.5rem; display: block; margin-bottom: 10px;"></i>
-                            <p>Tidak ada berkas bukti pembayaran yang dilampirkan.</p>
+                        <div style="padding: 30px; color: #94a3b8; border: 2px dashed #e2e8f0; border-radius: 10px; text-align: center; background: #f8fafc;">
+                            <i class="bi bi-card-image" style="font-size: 3rem; display: block; margin-bottom: 10px; color: #cbd5e1;"></i>
+                            <p style="margin: 0; font-weight: 500;">Tidak ada berkas bukti pembayaran.</p>
                         </div>
                     <?php endif; ?>
                 </div>
@@ -125,6 +136,8 @@ $status_pay = strtolower($data['status_pembayaran']);
                 <a href="index.php" class="btn-back-gray"><i class="bi bi-arrow-left"></i> Kembali ke Daftar</a>
                 <?php if ($status_pay == 'belum_bayar') : ?>
                     <a href="bayar.php?id=<?= $data['id_transaksi']; ?>" class="btn-orange btn-orange-flex">Upload Bukti Sekarang <i class="bi bi-chevron-right"></i></a>
+                <?php elseif ($status_pay == 'expired') : ?>
+                    <button class="btn-back-gray" disabled style="background:#e4e4e7; cursor:not-allowed;">Tagihan Expired</button>
                 <?php endif; ?>
             </div>
         </div>

@@ -169,6 +169,19 @@ $total_notif = $total_notif_transaksi + $total_notif_pemasangan;
         .badge-lunas    { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; gap: 5px; }
         .badge-menunggu { background: #fffbeb; color: #d97706; border: 1px solid #fde68a; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; gap: 5px; }
         .badge-belum    { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; gap: 5px; }
+   
+        .badge-expired { 
+            background-color: #fee2e2; color: #991b1b; 
+            padding: 4px 8px; border-radius: 4px; font-size: 12px; 
+        }
+        .badge-dicabut { 
+            background-color: #f1f5f9; color: #475569; 
+            padding: 4px 8px; border-radius: 4px; font-size: 12px; 
+        }
+
+        .row-expired {
+            background-color: #fef2f2 !important; 
+        }
 
         .btn-detail-tr {
             display: inline-flex; align-items: center; justify-content: center;
@@ -404,6 +417,7 @@ $total_notif = $total_notif_transaksi + $total_notif_pemasangan;
                         <option value="belum_bayar" <?= (isset($_GET['status']) && $_GET['status']=='belum_bayar') ? 'selected' : '' ?>>Belum Bayar</option>
                         <option value="menunggu_verifikasi" <?= (isset($_GET['status']) && $_GET['status']=='menunggu_verifikasi') ? 'selected' : '' ?>>Menunggu Verifikasi</option>
                         <option value="lunas" <?= (isset($_GET['status']) && $_GET['status']=='lunas') ? 'selected' : '' ?>>Lunas</option>
+                        <option value="expired" <?= (isset($_GET['status']) && $_GET['status']=='expired') ? 'selected' : '' ?>>Expired</option>
                     </select>
 
                     <button type="submit" class="btn-orange">
@@ -435,54 +449,56 @@ $total_notif = $total_notif_transaksi + $total_notif_pemasangan;
                         </tr>
                     </thead>
                     <tbody>
-                    <?php
-                    $no = $halaman_awal + 1;
-                    if (mysqli_num_rows($query) > 0):
-                        while ($data = mysqli_fetch_assoc($query)):
-                            $st = strtolower($data['status_pembayaran']);
-                    ?>
-                    <tr class="<?= $st === 'menunggu_verifikasi' ? 'row-menunggu' : '' ?>">
-                        <td><?= $no++ ?></td>
-                        <td><span class="invoice-code"><?= htmlspecialchars($data['kode_invoice']) ?></span></td>
-                        <td><?= htmlspecialchars($data['nama_customer']) ?></td>
-                        <td><?= date('M Y', mktime(0,0,0, $data['bulan_tagihan'], 1, $data['tahun_tagihan'])) ?></td>
-                        <td style="font-weight:600;">Rp <?= number_format($data['jumlah_bayar'], 0, ',', '.') ?></td>
-                        <td>
-                            <?php if ($st === 'lunas'): ?>
-                                <span class="badge-lunas"><i class="bi bi-check-circle-fill"></i> Lunas</span>
-                            <?php elseif ($st === 'menunggu_verifikasi'): ?>
-                                <span class="badge-menunggu"><i class="bi bi-hourglass-split"></i> Menunggu Verifikasi</span>
-                            <?php else: ?>
-                                <span class="badge-belum"><i class="bi bi-x-circle-fill"></i> Belum Bayar</span>
-                            <?php endif; ?>
-                        </td>
-                        <td style="color:#a1a1aa;font-size:13px;">
-                            <?= !empty($data['tanggal_bayar']) ? date('d/m/Y', strtotime($data['tanggal_bayar'])) : '—' ?>
-                        </td>
-                        <td>
-                            <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;">
-                                <a href="detail.php?id=<?= $data['id_transaksi'] ?>" class="btn-detail-tr" title="Lihat Detail">
-                                    Detail
-                                </a>
-                                <?php if ($st === 'menunggu_verifikasi'): ?>
-                                <a href="detail.php?id=<?= $data['id_transaksi'] ?>" class="btn-verify-tr" title="Verifikasi Pembayaran">
-                                    <i class="bi bi-shield-check"></i> Verifikasi
-                                </a>
+                        <?php
+                        $no = $halaman_awal + 1;
+                        if (mysqli_num_rows($query) > 0):
+                            while ($data = mysqli_fetch_assoc($query)):
+                                $st = strtolower($data['status_pembayaran']);
+                                $row_class = ($st === 'menunggu_verifikasi') ? 'row-menunggu' : 
+                                            (($st === 'expired') ? 'row-expired' : ''); 
+                        ?>
+                        <tr class="<?= $row_class ?>">
+                            <td><?= $no++ ?></td>
+                            <td><span class="invoice-code"><?= htmlspecialchars($data['kode_invoice']) ?></span></td>
+                            <td><?= htmlspecialchars($data['nama_customer']) ?></td>
+                            <td><?= date('M Y', mktime(0,0,0, $data['bulan_tagihan'], 1, $data['tahun_tagihan'])) ?></td>
+                            <td style="font-weight:600;">Rp <?= number_format($data['jumlah_bayar'], 0, ',', '.') ?></td>
+                            <td>
+                                <?php if ($st === 'lunas'): ?>
+                                    <span class="badge-lunas"><i class="bi bi-check-circle-fill"></i> Lunas</span>
+                                <?php elseif ($st === 'menunggu_verifikasi'): ?>
+                                    <span class="badge-menunggu"><i class="bi bi-hourglass-split"></i> Menunggu Verifikasi</span>
+                                <?php elseif ($st === 'expired'): ?>
+                                    <span class="badge-expired"><i class="bi bi-exclamation-circle-fill"></i> Expired</span>
+                                <?php elseif ($st === 'dicabut'): ?>
+                                    <span class="badge-dicabut"><i class="bi bi-slash-circle-fill"></i> Dicabut</span>
+                                <?php else: ?>
+                                    <span class="badge-belum"><i class="bi bi-x-circle-fill"></i> Belum Bayar</span>
                                 <?php endif; ?>
-                            </div>
-                        </td>
-                    </tr>
-                    <?php
-                        endwhile;
-                    else:
-                    ?>
-                    <tr>
-                        <td colspan="8" style="text-align:center;padding:40px;color:#a1a1aa;">
-                            <i class="bi bi-inbox" style="font-size:32px;display:block;margin-bottom:10px;"></i>
-                            Tidak ada data transaksi ditemukan.
-                        </td>
-                    </tr>
-                    <?php endif; ?>
+                            </td>
+                            <td style="color:#a1a1aa;font-size:13px;">
+                                <?= !empty($data['tanggal_bayar']) ? date('d/m/Y', strtotime($data['tanggal_bayar'])) : '—' ?>
+                            </td>
+                            <td>
+                                <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;">
+                                    <a href="detail.php?id=<?= $data['id_transaksi'] ?>" class="btn-detail-tr" title="Lihat Detail">Detail</a>
+                                    <?php if ($st === 'menunggu_verifikasi'): ?>
+                                        <a href="detail.php?id=<?= $data['id_transaksi'] ?>" class="btn-verify-tr" title="Verifikasi Pembayaran"><i class="bi bi-shield-check"></i> Verifikasi</a>
+                                    <?php endif; ?>
+                                </div>
+                            </td>
+                        </tr>
+                        <?php
+                            endwhile;
+                        else:
+                        ?>
+                        <tr>
+                            <td colspan="8" style="text-align:center;padding:40px;color:#a1a1aa;">
+                                <i class="bi bi-inbox" style="font-size:32px;display:block;margin-bottom:10px;"></i>
+                                Tidak ada data transaksi ditemukan.
+                            </td>
+                        </tr>
+                        <?php endif; ?>
                     </tbody>
                 </table>
             </div>

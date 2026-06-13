@@ -2,11 +2,18 @@
 require_once __DIR__ . '/../auth/cek_login.php';
 require_once __DIR__ . '/../koneksi.php';
 
-// 1. Jalankan fungsi cek tenggat waktu (Mengembalikan status: aman, peringatan_suspend, atau dicabut)
+if (isset($t['tanggal_selesai']) && $t['status_pembayaran'] == 'belum_bayar') {
+    $today = date('Y-m-d');
+    $batas_expired = date('Y-m-d', strtotime($t['tanggal_selesai'] . ' + 4 days'));
+    
+    if ($today > $batas_expired) {
+        $t['status_pembayaran'] = 'expired'; // Memaksa variabel menjadi expired
+    }
+}
+
 $analisis_langganan = cekMasaTenggatLangganan($koneksi, $_SESSION['id_customer']);
 $id_user = $_SESSION['id_user'];
 
-// 2. Ambil data terupdate dari database setelah statusnya disesuaikan oleh fungsi di atas
 $sql = "SELECT c.*, l.id_langganan, l.status_langganan, 
         l.tanggal_mulai, l.tanggal_selesai, 
         p.nama_paket, p.harga, p.kecepatan 
@@ -18,6 +25,24 @@ $sql = "SELECT c.*, l.id_langganan, l.status_langganan,
 
 $query = mysqli_query($koneksi, $sql);
 $data = mysqli_fetch_assoc($query);
+
+if ($data && !empty($data['id_langganan'])) {
+    $today = date('Y-m-d');
+    $due_date = $data['tanggal_selesai'];
+    $batas_dicabut = date('Y-m-d', strtotime($due_date . ' + 4 days'));
+
+    if ($data['status_langganan'] != 'berhenti') {
+        if ($today > $batas_dicabut && $data['status_langganan'] != 'dicabut') {
+            mysqli_query($koneksi, "UPDATE tb_langganan SET status_langganan = 'dicabut' WHERE id_langganan = '{$data['id_langganan']}'");
+            mysqli_query($koneksi, "UPDATE tb_transaksi SET status_pembayaran = 'expired' WHERE id_langganan = '{$data['id_langganan']}' AND status_pembayaran = 'belum_bayar'");
+            $data['status_langganan'] = 'dicabut'; 
+        } 
+        elseif ($today > $due_date && $today <= $batas_dicabut && $data['status_langganan'] == 'aktif') {
+            mysqli_query($koneksi, "UPDATE tb_langganan SET status_langganan = 'suspend' WHERE id_langganan = '{$data['id_langganan']}'");
+            $data['status_langganan'] = 'suspend';
+        }
+    }
+}
 
 $show_error = (!$data);
 $t = null;
@@ -394,6 +419,15 @@ function tgl_indo($tgl) {
             .hero-info-wrapper { flex-direction: column !important; }
             .hero-package { font-size: 26px !important; }
         }
+        .btn-dicabut {
+    background-color: #64748b !important; 
+    color: #ffffff !important;
+    border: none !important;
+    cursor: not-allowed !important;
+    opacity: 0.9;
+    box-shadow: none !important;
+}
+        .status-expired { background: #f4f4f5; color: #71717a; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; border: 1px solid #e4e4e7; }
     </style>
 </head>
 <body>
@@ -468,8 +502,7 @@ function tgl_indo($tgl) {
             <div class="hero-left">
                 <?php 
                 $status_l = strtolower(trim($data['status_langganan'] ?? ''));
-                
-                // DISESUAIKAN: Menampilkan label status berdasarkan data database terbaru
+
                 if ($status_l == 'suspend') : ?>
                     <span class="hero-label" style="background-color: #ef4444; color: white;">Paket Suspend (Ditangguhkan)</span>
                 <?php elseif ($status_l == 'dicabut') : ?>
@@ -490,34 +523,45 @@ function tgl_indo($tgl) {
                 <div class="hero-info-wrapper">
                     <div class="hero-info-box">
                         <span style="font-size: 12px; opacity: 0.8; display:block; margin-bottom:4px;">Jatuh Tempo</span>
-                        <h3 style="margin:0; font-size:15px; font-weight:700;"><?= tgl_indo($data['tanggal_selesai']); ?></h3>
-                    </div>
-                    <div class="hero-info-box">
-                        <span style="font-size: 12px; opacity: 0.8; display:block; margin-bottom:4px;">Tagihan Bulan Ini</span>
-                        <h3 style="margin:0; font-size:15px; font-weight:700;"><?= ($nominal > 0) ? 'Rp '.number_format($nominal, 0, ',', '.') : 'Tidak Ada'; ?></h3>
+                            <h3 style="margin:0; font-size:15px; font-weight:700;">
+                                <?= ($status_l == 'dicabut') ? '-' : tgl_indo($data['tanggal_selesai']); ?>
+                            </h3>
+                        </div>
+                        <div class="hero-info-box">
+                            <span style="font-size: 12px; opacity: 0.8; display:block; margin-bottom:4px;">Tagihan Bulan Ini</span>
+                            <h3 style="margin:0; font-size:15px; font-weight:700;">
+                                <?= ($status_l == 'dicabut') ? '-' : (($nominal > 0) ? 'Rp '.number_format($nominal, 0, ',', '.') : 'Tidak Ada'); ?>
+                            </h3>
                     </div>
                 </div>
             </div>
 
-            <div class="hero-right">
-                <div style="width: 100%;">
-                    <?php $status = strtolower(trim($t['status_pembayaran'] ?? '')); ?>
-                    
-                    <?php if($status == 'belum_bayar') : ?>
-                        <a href="tagihan/bayar.php?id=<?= $t['id_transaksi']; ?>" class="hero-button">Bayar Tagihan</a>
-                    <?php elseif($status == 'menunggu_verifikasi') : ?>
-                        <button class="hero-button waiting-btn" disabled>Menunggu Verifikasi</button>
-                    <?php else : ?>
-                        <button class="hero-button disabled-btn" disabled>Belum Ada Tagihan</button>
-                    <?php endif; ?>
+                <div class="hero-right">
+                    <div style="width: 100%;">
+                        <?php 
+                        $status_pembayaran = strtolower(trim($t['status_pembayaran'] ?? ''));
+                        $status_langganan = strtolower(trim($data['status_langganan'] ?? ''));
+                        ?>
 
-                    <?php if (empty($data['id_langganan']) || $status_l == 'menunggu_verifikasi' || $status_l == 'berhenti') : ?>
-                        <button type="button" class="btn-outline-danger" disabled>Berhenti Langganan</button>
-                    <?php elseif ($status_l == 'aktif' || $status_l == 'suspend' || $status_l == 'dicabut') : ?>
-                        <button type="button" class="btn-outline-danger" onclick="openBerhentiModal()">Berhenti Langganan</button>
-                    <?php endif; ?>
+                        <?php if($status_langganan == 'dicabut') : ?>
+                            <button class="hero-button btn-dicabut" disabled>Layanan Dicabut</button>
+                        <?php elseif($status_pembayaran == 'expired') : ?>
+                            <button class="hero-button" disabled style="background:#71717a; border:none;">Tagihan Kadaluarsa</button>
+                        <?php elseif($status_pembayaran == 'belum_bayar') : ?>
+                            <a href="tagihan/bayar.php?id=<?= $t['id_transaksi']; ?>" class="hero-button">Bayar Tagihan</a>
+                        <?php elseif($status_pembayaran == 'menunggu_verifikasi') : ?>
+                            <button class="hero-button waiting-btn" disabled>Menunggu Verifikasi</button>
+                        <?php else : ?>
+                            <button class="hero-button disabled-btn" disabled>Belum Ada Tagihan</button>
+                        <?php endif; ?>
+
+                        <?php if (in_array($status_langganan, ['aktif', 'suspend'])) : ?>
+                            <button type="button" class="btn-outline-danger" onclick="openBerhentiModal()">Berhenti Langganan</button>
+                        <?php else : ?>
+                            <button type="button" class="btn-outline-danger" disabled>Berhenti Langganan</button>
+                        <?php endif; ?>
+                    </div>
                 </div>
-            </div>
         </div>
 
         <div class="table-card">
@@ -537,8 +581,8 @@ function tgl_indo($tgl) {
                     <?php if (mysqli_num_rows($riwayat) > 0) : ?>
                         <?php while ($r = mysqli_fetch_assoc($riwayat)) : 
                             $s_pay = strtolower($r['status_pembayaran']);
-                            $class = ($s_pay == 'lunas') ? 'active' : (($s_pay == 'menunggu_verifikasi') ? 'pending' : 'belum');
-                            $text  = ($s_pay == 'lunas') ? 'Lunas' : (($s_pay == 'menunggu_verifikasi') ? 'Menunggu Verifikasi' : 'Belum Bayar');
+                            $class = ($s_pay == 'lunas') ? 'active' : (($s_pay == 'menunggu_verifikasi') ? 'pending' : (($s_pay == 'expired') ? 'expired' : 'belum'));
+                            $text  = ($s_pay == 'lunas') ? 'Lunas' : (($s_pay == 'menunggu_verifikasi') ? 'Menunggu Verifikasi' : (($s_pay == 'expired') ? 'Expired' : 'Belum Bayar'));
                             
                             $format_bulan = sprintf('%02d', $r['bulan_tagihan']);
                             $string_tanggal = $r['tahun_tagihan'] . '-' . $format_bulan . '-01';

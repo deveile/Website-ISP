@@ -7,100 +7,117 @@ if ($_SESSION['role'] != 'admin') {
     exit;
 }
 
-$query_notif_pemasangan = mysqli_query($koneksi, "
-    SELECT COUNT(*) AS total
-    FROM tb_pemasangan
-    WHERE status_pemasangan = 'menunggu'
-");
+$query_notif_pemasangan = mysqli_query($koneksi, "SELECT COUNT(*) AS total FROM tb_pemasangan WHERE status_pemasangan = 'menunggu'");
 $total_notif_pemasangan = mysqli_fetch_assoc($query_notif_pemasangan)['total'];
 
-$query_notif_transaksi = mysqli_query($koneksi, "
-    SELECT COUNT(*) AS total
-    FROM tb_transaksi
-    WHERE status_pembayaran = 'menunggu_verifikasi'
-");
+$query_notif_transaksi = mysqli_query($koneksi, "SELECT COUNT(*) AS total FROM tb_transaksi WHERE status_pembayaran = 'menunggu_verifikasi'");
 $total_notif_transaksi = mysqli_fetch_assoc($query_notif_transaksi)['total'] ?? 0;
-
-$filter_tahun = isset($_GET['tahun']) && $_GET['tahun'] != '' ? (int)$_GET['tahun'] : date('Y');
-$filter_tipe  = isset($_GET['tipe'])  && in_array($_GET['tipe'], ['bulanan','tahunan']) ? $_GET['tipe'] : 'bulanan';
 
 $q_tahun = mysqli_query($koneksi, "SELECT DISTINCT tahun_tagihan FROM tb_transaksi ORDER BY tahun_tagihan DESC");
 $list_tahun = [];
-while ($r = mysqli_fetch_assoc($q_tahun)) $list_tahun[] = $r['tahun_tagihan'];
-if (empty($list_tahun)) $list_tahun = [date('Y')];
+while ($r = mysqli_fetch_assoc($q_tahun)) $list_tahun[] = (int)$r['tahun_tagihan'];
+if (empty($list_tahun)) $list_tahun = [(int)date('Y')];
 
-$q_ringkasan = mysqli_query($koneksi, "
-    SELECT
-        COUNT(*) AS total_transaksi,
-        SUM(jumlah_bayar) AS total_tagihan,
-        SUM(CASE WHEN status_pembayaran='lunas' THEN jumlah_bayar ELSE 0 END) AS total_masuk,
-        SUM(CASE WHEN status_pembayaran='belum_bayar' THEN jumlah_bayar ELSE 0 END) AS total_belum,
-        SUM(CASE WHEN status_pembayaran='menunggu_verifikasi' THEN jumlah_bayar ELSE 0 END) AS total_menunggu,
-        COUNT(CASE WHEN status_pembayaran='lunas' THEN 1 END) AS jml_lunas,
-        COUNT(CASE WHEN status_pembayaran='belum_bayar' THEN 1 END) AS jml_belum,
-        COUNT(CASE WHEN status_pembayaran='menunggu_verifikasi' THEN 1 END) AS jml_menunggu
-    FROM tb_transaksi
-    WHERE tahun_tagihan = $filter_tahun
-");
-$ringkasan = mysqli_fetch_assoc($q_ringkasan);
+$filter_tipe          = isset($_GET['tipe']) && in_array($_GET['tipe'], ['bulanan','tahunan']) ? $_GET['tipe'] : 'bulanan';
+$filter_tahun         = isset($_GET['tahun']) && $_GET['tahun'] != '' ? (int)$_GET['tahun'] : (int)date('Y');
+$filter_bulan         = isset($_GET['bulan']) ? (int)$_GET['bulan'] : 0; // 0 berarti Semua Bulan
+$filter_tahun_mulai   = isset($_GET['tahun_mulai']) && $_GET['tahun_mulai'] != '' ? (int)$_GET['tahun_mulai'] : min($list_tahun);
+$filter_tahun_selesai = isset($_GET['tahun_selesai']) && $_GET['tahun_selesai'] != '' ? (int)$_GET['tahun_selesai'] : max($list_tahun);
 
-$q_bulanan = mysqli_query($koneksi, "
-    SELECT
-        bulan_tagihan,
-        tahun_tagihan,
-        COUNT(*) AS total_transaksi,
-        SUM(jumlah_bayar) AS total_tagihan,
-        SUM(CASE WHEN status_pembayaran='lunas' THEN jumlah_bayar ELSE 0 END) AS pendapatan,
-        SUM(CASE WHEN status_pembayaran='belum_bayar' THEN jumlah_bayar ELSE 0 END) AS belum_bayar,
-        COUNT(CASE WHEN status_pembayaran='lunas' THEN 1 END) AS jml_lunas,
-        COUNT(CASE WHEN status_pembayaran='belum_bayar' THEN 1 END) AS jml_belum,
-        COUNT(CASE WHEN status_pembayaran='menunggu_verifikasi' THEN 1 END) AS jml_menunggu
-    FROM tb_transaksi
-    WHERE tahun_tagihan = $filter_tahun
-    GROUP BY tahun_tagihan, bulan_tagihan
-    ORDER BY bulan_tagihan ASC
-");
-
-$data_bulanan = [];
-while ($r = mysqli_fetch_assoc($q_bulanan)) $data_bulanan[] = $r;
-
-$q_tahunan = mysqli_query($koneksi, "
-    SELECT
-        tahun_tagihan,
-        COUNT(*) AS total_transaksi,
-        SUM(jumlah_bayar) AS total_tagihan,
-        SUM(CASE WHEN status_pembayaran='lunas' THEN jumlah_bayar ELSE 0 END) AS pendapatan,
-        SUM(CASE WHEN status_pembayaran='belum_bayar' THEN jumlah_bayar ELSE 0 END) AS belum_bayar,
-        COUNT(CASE WHEN status_pembayaran='lunas' THEN 1 END) AS jml_lunas,
-        COUNT(CASE WHEN status_pembayaran='belum_bayar' THEN 1 END) AS jml_belum
-    FROM tb_transaksi
-    GROUP BY tahun_tagihan
-    ORDER BY tahun_tagihan DESC
-");
-
-$data_tahunan = [];
-while ($r = mysqli_fetch_assoc($q_tahunan)) $data_tahunan[] = $r;
-
-$nama_bulan = ['','Januari','Februari','Maret','April','Mei','Juni',
-               'Juli','Agustus','September','Oktober','November','Desember'];
-
+$nama_bulan = ['','Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
 function rp($n) { return 'Rp ' . number_format((int)$n, 0, ',', '.'); }
 
-$chart_labels    = [];
-$chart_masuk     = [];
-$chart_belum     = [];
-for ($i = 1; $i <= 12; $i++) {
-    $chart_labels[] = substr(['','Jan','Feb','Mar','Apr','Mei','Jun',
-                              'Jul','Agu','Sep','Okt','Nov','Des'][$i], 0, 3);
-    $found = false;
-    foreach ($data_bulanan as $b) {
-        if ((int)$b['bulan_tagihan'] === $i) {
-            $chart_masuk[]  = (int)$b['pendapatan'];
-            $chart_belum[]  = (int)$b['belum_bayar'];
-            $found = true; break;
-        }
+if ($filter_tipe === 'bulanan') {
+    $where_bulanan = "WHERE tahun_tagihan = $filter_tahun";
+    if ($filter_bulan > 0) {
+        $where_bulanan .= " AND bulan_tagihan = $filter_bulan";
     }
-    if (!$found) { $chart_masuk[] = 0; $chart_belum[] = 0; }
+
+    $q_ringkasan = mysqli_query($koneksi, "
+        SELECT
+            COUNT(*) AS total_transaksi,
+            SUM(jumlah_bayar) AS total_tagihan,
+            SUM(CASE WHEN status_pembayaran='lunas' THEN jumlah_bayar ELSE 0 END) AS total_masuk,
+            SUM(CASE WHEN status_pembayaran='belum_bayar' THEN jumlah_bayar ELSE 0 END) AS total_belum,
+            SUM(CASE WHEN status_pembayaran='menunggu_verifikasi' THEN jumlah_bayar ELSE 0 END) AS total_menunggu,
+            COUNT(CASE WHEN status_pembayaran='lunas' THEN 1 END) AS jml_lunas,
+            COUNT(CASE WHEN status_pembayaran='belum_bayar' THEN 1 END) AS jml_belum,
+            COUNT(CASE WHEN status_pembayaran='menunggu_verifikasi' THEN 1 END) AS jml_menunggu
+        FROM tb_transaksi
+        $where_bulanan
+    ");
+    $ringkasan = mysqli_fetch_assoc($q_ringkasan);
+
+    // Query Rincian Tabel Per Bulan
+    $q_bulanan = mysqli_query($koneksi, "
+        SELECT
+            bulan_tagihan, tahun_tagihan,
+            COUNT(*) AS total_transaksi,
+            SUM(jumlah_bayar) AS total_tagihan,
+            SUM(CASE WHEN status_pembayaran='lunas' THEN jumlah_bayar ELSE 0 END) AS pendapatan,
+            SUM(CASE WHEN status_pembayaran='belum_bayar' THEN jumlah_bayar ELSE 0 END) AS belum_bayar,
+            COUNT(CASE WHEN status_pembayaran='lunas' THEN 1 END) AS jml_lunas,
+            COUNT(CASE WHEN status_pembayaran='belum_bayar' THEN 1 END) AS jml_belum,
+            COUNT(CASE WHEN status_pembayaran='menunggu_verifikasi' THEN 1 END) AS jml_menunggu
+        FROM tb_transaksi
+        $where_bulanan
+        GROUP BY tahun_tagihan, bulan_tagihan
+        ORDER BY bulan_tagihan ASC
+    ");
+    $data_bulanan = [];
+    while ($r = mysqli_fetch_assoc($q_bulanan)) $data_bulanan[] = $r;
+
+    // Siapkan Data Grafik Bulanan
+    $chart_labels = []; $chart_masuk = []; $chart_belum = [];
+    $months_short = ['','Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+    
+    $start_m = $filter_bulan > 0 ? $filter_bulan : 1;
+    $end_m   = $filter_bulan > 0 ? $filter_bulan : 12;
+
+    for ($i = $start_m; $i <= $end_m; $i++) {
+        $chart_labels[] = $months_short[$i];
+        $found = false;
+        foreach ($data_bulanan as $b) {
+            if ((int)$b['bulan_tagihan'] === $i) {
+                $chart_masuk[] = (int)$b['pendapatan'];
+                $chart_belum[] = (int)$b['belum_bayar'];
+                $found = true; break;
+            }
+        }
+        if (!$found) { $chart_masuk[] = 0; $chart_belum[] = 0; }
+    }
+
+// ==========================================
+// LOGIKA JIKA PILIH VIEW TAHUNAN
+// ==========================================
+} else {
+    // Query Ringkasan Card Atas Berdasarkan Jangkauan Tahun
+    $q_all = mysqli_fetch_assoc(mysqli_query($koneksi, "
+        SELECT 
+            COUNT(*) AS tot, 
+            SUM(jumlah_bayar) AS total,
+            SUM(CASE WHEN status_pembayaran='lunas' THEN jumlah_bayar ELSE 0 END) AS masuk
+        FROM tb_transaksi 
+        WHERE tahun_tagihan BETWEEN $filter_tahun_mulai AND $filter_tahun_selesai
+    "));
+
+    // Query Rincian Tabel Per Tahun
+    $q_tahunan = mysqli_query($koneksi, "
+        SELECT
+            tahun_tagihan,
+            COUNT(*) AS total_transaksi,
+            SUM(jumlah_bayar) AS total_tagihan,
+            SUM(CASE WHEN status_pembayaran='lunas' THEN jumlah_bayar ELSE 0 END) AS pendapatan,
+            SUM(CASE WHEN status_pembayaran='belum_bayar' THEN jumlah_bayar ELSE 0 END) AS belum_bayar,
+            COUNT(CASE WHEN status_pembayaran='lunas' THEN 1 END) AS jml_lunas,
+            COUNT(CASE WHEN status_pembayaran='belum_bayar' THEN 1 END) AS jml_belum
+        FROM tb_transaksi
+        WHERE tahun_tagihan BETWEEN $filter_tahun_mulai AND $filter_tahun_selesai
+        GROUP BY tahun_tagihan
+        ORDER BY tahun_tagihan DESC
+    ");
+    $data_tahunan = [];
+    while ($r = mysqli_fetch_assoc($q_tahunan)) $data_tahunan[] = $r;
 }
 ?>
 <!DOCTYPE html>
@@ -128,37 +145,15 @@ for ($i = 1; $i <= 12; $i++) {
         50%       { transform: scale(1.1); box-shadow: 0 0 0 5px rgba(239,68,68,0); }
     }
 
-    .topbar-header-wrapper {
-        display: flex !important;
-        align-items: center !important; 
-        gap: 16px !important;
-        width: 100% !important;
-    }
+    .topbar-header-wrapper { display: flex !important; align-items: center !important; gap: 16px !important; width: 100% !important; }
     .btn-hamburger {
-        background: #f4f4f5 !important; 
-        border: none !important;
-        border-radius: 10px !important;
-        width: 40px !important;
-        height: 40px !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        cursor: pointer !important;
-        color: #18181b !important;
-        transition: all 0.2s ease !important;
-        padding: 0 !important;
-        flex-shrink: 0 !important;
+        background: #f4f4f5 !important; border: none !important; border-radius: 10px !important;
+        width: 40px !important; height: 40px !important; display: flex !important;
+        align-items: center !important; justify-content: center !important; cursor: pointer !important;
+        color: #18181b !important; transition: all 0.2s ease !important; padding: 0 !important; flex-shrink: 0 !important;
     }
-    .btn-hamburger i {
-        font-size: 22px !important;
-        font-weight: 900 !important;
-        -webkit-text-stroke: 0.4px #18181b; 
-        display: inline-block !important;
-        line-height: 1 !important;
-    }
-    .btn-hamburger:hover {
-        background: #e4e4e7 !important;
-    }
+    .btn-hamburger i { font-size: 22px !important; font-weight: 900 !important; -webkit-text-stroke: 0.4px #18181b; display: inline-block !important; line-height: 1 !important; }
+    .btn-hamburger:hover { background: #e4e4e7 !important; }
 
     .lap-stat-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 18px; margin-bottom: 28px; }
     .lap-stat {
@@ -167,11 +162,7 @@ for ($i = 1; $i <= 12; $i++) {
         display: flex; align-items: center; gap: 16px;
     }
     .lap-stat:hover { box-shadow: 0 6px 20px rgba(0,0,0,.08); transform: translateY(-2px); }
-    .lap-stat-icon {
-        width: 52px; height: 52px; border-radius: 14px;
-        display: flex; align-items: center; justify-content: center;
-        font-size: 22px; flex-shrink: 0;
-    }
+    .lap-stat-icon { width: 52px; height: 52px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
     .lap-stat-body small { font-size: 12px; color: #a1a1aa; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; display: block; margin-bottom: 4px; }
     .lap-stat-body strong { font-size: 20px; font-weight: 800; color: #18181b; display: block; line-height: 1.2; }
     .lap-stat-body span   { font-size: 12px; color: #a1a1aa; }
@@ -182,15 +173,8 @@ for ($i = 1; $i <= 12; $i++) {
     .icon-blue   { background: #eff6ff; color: #3b82f6; }
     .icon-yellow { background: #fffbeb; color: #f59e0b; }
 
-    .lap-section {
-        background: #fff; border-radius: 16px; border: 1px solid #e4e4e7;
-        overflow: hidden; margin-bottom: 24px;
-    }
-    .lap-section-header {
-        padding: 18px 24px; border-bottom: 1px solid #e4e4e7;
-        display: flex; align-items: center; justify-content: space-between;
-        flex-wrap: wrap; gap: 12px;
-    }
+    .lap-section { background: #fff; border-radius: 16px; border: 1px solid #e4e4e7; overflow: hidden; margin-bottom: 24px; }
+    .lap-section-header { padding: 18px 24px; border-bottom: 1px solid #e4e4e7; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
     .lap-section-header h3 { font-size: 16px; font-weight: 800; color: #18181b; margin: 0; }
     .lap-section-body { padding: 24px; overflow-x: auto; }
 
@@ -209,44 +193,19 @@ for ($i = 1; $i <= 12; $i++) {
 
     .chart-wrapper { height: 300px; position: relative; }
 
-    .filter-bar {
-        background: #fff; border-radius: 14px; border: 1px solid #e4e4e7;
-        padding: 18px 22px; margin-bottom: 24px;
-        display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
-    }
+    .filter-bar { background: #fff; border-radius: 14px; border: 1px solid #e4e4e7; padding: 18px 22px; margin-bottom: 24px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
     .filter-bar label { font-size: 13px; font-weight: 700; color: #52525b; }
-    .filter-bar select, .filter-bar input {
-        padding: 9px 14px; border-radius: 8px;
-        border: 1.5px solid #e4e4e7; font-size: 14px;
-        outline: none; background: #fafafa; color: #18181b;
-        transition: all .2s; cursor: pointer;
-    }
+    .filter-bar select { padding: 9px 14px; border-radius: 8px; border: 1.5px solid #e4e4e7; font-size: 14px; outline: none; background: #fafafa; color: #18181b; transition: all .2s; cursor: pointer; }
     .filter-bar select:focus { border-color: #f4600c; box-shadow: 0 0 0 3px rgba(244,96,12,.12); }
 
     .export-group { display: flex; gap: 8px; margin-left: auto; }
-
-    .btn-export-pdf {
-        display: inline-flex; align-items: center; gap: 7px;
-        padding: 10px 18px; border-radius: 8px; font-size: 13px; font-weight: 700;
-        border: none; cursor: pointer; transition: all .2s; text-decoration: none;
-        background: #fef2f2; color: #dc2626; border: 1.5px solid #fecaca;
-    }
+    .btn-export-pdf { display: inline-flex; align-items: center; gap: 7px; padding: 10px 18px; border-radius: 8px; font-size: 13px; font-weight: 700; border: none; cursor: pointer; transition: all .2s; text-decoration: none; background: #fef2f2; color: #dc2626; border: 1.5px solid #fecaca; }
     .btn-export-pdf:hover { background: #dc2626; color: #fff; border-color: #dc2626; }
-
-    .btn-export-excel {
-        display: inline-flex; align-items: center; gap: 7px;
-        padding: 10px 18px; border-radius: 8px; font-size: 13px; font-weight: 700;
-        border: none; cursor: pointer; transition: all .2s; text-decoration: none;
-        background: #f0fdf4; color: #16a34a; border: 1.5px solid #bbf7d0;
-    }
+    .btn-export-excel { display: inline-flex; align-items: center; gap: 7px; padding: 10px 18px; border-radius: 8px; font-size: 13px; font-weight: 700; border: none; cursor: pointer; transition: all .2s; text-decoration: none; background: #f0fdf4; color: #16a34a; border: 1.5px solid #bbf7d0; }
     .btn-export-excel:hover { background: #16a34a; color: #fff; border-color: #16a34a; }
 
     .tab-group { display: flex; gap: 6px; }
-    .tab-btn {
-        padding: 8px 18px; border-radius: 8px; font-size: 13px; font-weight: 700;
-        border: 1.5px solid #e4e4e7; background: #fafafa; color: #52525b;
-        cursor: pointer; transition: all .2s; text-decoration: none; display: inline-block;
-    }
+    .tab-btn { padding: 8px 18px; border-radius: 8px; font-size: 13px; font-weight: 700; border: 1.5px solid #e4e4e7; background: #fafafa; color: #52525b; cursor: pointer; transition: all .2s; text-decoration: none; display: inline-block; }
     .tab-btn.active { background: #f4600c; color: #fff; border-color: #f4600c; }
     .tab-btn:hover:not(.active) { background: #f4f4f5; color: #18181b; }
 
@@ -266,7 +225,6 @@ for ($i = 1; $i <= 12; $i++) {
         .sidebar.collapsed .sidebar-logo h2, .sidebar.collapsed ul li a span, .sidebar.collapsed .notif-badge { display: none !important; }
         .sidebar.collapsed ul li a { justify-content: center !important; }
     }
-
     @media (max-width: 1024px) {
         .sidebar { position: fixed !important; left: -260px !important; top: 0; bottom: 0; width: 260px !important; z-index: 9999; background: #fff; }
         .sidebar.active { left: 0 !important; }
@@ -286,24 +244,10 @@ for ($i = 1; $i <= 12; $i++) {
         <li><a href="../index.php"><i class="bi bi-grid"></i> <span>Dashboard</span></a></li>
         <li><a href="../paket/index.php"><i class="bi bi-wifi"></i> <span>Kelola Paket</span></a></li>
         <li><a href="../customer/index.php"><i class="bi bi-people"></i> <span>Data Pelanggan</span></a></li>
-        <li><a href="../pemasangan/index.php">
-                <i class="bi bi-tools"></i>
-                <span>Kelola Pemasangan</span>
-                <?php if ($total_notif_pemasangan > 0): ?>
-                    <span class="notif-badge">
-                        <?= $total_notif_pemasangan; ?>
-                    </span>
-                <?php endif; ?>
-                </a>
-            </li>
-            <li>
-                <a href="../transaksi/index.php">
-                    <i class="bi bi-credit-card"></i> <span>Data Transaksi</span>
-                    <?php if ($total_notif_transaksi > 0): ?>
-                        <span class="notif-badge"><?= $total_notif_transaksi; ?></span>
-                    <?php endif; ?>
-                </a>
-            </li>
+        <li><a href="../pemasangan/index.php"><i class="bi bi-tools"></i> <span>Kelola Pemasangan</span>
+                <?php if ($total_notif_pemasangan > 0): ?><span class="notif-badge"><?= $total_notif_pemasangan; ?></span><?php endif; ?></a></li>
+        <li><a href="../transaksi/index.php"><i class="bi bi-credit-card"></i> <span>Data Transaksi</span>
+                <?php if ($total_notif_transaksi > 0): ?><span class="notif-badge"><?= $total_notif_transaksi; ?></span><?php endif; ?></a></li>
         <li><a href="index.php" class="active"><i class="bi bi-bar-chart-line"></i> <span>Laporan Keuangan</span></a></li>
         <li><a href="../admin_user/index.php"><i class="bi bi-person-gear"></i> <span>Kelola Admin</span></a></li>
         <li><a href="../teknisi_user/index.php"><i class="bi bi-person-plus"></i> <span>Kelola Teknisi</span></a></li>
@@ -314,9 +258,7 @@ for ($i = 1; $i <= 12; $i++) {
 <div class="dashboard-content">
     <div class="topbar">
         <div class="topbar-header-wrapper">
-            <button class="btn-hamburger" id="hamburgerBtn">
-                <i class="bi bi-list"></i>
-            </button>
+            <button class="btn-hamburger" id="hamburgerBtn"><i class="bi bi-list"></i></button>
             <div>
                 <h1 style="margin:0; font-size:24px; font-weight:800; color:#18181b; line-height:1.2;">Laporan Keuangan</h1>
                 <p style="margin:4px 0 0 0; color:#71717a; font-size:14px;">Rekap pendapatan dan tagihan Anuwani Network</p>
@@ -326,37 +268,54 @@ for ($i = 1; $i <= 12; $i++) {
 
     <div class="filter-bar">
         <form method="GET" style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;width:100%;">
+            <input type="hidden" name="tipe" value="<?= $filter_tipe ?>">
 
             <label>Tampilkan:</label>
             <div class="tab-group">
-                <a href="?tipe=bulanan&tahun=<?= $filter_tahun ?>"
-                   class="tab-btn <?= $filter_tipe=='bulanan'?'active':'' ?>">
+                <a href="?tipe=bulanan&tahun=<?= $filter_tahun ?>&bulan=<?= $filter_bulan ?>" class="tab-btn <?= $filter_tipe=='bulanan'?'active':'' ?>">
                     <i class="bi bi-calendar-month"></i> Bulanan
                 </a>
-                <a href="?tipe=tahunan&tahun=<?= $filter_tahun ?>"
-                   class="tab-btn <?= $filter_tipe=='tahunan'?'active':'' ?>">
+                <a href="?tipe=tahunan&tahun_mulai=<?= $filter_tahun_mulai ?>&tahun_selesai=<?= $filter_tahun_selesai ?>" class="tab-btn <?= $filter_tipe=='tahunan'?'active':'' ?>">
                     <i class="bi bi-calendar-range"></i> Tahunan
                 </a>
             </div>
 
             <?php if ($filter_tipe === 'bulanan'): ?>
-            <label>Tahun:</label>
-            <select name="tahun" onchange="this.form.submit()">
-                <?php foreach ($list_tahun as $t): ?>
-                    <option value="<?= $t ?>" <?= $t==$filter_tahun?'selected':'' ?>><?= $t ?></option>
-                <?php endforeach; ?>
-            </select>
-            <input type="hidden" name="tipe" value="bulanan">
+                <label>Bulan:</label>
+                <select name="bulan" onchange="this.form.submit()">
+                    <option value="0" <?= $filter_bulan === 0 ? 'selected' : '' ?>>Semua Bulan</option>
+                    <?php for($m=1; $m<=12; $m++): ?>
+                        <option value="<?= $m ?>" <?= $filter_bulan === $m ? 'selected' : '' ?>><?= $nama_bulan[$m] ?></option>
+                    <?php endfor; ?>
+                </select>
+
+                <label>Tahun:</label>
+                <select name="tahun" onchange="this.form.submit()">
+                    <?php foreach ($list_tahun as $t): ?>
+                        <option value="<?= $t ?>" <?= $t===$filter_tahun?'selected':'' ?>><?= $t ?></option>
+                    <?php endforeach; ?>
+                </select>
+            <?php else: ?>
+                <label>Dari Tahun:</label>
+                <select name="tahun_mulai" onchange="this.form.submit()">
+                    <?php foreach (array_reverse($list_tahun) as $t): ?>
+                        <option value="<?= $t ?>" <?= $t===$filter_tahun_mulai?'selected':'' ?>><?= $t ?></option>
+                    <?php endforeach; ?>
+                </select>
+
+                <label>Sampai Tahun:</label>
+                <select name="tahun_selesai" onchange="this.form.submit()">
+                    <?php foreach ($list_tahun as $t): ?>
+                        <option value="<?= $t ?>" <?= $t===$filter_tahun_selesai?'selected':'' ?>><?= $t ?></option>
+                    <?php endforeach; ?>
+                </select>
             <?php endif; ?>
 
-
             <div class="export-group">
-                <a href="export_pdf.php?tipe=<?= $filter_tipe ?>&tahun=<?= $filter_tahun ?>"
-                   target="_blank" class="btn-export-pdf">
+                <a href="export_pdf.php?tipe=<?= $filter_tipe ?>&tahun=<?= $filter_tahun ?>&bulan=<?= $filter_bulan ?>&tahun_mulai=<?= $filter_tahun_mulai ?>&tahun_selesai=<?= $filter_tahun_selesai ?>" target="_blank" class="btn-export-pdf">
                     <i class="bi bi-file-earmark-pdf"></i> Export PDF
                 </a>
-                <a href="export_excel.php?tipe=<?= $filter_tipe ?>&tahun=<?= $filter_tahun ?>"
-                   class="btn-export-excel">
+                <a href="export_excel.php?tipe=<?= $filter_tipe ?>&tahun=<?= $filter_tahun ?>&bulan=<?= $filter_bulan ?>&tahun_mulai=<?= $filter_tahun_mulai ?>&tahun_selesai=<?= $filter_tahun_selesai ?>" class="btn-export-excel">
                     <i class="bi bi-file-earmark-excel"></i> Export Excel
                 </a>
             </div>
@@ -369,7 +328,7 @@ for ($i = 1; $i <= 12; $i++) {
         <div class="lap-stat">
             <div class="lap-stat-icon icon-orange"><i class="bi bi-cash-stack"></i></div>
             <div class="lap-stat-body">
-                <small>Total Tagihan <?= $filter_tahun ?></small>
+                <small>Total Tagihan <?= $filter_bulan > 0 ? $nama_bulan[$filter_bulan] : '' ?> <?= $filter_tahun ?></small>
                 <strong><?= rp($ringkasan['total_tagihan']) ?></strong>
                 <span><?= (int)$ringkasan['total_transaksi'] ?> transaksi</span>
             </div>
@@ -402,7 +361,7 @@ for ($i = 1; $i <= 12; $i++) {
 
     <div class="lap-section">
         <div class="lap-section-header">
-            <h3><i class="bi bi-bar-chart" style="color:#f4600c;margin-right:8px;"></i>Grafik Pendapatan <?= $filter_tahun ?></h3>
+            <h3><i class="bi bi-bar-chart" style="color:#f4600c;margin-right:8px;"></i>Grafik Pendapatan <?= $filter_bulan > 0 ? $nama_bulan[$filter_bulan] : '' ?> <?= $filter_tahun ?></h3>
         </div>
         <div class="lap-section-body">
             <div class="chart-wrapper">
@@ -432,7 +391,7 @@ for ($i = 1; $i <= 12; $i++) {
                 </thead>
                 <tbody>
                 <?php if (empty($data_bulanan)): ?>
-                    <tr><td colspan="8" style="text-align:center;color:#a1a1aa;padding:32px;">Tidak ada data untuk tahun <?= $filter_tahun ?></td></tr>
+                    <tr><td colspan="8" style="text-align:center;color:#a1a1aa;padding:32px;">Tidak ada data untuk filter tersebut</td></tr>
                 <?php else: ?>
                     <?php
                     $tot_transaksi = $tot_lunas = $tot_belum = $tot_menunggu = $tot_masuk = $tot_tunggakan = 0;
@@ -455,13 +414,9 @@ for ($i = 1; $i <= 12; $i++) {
                         <td style="color:#dc2626;"><?= rp($b['belum_bayar']) ?></td>
                         <td>
                             <div style="min-width:80px;">
-                                <span style="font-size:12px;font-weight:700;color:<?= $pct>=80?'#16a34a':($pct>=50?'#d97706':'#dc2626') ?>">
-                                    <?= $pct ?>%
-                                </span>
+                                <span style="font-size:12px;font-weight:700;color:<?= $pct>=80?'#16a34a':($pct>=50?'#d97706':'#dc2626') ?>"><?= $pct ?>%</span>
                                 <div class="progress-bar-wrap">
-                                    <div class="progress-bar-fill"
-                                         style="width:<?= $pct ?>%;background:<?= $pct>=80?'#22c55e':($pct>=50?'#f59e0b':'#ef4444') ?>;">
-                                    </div>
+                                    <div class="progress-bar-fill" style="width:<?= $pct ?>%;background:<?= $pct>=80?'#22c55e':($pct>=50?'#f59e0b':'#ef4444') ?>;"></div>
                                 </div>
                             </div>
                         </td>
@@ -489,32 +444,26 @@ for ($i = 1; $i <= 12; $i++) {
 
     <?php else: ?>
 
-    <?php
-    $q_all = mysqli_fetch_assoc(mysqli_query($koneksi,
-        "SELECT COUNT(*) AS tot, SUM(jumlah_bayar) AS total,
-                SUM(CASE WHEN status_pembayaran='lunas' THEN jumlah_bayar ELSE 0 END) AS masuk
-         FROM tb_transaksi"));
-    ?>
     <div class="lap-stat-grid" style="grid-template-columns:repeat(3,1fr);">
         <div class="lap-stat">
             <div class="lap-stat-icon icon-blue"><i class="bi bi-receipt"></i></div>
             <div class="lap-stat-body">
-                <small>Total Semua Transaksi</small>
+                <small>Total Transaksi Terfilter</small>
                 <strong><?= (int)$q_all['tot'] ?></strong>
-                <span>Sejak pertama beroperasi</span>
+                <span>Tahun <?= $filter_tahun_mulai ?> - <?= $filter_tahun_selesai ?></span>
             </div>
         </div>
         <div class="lap-stat">
             <div class="lap-stat-icon icon-orange"><i class="bi bi-cash-stack"></i></div>
             <div class="lap-stat-body">
-                <small>Total Tagihan Keseluruhan</small>
+                <small>Total Tagihan Jangkauan</small>
                 <strong><?= rp($q_all['total']) ?></strong>
             </div>
         </div>
         <div class="lap-stat">
             <div class="lap-stat-icon icon-green"><i class="bi bi-graph-up-arrow"></i></div>
             <div class="lap-stat-body">
-                <small>Total Pendapatan Masuk</small>
+                <small>Total Pendapatan Jangkauan</small>
                 <strong><?= rp($q_all['masuk']) ?></strong>
             </div>
         </div>
@@ -522,7 +471,7 @@ for ($i = 1; $i <= 12; $i++) {
 
     <div class="lap-section">
         <div class="lap-section-header">
-            <h3><i class="bi bi-bar-chart" style="color:#f4600c;margin-right:8px;"></i>Grafik Pendapatan Per Tahun</h3>
+            <h3><i class="bi bi-bar-chart" style="color:#f4600c;margin-right:8px;"></i>Grafik Pendapatan Per Tahun (<?= $filter_tahun_mulai ?> - <?= $filter_tahun_selesai ?>)</h3>
         </div>
         <div class="lap-section-body">
             <div class="chart-wrapper">
@@ -530,7 +479,6 @@ for ($i = 1; $i <= 12; $i++) {
             </div>
         </div>
     </div>
-
 
     <div class="lap-section">
         <div class="lap-section-header">
@@ -551,7 +499,7 @@ for ($i = 1; $i <= 12; $i++) {
                 </thead>
                 <tbody>
                 <?php if (empty($data_tahunan)): ?>
-                    <tr><td colspan="7" style="text-align:center;color:#a1a1aa;padding:32px;">Belum ada data</td></tr>
+                    <tr><td colspan="7" style="text-align:center;color:#a1a1aa;padding:32px;">Belum ada data jangkauan tahun ini</td></tr>
                 <?php else: ?>
                     <?php foreach ($data_tahunan as $t):
                         $pct = $t['total_tagihan'] > 0 ? round($t['pendapatan'] / $t['total_tagihan'] * 100) : 0;
@@ -564,13 +512,9 @@ for ($i = 1; $i <= 12; $i++) {
                         <td style="color:#16a34a;font-weight:700;"><?= rp($t['pendapatan']) ?></td>
                         <td style="color:#dc2626;"><?= rp($t['belum_bayar']) ?></td>
                         <td>
-                            <span style="font-size:12px;font-weight:700;color:<?= $pct>=80?'#16a34a':($pct>=50?'#d97706':'#dc2626') ?>">
-                                <?= $pct ?>%
-                            </span>
+                            <span style="font-size:12px;font-weight:700;color:<?= $pct>=80?'#16a34a':($pct>=50?'#d97706':'#dc2626') ?>"><?= $pct ?>%</span>
                             <div class="progress-bar-wrap">
-                                <div class="progress-bar-fill"
-                                     style="width:<?= $pct ?>%;background:<?= $pct>=80?'#22c55e':($pct>=50?'#f59e0b':'#ef4444') ?>;">
-                                </div>
+                                <div class="progress-bar-fill" style="width:<?= $pct ?>%;background:<?= $pct>=80?'#22c55e':($pct>=50?'#f59e0b':'#ef4444') ?>;"></div>
                             </div>
                         </td>
                     </tr>
@@ -580,7 +524,6 @@ for ($i = 1; $i <= 12; $i++) {
             </table>
         </div>
     </div>
-
     <?php endif; ?>
 </div>
 </div>
@@ -611,7 +554,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 sidebar.classList.toggle('active');
             }
         });
-
         document.addEventListener('click', function(e) {
             if (window.innerWidth <= 1024 && !sidebar.contains(e.target) && !hamburgerBtn.contains(e.target)) {
                 sidebar.classList.remove('active');
@@ -626,45 +568,26 @@ new Chart(document.getElementById('chartBulanan'), {
     data: {
         labels: <?= json_encode($chart_labels) ?>,
         datasets: [
-            {
-                label: 'Pendapatan Masuk',
-                data: <?= json_encode($chart_masuk) ?>,
-                backgroundColor: 'rgba(34,197,94,.75)',
-                borderRadius: 8, borderSkipped: false,
-            },
-            {
-                label: 'Belum Dibayar',
-                data: <?= json_encode($chart_belum) ?>,
-                backgroundColor: 'rgba(239,68,68,.65)',
-                borderRadius: 8, borderSkipped: false,
-            }
+            { label: 'Pendapatan Masuk', data: <?= json_encode($chart_masuk) ?>, backgroundColor: 'rgba(34,197,94,.75)', borderRadius: 8, borderSkipped: false },
+            { label: 'Belum Dibayar', data: <?= json_encode($chart_belum) ?>, backgroundColor: 'rgba(239,68,68,.65)', borderRadius: 8, borderSkipped: false }
         ]
     },
     options: {
         responsive: true, maintainAspectRatio: false,
         plugins: {
             legend: { position: 'top', labels: { font: { size: 13, weight: '600' } } },
-            tooltip: {
-                callbacks: {
-                    label: ctx => ' Rp ' + ctx.raw.toLocaleString('id-ID')
-                }
-            }
+            tooltip: { callbacks: { label: ctx => ' Rp ' + ctx.raw.toLocaleString('id-ID') } }
         },
         scales: {
-            y: {
-                ticks: {
-                    callback: v => 'Rp ' + (v/1000000).toFixed(1) + 'jt'
-                },
-                grid: { color: '#f4f4f5' }
-            },
+            y: { ticks: { callback: v => 'Rp ' + (v/1000000).toFixed(1) + 'jt' }, grid: { color: '#f4f4f5' } },
             x: { grid: { display: false } }
         }
     }
 });
 <?php else: ?>
-const tahunLabels = <?= json_encode(array_column($data_tahunan, 'tahun_tagihan')) ?>;
-const tahunMasuk  = <?= json_encode(array_map(fn($r)=>(int)$r['pendapatan'], $data_tahunan)) ?>;
-const tahunBelum  = <?= json_encode(array_map(fn($r)=>(int)$r['belum_bayar'], $data_tahunan)) ?>;
+const tahunLabels = <?= json_encode(array_reverse(array_column($data_tahunan, 'tahun_tagihan'))) ?>;
+const tahunMasuk  = <?= json_encode(array_reverse(array_map(fn($r)=>(int)$r['pendapatan'], $data_tahunan))) ?>;
+const tahunBelum  = <?= json_encode(array_reverse(array_map(fn($r)=>(int)$r['belum_bayar'], $data_tahunan))) ?>;
 
 new Chart(document.getElementById('chartTahunan'), {
     type: 'bar',
