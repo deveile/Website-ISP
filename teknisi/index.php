@@ -32,7 +32,7 @@ $sql_jadwal = "SELECT tp.*, tc.nama_customer, tc.telepon_customer, pk.nama_paket
                INNER JOIN tb_customer tc ON tp.id_customer = tc.id_customer
                INNER JOIN tb_paket pk ON tp.id_paket = pk.id_paket
                WHERE tp.id_teknisi = '$id_teknisi'
-               ORDER BY tp.status_pemasangan ASC, tp.tanggal_pasang ASC LIMIT 3";
+               ORDER BY tp.status_pemasangan ASC, tp.tanggal_pasang DESC LIMIT 3";
 $riwayat_tugas = mysqli_query($koneksi, $sql_jadwal);
 
 function tgl_indo($tgl) {

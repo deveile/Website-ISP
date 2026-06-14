@@ -20,7 +20,7 @@ if(!$koneksi){
 
 // PANGGIL AUTOLOAD PHPMAILER VERSI LAMA DI SINI
 // Jalur disesuaikan: auth -> Mail\phpmailer -> PHPMailerAutoload.php
-require 'auth/Mail/phpmailer/PHPMailerAutoload.php';
+require_once 'auth/Mail/phpmailer/PHPMailerAutoload.php';
 
 function kirimEmailPeringatan($koneksi, $id_customer, $sisa_tenggat) {
     // 1. Ambil data email dan nama customer dari tb_customer

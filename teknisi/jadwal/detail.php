@@ -20,7 +20,7 @@ $success_alert = false;
 $error_alert = false;
 $msg = "";
 
-// Ambil data detail pemasangan & Izinkan akses jika ID teknisi COCOK ATAU jika tugas BELUM memiliki teknisi (Sistem Rebutan)
+// Ambil data detail pemasangan & HANYA IZINKAN AKSES jika ID teknisi COCOK dengan yang ditunjuk Admin
 $query_detail = mysqli_query($koneksi, "
     SELECT 
         p.*,
@@ -30,7 +30,7 @@ $query_detail = mysqli_query($koneksi, "
     LEFT JOIN tb_customer c ON p.id_customer = c.id_customer
     LEFT JOIN tb_paket pk ON p.id_paket = pk.id_paket
     WHERE p.id_pemasangan = '$id_pemasangan' 
-      AND (p.id_teknisi = '$id_teknisi_session' OR p.id_teknisi IS NULL OR p.id_teknisi = '' OR p.id_teknisi = 0)
+      AND p.id_teknisi = '$id_teknisi_session' -- Mengunci akses hanya untuk teknisi pilihan Admin
 ");
 $data = mysqli_fetch_assoc($query_detail);
 
@@ -63,18 +63,20 @@ if (isset($_POST['ubah_status'])) {
                 
                 if (in_array($file_ext, $ekstensi_diizinkan)) {
                     $nama_file_baru = "bukti_" . $id_pemasangan . "_" . time() . "." . $file_ext;
-                    $folder_tujuan = "../../assets/images/bukti_pasang/";
+                    $folder_tujuan = "../../assets/uploads/bukti_pasang/";
                     
                     if (!is_dir($folder_tujuan)) { mkdir($folder_tujuan, 0755, true); }
 
-                    if (move_uploaded_file($file_tmp, $folder_tujuan . $nama_file_baru)) {
-                        // KUNCI AMAN: Update status dan tanggal pasang berdasarkan ID teknisi yang login
+                   if (move_uploaded_file($file_tmp, $folder_tujuan . $nama_file_baru)) {
+                        // PERBAIKAN 1: Izinkan update jika tugas milik dia, ATAU jika statusnya rebutan (id_teknisi masih kosong/0)
                         $query_update = "UPDATE tb_pemasangan SET 
                                             status_pemasangan = '$status_baru', 
+                                            id_teknisi = '$id_teknisi_session', -- Amankan penguncian ID Teknisi di sini
                                             tanggal_pasang = '$tanggal_sekarang',
                                             catatan = '$catatan_teknis',
                                             bukti_foto = '$nama_file_baru'
-                                         WHERE id_pemasangan = '$id_pemasangan' AND id_teknisi = '$id_teknisi_session'";
+                                         WHERE id_pemasangan = '$id_pemasangan' 
+                                           AND (id_teknisi = '$id_teknisi_session' OR id_teknisi IS NULL OR id_teknisi = '' OR id_teknisi = 0)";
                     } else {
                         $error_alert = true;
                         $msg = "Gagal memindahkan file foto ke server data.";
@@ -88,11 +90,14 @@ if (isset($_POST['ubah_status'])) {
                 $msg = "Gagal menyelesaikan tugas! Teknisi wajib menyertakan foto bukti pemasangan.";
             }
         } else {
-            // JIKA STATUS DIUBAH MENJADI DIPROSES
+            // JIKA STATUS DIUBAH MENJADI DIPROSES (Sistem Rebutan dimulai dari sini)
+            // PERBAIKAN 2: Set id_teknisi saat tombol "Mulai Proses Lapangan" diklik
             $query_update = "UPDATE tb_pemasangan SET 
                                 status_pemasangan = '$status_baru',
+                                id_teknisi = '$id_teknisi_session', -- Kunci teknisinya di sini agar tugas tidak direbut orang lain
                                 catatan = '$catatan_teknis'
-                             WHERE id_pemasangan = '$id_pemasangan' AND id_teknisi = '$id_teknisi_session'";
+                             WHERE id_pemasangan = '$id_pemasangan' 
+                               AND (id_teknisi = '$id_teknisi_session' OR id_teknisi IS NULL OR id_teknisi = '' OR id_teknisi = 0)";
         }
 
         // Eksekusi Query
@@ -267,7 +272,7 @@ function tgl_indo($tanggal) {
                     <?php if (!empty($data['bukti_foto'])) : ?>
                     <tr>
                         <td class="label">Foto Bukti Terupload</td>
-                        <td>: <a href="../../assets/images/bukti_pasang/<?= $data['bukti_foto']; ?>" target="_blank" style="color: #ea580c; font-weight: 600; text-decoration: underline;"><i class="bi bi-image"></i> Lihat Foto Lapangan</a></td>
+                        <td>: <a href="../../assets/uploads/bukti_pasang/<?= $data['bukti_foto']; ?>" target="_blank" style="color: #ea580c; font-weight: 600; text-decoration: underline;"><i class="bi bi-image"></i> Lihat Foto Lapangan</a></td>
                     </tr>
                     <?php endif; ?>
                 </table>

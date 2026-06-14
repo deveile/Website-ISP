@@ -39,7 +39,7 @@ if (mysqli_num_rows($cek_username) > 0) {
 
     // Kirim Email OTP menggunakan PHPMailer terlebih dahulu sebelum insert database
     // Sesuaikan path ke file PHPMailerAutoload.php milikmu
-    require "Mail/phpmailer/PHPMailerAutoload.php"; 
+    require_once "Mail/phpmailer/PHPMailerAutoload.php"; 
     $mail = new PHPMailer;
 
     $mail->isSMTP();

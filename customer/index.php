@@ -523,45 +523,61 @@ function tgl_indo($tgl) {
                 <div class="hero-info-wrapper">
                     <div class="hero-info-box">
                         <span style="font-size: 12px; opacity: 0.8; display:block; margin-bottom:4px;">Jatuh Tempo</span>
-                            <h3 style="margin:0; font-size:15px; font-weight:700;">
-                                <?= ($status_l == 'dicabut') ? '-' : tgl_indo($data['tanggal_selesai']); ?>
-                            </h3>
-                        </div>
-                        <div class="hero-info-box">
-                            <span style="font-size: 12px; opacity: 0.8; display:block; margin-bottom:4px;">Tagihan Bulan Ini</span>
-                            <h3 style="margin:0; font-size:15px; font-weight:700;">
-                                <?= ($status_l == 'dicabut') ? '-' : (($nominal > 0) ? 'Rp '.number_format($nominal, 0, ',', '.') : 'Tidak Ada'); ?>
-                            </h3>
+                        <h3 style="margin:0; font-size:15px; font-weight:700;">
+                            <?php 
+                            if ($status_l == 'dicabut') {
+                                echo 'Non-Aktif';
+                            } else {
+                                echo tgl_indo($data['tanggal_selesai']);
+                            }
+                            ?>
+                        </h3>
+                    </div>
+                    <div class="hero-info-box">
+                        <span style="font-size: 12px; opacity: 0.8; display:block; margin-bottom:4px;">Tagihan Bulan Ini</span>
+                        <h3 style="margin:0; font-size:15px; font-weight:700;">
+                            <?php 
+                            if ($status_l == 'dicabut') {
+                                echo 'Rp 0';
+                            } else {
+                                // Jika status pembayaran belum lunas dan ada data tagihan, tampilkan nominalnya
+                                echo ($t && $t['status_pembayaran'] != 'lunas') ? 'Rp ' . number_format($t['jumlah_bayar'], 0, ',', '.') : 'Tidak Ada';
+                            }
+                            ?>
+                        </h3>
                     </div>
                 </div>
             </div>
 
-                <div class="hero-right">
-                    <div style="width: 100%;">
-                        <?php 
-                        $status_pembayaran = strtolower(trim($t['status_pembayaran'] ?? ''));
-                        $status_langganan = strtolower(trim($data['status_langganan'] ?? ''));
-                        ?>
+            <div class="hero-right">
+                <div style="width: 100%;">
+                    <?php 
+                    $status_pembayaran = strtolower(trim($t['status_pembayaran'] ?? ''));
+                    $status_langganan = strtolower(trim($data['status_langganan'] ?? ''));
+                    ?>
 
-                        <?php if($status_langganan == 'dicabut') : ?>
-                            <button class="hero-button btn-dicabut" disabled>Layanan Dicabut</button>
-                        <?php elseif($status_pembayaran == 'expired') : ?>
-                            <button class="hero-button" disabled style="background:#71717a; border:none;">Tagihan Kadaluarsa</button>
-                        <?php elseif($status_pembayaran == 'belum_bayar') : ?>
-                            <a href="tagihan/bayar.php?id=<?= $t['id_transaksi']; ?>" class="hero-button">Bayar Tagihan</a>
-                        <?php elseif($status_pembayaran == 'menunggu_verifikasi') : ?>
-                            <button class="hero-button waiting-btn" disabled>Menunggu Verifikasi</button>
-                        <?php else : ?>
-                            <button class="hero-button disabled-btn" disabled>Belum Ada Tagihan</button>
-                        <?php endif; ?>
+                    <?php if ($status_langganan == 'dicabut') : ?>
+                        <!-- TOMBOL RE-AKTIVASI JIKA LAYANAN DICABUT -->
+                        <a href="paket/index.php" class="hero-button" style="background-color: #10b981; border: none; display: block; text-decoration: none;">
+                            <i class="bi bi-lightning-charge-fill"></i> Langganan Lagi
+                        </a>
+                    <?php elseif ($status_pembayaran == 'expired') : ?>
+                        <button class="hero-button" disabled style="background:#71717a; border:none;">Tagihan Kadaluarsa</button>
+                    <?php elseif ($status_pembayaran == 'belum_bayar') : ?>
+                        <a href="tagihan/bayar.php?id=<?= $t['id_transaksi']; ?>" class="hero-button">Bayar Tagihan</a>
+                    <?php elseif ($status_pembayaran == 'menunggu_verifikasi') : ?>
+                        <button class="hero-button waiting-btn" disabled>Menunggu Verifikasi</button>
+                    <?php else : ?>
+                        <button class="hero-button disabled-btn" disabled>Belum Ada Tagihan</button>
+                    <?php endif; ?>
 
-                        <?php if (in_array($status_langganan, ['aktif', 'suspend'])) : ?>
-                            <button type="button" class="btn-outline-danger" onclick="openBerhentiModal()">Berhenti Langganan</button>
-                        <?php else : ?>
-                            <button type="button" class="btn-outline-danger" disabled>Berhenti Langganan</button>
-                        <?php endif; ?>
-                    </div>
+                    <?php if (in_array($status_langganan, ['aktif', 'suspend'])) : ?>
+                        <button type="button" class="btn-outline-danger" onclick="openBerhentiModal()">Berhenti Langganan</button>
+                    <?php else : ?>
+                        <button type="button" class="btn-outline-danger" disabled>Berhenti Langganan</button>
+                    <?php endif; ?>
                 </div>
+            </div>
         </div>
 
         <div class="table-card">
@@ -581,7 +597,7 @@ function tgl_indo($tgl) {
                     <?php if (mysqli_num_rows($riwayat) > 0) : ?>
                         <?php while ($r = mysqli_fetch_assoc($riwayat)) : 
                             $s_pay = strtolower($r['status_pembayaran']);
-                            $class = ($s_pay == 'lunas') ? 'active' : (($s_pay == 'menunggu_verifikasi') ? 'pending' : (($s_pay == 'expired') ? 'expired' : 'belum'));
+                            $class = ($s_pay == 'lunas') ? 'active' : (($s_pay == 'menunggu_verifikasi') ? 'pending' : (($s_pay == 'expired') ? 'expired' : 'belum_bayar'));
                             $text  = ($s_pay == 'lunas') ? 'Lunas' : (($s_pay == 'menunggu_verifikasi') ? 'Menunggu Verifikasi' : (($s_pay == 'expired') ? 'Expired' : 'Belum Bayar'));
                             
                             $format_bulan = sprintf('%02d', $r['bulan_tagihan']);
@@ -595,7 +611,7 @@ function tgl_indo($tgl) {
                             <td><span class="status-<?= $class; ?>"><?= $text; ?></span></td>
                             <td><?= !empty($r['tanggal_bayar']) ? tgl_indo($r['tanggal_bayar']) : '-'; ?></td>
                             <td style="text-align:center;">
-                                <?php if ($s_pay == 'belum') : ?>
+                                <?php if ($s_pay == 'belum_bayar') : ?>
                                 <a href="tagihan/bayar.php?id=<?= $r['id_transaksi']; ?>" class="btn-bayar">Bayar</a>
                                 <?php else : ?>
                                     <a href="tagihan/detail.php?id=<?= $r['id_transaksi']; ?>" class="btn-detail">Detail</a>

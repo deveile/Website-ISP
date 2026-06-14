@@ -37,7 +37,7 @@ if (isset($_POST["recover"])) {
         $_SESSION['reset_email'] = $email;
 
         // Load PHPMailer
-        require "Mail/phpmailer/PHPMailerAutoload.php";
+        require_once "Mail/phpmailer/PHPMailerAutoload.php";
         $mail = new PHPMailer;
 
         $mail->isSMTP();
