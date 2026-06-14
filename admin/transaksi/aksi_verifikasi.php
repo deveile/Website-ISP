@@ -61,7 +61,20 @@ if ($aksi === 'terima') {
                     tanggal_selesai = '$tgl_selesai_baru' 
                 WHERE id_langganan = '$id_langganan'
             ");
-        } else {
+        } 
+        // --- LOGIKA BARU: JIKA JENIS TRANSAKSI REAKTIVASI ---
+        elseif ($trx['jenis_transaksi'] == 'reaktivasi' && !empty($trx['id_paket_baru'])) {
+            $id_paket_baru = (int)$trx['id_paket_baru'];
+            $update_langganan = mysqli_query($koneksi, "
+                UPDATE tb_langganan 
+                SET id_paket = '$id_paket_baru', 
+                    status_langganan = 'aktif',
+                    tanggal_mulai = '$tanggal_bayar', 
+                    tanggal_selesai = '$tgl_selesai_baru' 
+                WHERE id_langganan = '$id_langganan'
+            ");
+        } 
+        else {
             $update_langganan = mysqli_query($koneksi, "
                 UPDATE tb_langganan 
                 SET status_langganan = 'aktif',
@@ -96,6 +109,7 @@ if ($aksi === 'terima') {
     ");
 
     if ($ok) {
+       
         mysqli_query($koneksi, "
             UPDATE tb_langganan 
             SET status_langganan = 'suspend' 

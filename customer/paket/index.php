@@ -13,6 +13,8 @@ $queryCustomer = mysqli_query($koneksi, "SELECT * FROM tb_customer WHERE id_user
 $customer = mysqli_fetch_assoc($queryCustomer);
 $id_customer = $customer['id_customer'] ?? '';
 
+// MODIFIKASI LOGIKA: Kita pecah pencarian. 
+// 1. Cek dulu apakah ada langganan yang sedang berjalan (aktif/suspend) untuk fitur UPGRADE
 $cek_langganan = mysqli_query($koneksi, "
     SELECT l.*, p.harga
     FROM tb_langganan l
@@ -22,6 +24,15 @@ $cek_langganan = mysqli_query($koneksi, "
     LIMIT 1
     ");
 $langganan = mysqli_fetch_assoc($cek_langganan);
+
+// 2. Cek apakah customer ini PERNAH punya langganan tapi sekarang statusnya nonaktif (untuk fitur REAKTIVASI)
+$cek_langganan_lama = mysqli_query($koneksi, "
+    SELECT * FROM tb_langganan 
+    WHERE id_customer = '$id_customer' 
+    AND status_langganan = 'nonaktif' 
+    ORDER BY id_langganan DESC LIMIT 1
+");
+$langganan_lama = mysqli_fetch_assoc($cek_langganan_lama);
 
 $is_pending = false;
 if ($langganan) {
@@ -261,33 +272,37 @@ $data = mysqli_query($koneksi, "SELECT * FROM tb_paket WHERE status='aktif' ORDE
                     <p><?= nl2br($paket['deskripsi']); ?></p>
                     
                     <?php if (!$langganan) : ?>
-                        <a href="../pemasangan/index.php?id=<?= $paket['id_paket']; ?>" class="btn-orange">Pesan Sekarang</a>
+                        <?php if ($langganan_lama) : ?>
+                            <a href="../pemasangan/proses.php?id_paket=<?= $paket['id_paket']; ?>&id_langganan=<?= $langganan_lama['id_langganan']; ?>&aksi=reaktivasi" class="btn-orange">Langganan Lagi</a>
+                        <?php else : ?>
+                            <a href="../pemasangan/index.php?id=<?= $paket['id_paket']; ?>" class="btn-orange">Pesan Sekarang</a>
+                        <?php endif; ?>
                     <?php else : ?>
                         <?php if ($langganan['id_paket'] == $paket['id_paket']) : ?>
                         <button class="btn-disabled" disabled>
                             <i class="bi bi-check-circle-fill"></i> Paket Aktif Anda
                         </button>
 
-                    <?php elseif ($paket['harga'] <= $langganan['harga']) : ?>
+                        <?php elseif ($paket['harga'] <= $langganan['harga']) : ?>
 
                         <button class="btn-disabled" disabled>
                             Tidak Bisa Upgrade
                         </button>
 
-                    <?php elseif ($is_pending) : ?>
+                        <?php elseif ($is_pending) : ?>
 
                         <button class="btn-disabled" disabled>
                             Upgrade Menunggu Verifikasi
                         </button>
 
-                    <?php else : ?>
+                        <?php else : ?>
 
                         <a href="../pemasangan/proses.php?id_paket=<?= $paket['id_paket']; ?>&id_langganan=<?= $langganan['id_langganan']; ?>&aksi=upgrade"
                         class="btn-orange">
                             Upgrade Paket
                         </a>
 
-                    <?php endif; ?>
+                        <?php endif; ?>
                     <?php endif; ?>
                 </div>
             <?php endwhile; ?>
