@@ -319,7 +319,7 @@ function tgl_indo($tanggal) {
                         </td>
                     </tr>
                     <tr>
-                        <td class="label">Catatan teknisi</td>
+                        <td class="label">Catatan</td>
                         <td>: <em><?= !empty($data['catatan']) ? htmlspecialchars($data['catatan']) : '-'; ?></em></td>
                     </tr>
                     

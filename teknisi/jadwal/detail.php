@@ -46,7 +46,7 @@ $status = strtolower(trim($data['status_pemasangan']));
 if (isset($_POST['ubah_status'])) {
     $status_baru = mysqli_real_escape_string($koneksi, $_POST['status_pemasangan']);
     $tanggal_sekarang = date('Y-m-d');
-    $catatan_teknis = mysqli_real_escape_string($koneksi, $_POST['catatan_teknis'] ?? '');
+    $catatan_teknis = ''; // Tetap dikosongkan agar kolom 'catatan' di DB aman saat update
 
     if ($status_baru === 'dibatalkan') {
         $error_alert = true;
@@ -68,10 +68,9 @@ if (isset($_POST['ubah_status'])) {
                     if (!is_dir($folder_tujuan)) { mkdir($folder_tujuan, 0755, true); }
 
                    if (move_uploaded_file($file_tmp, $folder_tujuan . $nama_file_baru)) {
-                        // PERBAIKAN 1: Izinkan update jika tugas milik dia, ATAU jika statusnya rebutan (id_teknisi masih kosong/0)
                         $query_update = "UPDATE tb_pemasangan SET 
                                             status_pemasangan = '$status_baru', 
-                                            id_teknisi = '$id_teknisi_session', -- Amankan penguncian ID Teknisi di sini
+                                            id_teknisi = '$id_teknisi_session', 
                                             tanggal_pasang = '$tanggal_sekarang',
                                             catatan = '$catatan_teknis',
                                             bukti_foto = '$nama_file_baru'
@@ -90,11 +89,10 @@ if (isset($_POST['ubah_status'])) {
                 $msg = "Gagal menyelesaikan tugas! Teknisi wajib menyertakan foto bukti pemasangan.";
             }
         } else {
-            // JIKA STATUS DIUBAH MENJADI DIPROSES (Sistem Rebutan dimulai dari sini)
-            // PERBAIKAN 2: Set id_teknisi saat tombol "Mulai Proses Lapangan" diklik
+            // JIKA STATUS DIUBAH MENJADI DIPROSES
             $query_update = "UPDATE tb_pemasangan SET 
                                 status_pemasangan = '$status_baru',
-                                id_teknisi = '$id_teknisi_session', -- Kunci teknisinya di sini agar tugas tidak direbut orang lain
+                                id_teknisi = '$id_teknisi_session', 
                                 catatan = '$catatan_teknis'
                              WHERE id_pemasangan = '$id_pemasangan' 
                                AND (id_teknisi = '$id_teknisi_session' OR id_teknisi IS NULL OR id_teknisi = '' OR id_teknisi = 0)";
@@ -265,10 +263,6 @@ function tgl_indo($tanggal) {
                             ?>
                         </td>
                     </tr>
-                    <tr>
-                        <td class="label">Catatan Teknis Admin</td>
-                        <td>: <em><?= !empty($data['catatan']) ? htmlspecialchars($data['catatan']) : '-'; ?></em></td>
-                    </tr>
                     <?php if (!empty($data['bukti_foto'])) : ?>
                     <tr>
                         <td class="label">Foto Bukti Terupload</td>
@@ -294,9 +288,6 @@ function tgl_indo($tanggal) {
 
                         <div class="action-panel">
                             <?php if ($status == 'menunggu' || $status == 'pending') : ?>
-                                <label class="form-label">Catatan Lapangan (Opsional)</label>
-                                <textarea name="catatan_teknis" class="form-control" rows="3" placeholder="Tulis catatan penunjang..."></textarea>
-                                
                                 <button type="button" class="btn-action btn-action-process" onclick="eksekusiTeknisi('diproses')">
                                     <i class="bi bi-gear-fill"></i> Mulai Proses Lapangan
                                 </button>
@@ -306,9 +297,6 @@ function tgl_indo($tanggal) {
                                 <div style="background: #fff7ed; padding: 12px; border-radius: 8px; border: 1px solid #ffedd5; margin-bottom: 8px;">
                                     <label class="form-label" style="margin-top:0; color:#c2410c;"><i class="bi bi-camera-fill"></i> Upload Bukti Gambar (Wajib)</label>
                                     <input type="file" name="bukti_foto" id="file_bukti" class="form-control" accept="image/png, image/jpeg, image/jpg">
-                                    
-                                    <label class="form-label">Catatan Teknis Hasil Pasang</label>
-                                    <textarea name="catatan_teknis" id="catatan_hasil" class="form-control" rows="3" placeholder="Contoh: Redaman -18dB, modem terpasang di ruang tamu."></textarea>
                                 </div>
 
                                 <button type="button" class="btn-action btn-action-success" onclick="eksekusiTeknisi('terpasang')">
