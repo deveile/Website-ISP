@@ -213,56 +213,64 @@ function tgl_indo($tanggal) {
     }
         
     .pagination-wrapper {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 15px;
-        margin-top: 20px;
-        padding-top: 15px;
-        border-top: 1px solid #f0f0f0;
-        padding-left: 20px;
-        padding-right: 20px;
-        padding-bottom: 20px;
-    }
-    .pagination-info {
-        font-size: 14px;
-        color: #666;
-    }
-    .pagination-buttons {
-        display: flex;
-        gap: 5px;
-        list-style: none;
-        padding: 0;
-        margin: 0;
-    }
-    .pagination-buttons a, .pagination-buttons span {
-        display: inline-block;
-        padding: 8px 14px;
-        border-radius: 6px;
-        border: 1px solid #e2e8f0;
-        color: #4a5568;
-        text-decoration: none;
-        font-size: 14px;
-        font-weight: 500;
-        transition: all 0.2s;
-    }
-    .pagination-buttons a:hover {
-        background: #edf2f7;
-        border-color: #cbd5e1;
-    }
-    .pagination-buttons .active-page {
-        background: #ff6b00;
-        color: #ffffff;
-        border-color: #ff6b00;
-        font-weight: 600;
-    }
-    .pagination-buttons .disabled-btn {
-        color: #cbd5e1;
-        background: #f8fafc;
-        pointer-events: none;
-        border-color: #e2e8f0;
-    }
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid #f0f0f0;
+    padding-left: 20px;
+    padding-right: 20px;
+    padding-bottom: 20px;
+}
+.pagination-info {
+    font-size: 14px;
+    color: #666;
+}
+
+/* MODIFIKASI DISINI: Supaya tombol rapi dan bisa di-slide kanan-kiri di HP */
+.pagination-buttons {
+    display: flex;
+    gap: 5px;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    overflow-x: auto;                  /* Sakti: Membuat area bisa di-slide */
+    white-space: nowrap;               /* Mencegah tombol patah ke bawah */
+    -webkit-overflow-scrolling: touch; /* Scroll smooth di iOS/Android */
+}
+
+.pagination-buttons a, .pagination-buttons span {
+    display: inline-flex;              /* Mengubah ke inline-flex agar ikon tengah sempurna */
+    align-items: center;
+    justify-content: center;
+    padding: 8px 14px;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+    color: #4a5568;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+.pagination-buttons a:hover {
+    background: #edf2f7;
+    border-color: #cbd5e1;
+}
+.pagination-buttons .active-page {
+    background: #ff6b00;
+    color: #ffffff;
+    border-color: #ff6b00;
+    font-weight: 600;
+}
+.pagination-buttons .disabled-btn {
+    color: #cbd5e1;
+    background: #f8fafc;
+    pointer-events: none;
+    border-color: #e2e8f0;
+}
     @media (min-width: 992px) {
         .sidebar {
             position: fixed !important;
@@ -520,48 +528,63 @@ function tgl_indo($tanggal) {
             </div>
 
             <?php if ($total_pages > 1) : ?>
-            <div class="pagination-wrapper">
-                <div class="pagination-info">
-                    Menampilkan data <b><?= $offset + 1; ?></b> sampai <b><?= min($offset + $limit, $total_data); ?></b> dari <b><?= $total_data; ?></b> total customer.
-                </div>
-                <div class="pagination-buttons">
-                    <?php if ($page > 1) : ?>
-                        <a href="index.php?page=<?= $page - 1; ?>"><i class="bi bi-chevron-left"></i></a>
-                    <?php else : ?>
-                        <span class="disabled-btn"><i class="bi bi-chevron-left"></i></span>
-                    <?php endif; ?>
-
-                    <?php
-                    $start_loop = max(1, $page - 2);
-                    $end_loop = min($total_pages, $page + 2);
-                    
-                    if ($start_loop > 1) {
-                        echo '<a href="index.php?page=1">1</a>';
-                        if ($start_loop > 2) echo '<span>...</span>';
-                    }
-
-                    for ($i = $start_loop; $i <= $end_loop; $i++) {
-                        if ($page == $i) {
-                            echo '<span class="active-page">' . $i . '</span>';
-                        } else {
-                            echo '<a href="index.php?page=' . $i . '">' . $i . '</a>';
-                        }
-                    }
-
-                    if ($end_loop < $total_pages) {
-                        if ($end_loop < $total_pages - 1) echo '<span>...</span>';
-                        echo '<a href="index.php?page=' . $total_pages . '">' . $total_pages . '</a>';
-                    }
-                    ?>
-
-                    <?php if ($page < $total_pages) : ?>
-                        <a href="index.php?page=<?= $page + 1; ?>"><i class="bi bi-chevron-right"></i></a>
-                    <?php else : ?>
-                        <span class="disabled-btn"><i class="bi bi-chevron-right"></i></span>
-                    <?php endif; ?>
-                </div>
-            </div>
+    <?php
+    // TRIK SAKTI: Otomatis mengikat filter/pencarian customer yang sedang aktif di URL
+    $url_params = $_GET;
+    unset($url_params['page']); // Hapus page lama agar tidak menumpuk di URL
+    $query_string = http_build_query($url_params);
+    $append_url = $query_string ? '&' . $query_string : '';
+    ?>
+    
+    <div class="pagination-wrapper">
+        <div class="pagination-info">
+            Menampilkan data <b><?= $offset + 1; ?></b> sampai <b><?= min($offset + $limit, $total_data); ?></b> dari <b><?= $total_data; ?></b> total customer.
+        </div>
+        <div class="pagination-buttons">
+            <?php if ($page > 1) : ?>
+                <a href="index.php?page=<?= $page - 1; ?><?= $append_url ?>"><i class="bi bi-chevron-left"></i></a>
+            <?php else : ?>
+                <span class="disabled-btn"><i class="bi bi-chevron-left"></i></span>
             <?php endif; ?>
+
+            <?php
+            $start_loop = max(1, $page - 2);
+            $end_loop = min($total_pages, $page + 2);
+            
+            // Halaman Pertama & Titik-titik Awal
+            if ($start_loop > 1) {
+                echo '<a href="index.php?page=1' . $append_url . '">1</a>';
+                if ($start_loop > 2) {
+                    echo '<span>...</span>'; // Titik-titik polos tanpa link jump
+                }
+            }
+
+            // Looping Angka Utama (Radius 2 dari Halaman Aktif)
+            for ($i = $start_loop; $i <= $end_loop; $i++) {
+                if ($page == $i) {
+                    echo '<span class="active-page">' . $i . '</span>';
+                } else {
+                    echo '<a href="index.php?page=' . $i . $append_url . '">' . $i . '</a>';
+                }
+            }
+
+            // Titik-titik Akhir & Halaman Terakhir
+            if ($end_loop < $total_pages) {
+                if ($end_loop < $total_pages - 1) {
+                    echo '<span>...</span>';
+                }
+                echo '<a href="index.php?page=' . $total_pages . $append_url . '">' . $total_pages . '</a>';
+            }
+            ?>
+
+            <?php if ($page < $total_pages) : ?>
+                <a href="index.php?page=<?= $page + 1; ?><?= $append_url ?>"><i class="bi bi-chevron-right"></i></a>
+            <?php else : ?>
+                <span class="disabled-btn"><i class="bi bi-chevron-right"></i></span>
+            <?php endif; ?>
+        </div>
+    </div>
+<?php endif; ?>
 
         </div>
     </div>

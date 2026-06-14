@@ -27,14 +27,13 @@ if ($data && password_verify($password, $data['password'])) {
         $_SESSION['nama']     = $adm['nama_admin'] ?? 'Admin';
         $_SESSION['id_admin'] = $adm['id_admin'] ?? null;
 
-        // Otomatis generate tagihan saat admin login
-        generate_tagihan_jatuh_tempo($koneksi);
+        // Keterangan: Fungsi otomatisasi tagihan sudah dihapus dari sini 
+        // agar proses login admin menjadi sangat cepat.
 
         $text = 'Selamat datang Admin';
         $redirect = '/website-isp/admin/index.php';
         
     } elseif ($data['role'] === 'teknisi') {
-        // AMBIL DATA DARI TB_TEKNISI JIKA ROLE ADALAH TEKNISI
         $tek = mysqli_fetch_assoc(mysqli_query($koneksi, "
             SELECT * FROM tb_teknisi WHERE id_user = {$data['id_user']} LIMIT 1
         "));
@@ -42,10 +41,9 @@ if ($data && password_verify($password, $data['password'])) {
         $_SESSION['id_teknisi'] = $tek['id_teknisi'] ?? null;
 
         $text = 'Selamat datang Teknisi';
-        $redirect = '/website-isp/teknisi/index.php'; // Sesuaikan dengan folder dashboard teknisimu
+        $redirect = '/website-isp/teknisi/index.php'; 
         
     } else {
-        // JIKA BUKAN ADMIN/TEKNISI, MAKA ROLE ADALAH CUSTOMER
         $cust = mysqli_fetch_assoc(mysqli_query($koneksi, "
             SELECT * FROM tb_customer WHERE id_user = {$data['id_user']} LIMIT 1
         "));
@@ -60,52 +58,6 @@ if ($data && password_verify($password, $data['password'])) {
     $title = 'Login Gagal';
     $text = !$data ? 'Username tidak ditemukan' : 'Password salah';
     $redirect = 'login.php';
-}
-
-function generate_tagihan_jatuh_tempo($koneksi) {
-    $hari_ini = date('Y-m-d');
-    $q = mysqli_query($koneksi, "
-        SELECT tl.id_langganan, tl.tanggal_selesai, tp.harga 
-        FROM tb_langganan tl
-        INNER JOIN tb_paket tp ON tl.id_paket = tp.id_paket
-        INNER JOIN tb_customer tc ON tl.id_customer = tc.id_customer
-        WHERE tl.status_langganan = 'aktif'
-          AND tp.status = 'aktif'
-          AND tl.tanggal_selesai <= '$hari_ini'
-    ");
-
-    if (!$q || mysqli_num_rows($q) === 0) return;
-
-    while ($row = mysqli_fetch_assoc($q)) {
-        $id_langganan  = (int)$row['id_langganan'];
-        $harga         = (int)$row['harga'];
-        $tgl_selesai   = $row['tanggal_selesai'];
-        $bulan_tagihan = (int)date('m', strtotime($tgl_selesai));
-        $tahun_tagihan = (int)date('Y', strtotime($tgl_selesai));
-
-        $cek_ada = mysqli_fetch_assoc(mysqli_query($koneksi, "
-            SELECT id_transaksi FROM tb_transaksi
-            WHERE id_langganan = $id_langganan
-              AND bulan_tagihan = $bulan_tagihan
-              AND tahun_tagihan = $tahun_tagihan
-            LIMIT 1
-        "));
-
-        if ($cek_ada) continue;
-
-        $kode_invoice = 'INV-' . $tahun_tagihan . sprintf('%02d', $bulan_tagihan) . '-' . 
-            strtoupper(substr(md5($id_langganan . microtime() . rand()), 0, 6));
-
-        mysqli_query($koneksi, "
-            INSERT INTO tb_transaksi (
-                id_langganan, kode_invoice, bulan_tagihan, 
-                tahun_tagihan, jumlah_bayar, status_pembayaran, created_at
-            ) VALUES (
-                $id_langganan, '$kode_invoice', $bulan_tagihan, 
-                $tahun_tagihan, $harga, 'belum_bayar', NOW()
-            )
-        ");
-    }
 }
 ?>
 <!DOCTYPE html>

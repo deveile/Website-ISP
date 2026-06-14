@@ -181,7 +181,19 @@ function tgl_indo($tanggal) {
 
     .pagination-container { display: flex; align-items: center; justify-content: space-between; margin-top: 20px; padding-top: 20px; border-top: 1px solid #e4e4e7; flex-wrap: wrap; gap: 10px; }
     .pagination-info { font-size: 13px; color: #71717a; }
-    .pagination-list { display: flex; gap: 5px; list-style: none; padding: 0; margin: 0; }
+    
+    /* MODIFIKASI: Menambahkan fitur slide/scroll horizontal khusus di layar HP */
+    .pagination-list { 
+        display: flex; 
+        gap: 5px; 
+        list-style: none; 
+        padding: 0; 
+        margin: 0; 
+        overflow-x: auto;                  /* Membuat halaman bisa digeser kanan-kiri jika penuh */
+        white-space: nowrap;               /* Mencegah nomor halaman patah/turun ke bawah */
+        -webkit-overflow-scrolling: touch; /* Membuat scroll terasa smooth di iOS/Android */
+    }
+    
     .pagination-list a { display: inline-flex; align-items: center; justify-content: center; min-width: 32px; height: 32px; padding: 0 8px; font-size: 13px; font-weight: 600; text-decoration: none; border-radius: 8px; border: 1.5px solid #e4e4e7; background: #fff; color: #27272a; transition: all 0.2s; }
     .pagination-list a:hover { background: #f4f4f5; }
     .pagination-list .active-page a { background: #ff6600; color: #fff; border-color: #ff6600; pointer-events: none; }
@@ -417,44 +429,68 @@ function tgl_indo($tanggal) {
             </div>
 
             <?php if ($jumlahHalaman > 1) : ?>
-            <div class="pagination-container">
-                <div class="pagination-info">
-                    Menampilkan data ke-<?= $awalData + 1; ?> sampai <?= min($awalData + $limit, $totalData); ?> dari total <strong><?= $totalData; ?></strong> data
-                </div>
-                <ul class="pagination-list">
-                    <li class="<?= ($halaman <= 1) ? 'disabled-page' : '' ?>">
-                        <a href="index.php?halaman=<?= $halaman - 1; ?>"><i class="bi bi-chevron-left"></i></a>
-                    </li>
+    <?php
+    // TRIK SAKTI: Mengamankan semua filter URL (pencarian, status, dll) secara otomatis
+    $url_params = $_GET;
+    unset($url_params['halaman']); // Hapus parameter halaman lama agar tidak menumpuk
+    $query_string = http_build_query($url_params);
+    $append_url = $query_string ? '&' . $query_string : '';
+    ?>
+    
+    <div class="pagination-container">
+        <div class="pagination-info">
+            Menampilkan data ke-<?= $awalData + 1; ?> sampai <?= min($awalData + $limit, $totalData); ?> dari total <strong><?= $totalData; ?></strong> data
+        </div>
+        
+        <ul class="pagination-list">
+            <li class="<?= ($halaman <= 1) ? 'disabled-page' : '' ?>">
+                <?php if ($halaman <= 1): ?>
+                    <a><i class="bi bi-chevron-left"></i></a>
+                <?php else: ?>
+                    <a href="index.php?halaman=<?= $halaman - 1; ?><?= $append_url ?>"><i class="bi bi-chevron-left"></i></a>
+                <?php endif; ?>
+            </li>
 
-                    <?php
-                    $start_loop = max(1, $halaman - 2);
-                    $end_loop = min($jumlahHalaman, $halaman + 2);
-                    
-                    if ($start_loop > 1) {
-                        echo '<li><a href="index.php?halaman=1">1</a></li>';
-                        if ($start_loop > 2) echo '<li class="disabled-page"><a href="#">...</a></li>';
-                    }
+            <?php
+            $start_loop = max(1, $halaman - 2);
+            $end_loop = min($jumlahHalaman, $halaman + 2);
+            
+            // Halaman Pertama & Titik-titik Awal
+            if ($start_loop > 1) {
+                echo '<li><a href="index.php?halaman=1' . $append_url . '">1</a></li>';
+                if ($start_loop > 2) {
+                    echo '<li class="disabled-page"><a>...</a></li>'; // FIX: Tanpa href="#" agar tidak lompat ke atas
+                }
+            }
 
-                    for ($i = $start_loop; $i <= $end_loop; $i++) {
-                        if ($halaman == $i) {
-                            echo '<li class="active-page"><a href="#">' . $i . '</a></li>';
-                        } else {
-                            echo '<li><a href="index.php?halaman=' . $i . '">' . $i . '</a></li>';
-                        }
-                    }
+            // Looping Angka Utama Berdasarkan Radius
+            for ($i = $start_loop; $i <= $end_loop; $i++) {
+                if ($halaman == $i) {
+                    echo '<li class="active-page"><a>' . $i . '</a></li>'; // FIX: Tanpa href="#" pada halaman aktif
+                } else {
+                    echo '<li><a href="index.php?halaman=' . $i . $append_url . '">' . $i . '</a></li>';
+                }
+            }
 
-                    if ($end_loop < $jumlahHalaman) {
-                        if ($end_loop < $jumlahHalaman - 1) echo '<li class="disabled-page"><a href="#">...</a></li>';
-                        echo '<li><a href="index.php?halaman=' . $jumlahHalaman . '">' . $jumlahHalaman . '</a></li>';
-                    }
-                    ?>
+            // Titik-titik Akhir & Halaman Terakhir
+            if ($end_loop < $jumlahHalaman) {
+                if ($end_loop < $jumlahHalaman - 1) {
+                    echo '<li class="disabled-page"><a>...</a></li>'; // FIX: Tanpa href="#"
+                }
+                echo '<li><a href="index.php?halaman=' . $jumlahHalaman . $append_url . '">' . $jumlahHalaman . '</a></li>';
+            }
+            ?>
 
-                    <li class="<?= ($halaman >= $jumlahHalaman) ? 'disabled-page' : '' ?>">
-                        <a href="index.php?halaman=<?= $halaman + 1; ?>"><i class="bi bi-chevron-right"></i></a>
-                    </li>
-                </ul>
-            </div>
-            <?php endif; ?>
+            <li class="<?= ($halaman >= $jumlahHalaman) ? 'disabled-page' : '' ?>">
+                <?php if ($halaman >= $jumlahHalaman): ?>
+                    <a><i class="bi bi-chevron-right"></i></a>
+                <?php else: ?>
+                    <a href="index.php?halaman=<?= $halaman + 1; ?><?= $append_url ?>"><i class="bi bi-chevron-right"></i></a>
+                <?php endif; ?>
+            </li>
+        </ul>
+    </div>
+<?php endif; ?>
 
         </div>
     </div>

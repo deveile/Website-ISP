@@ -20,7 +20,7 @@ if (empty($list_tahun)) $list_tahun = [(int)date('Y')];
 
 $filter_tipe          = isset($_GET['tipe']) && in_array($_GET['tipe'], ['bulanan','tahunan']) ? $_GET['tipe'] : 'bulanan';
 $filter_tahun         = isset($_GET['tahun']) && $_GET['tahun'] != '' ? (int)$_GET['tahun'] : (int)date('Y');
-$filter_bulan         = isset($_GET['bulan']) ? (int)$_GET['bulan'] : 0; // 0 berarti Semua Bulan
+$filter_bulan         = isset($_GET['bulan']) ? (int)$_GET['bulan'] : 0; 
 $filter_tahun_mulai   = isset($_GET['tahun_mulai']) && $_GET['tahun_mulai'] != '' ? (int)$_GET['tahun_mulai'] : min($list_tahun);
 $filter_tahun_selesai = isset($_GET['tahun_selesai']) && $_GET['tahun_selesai'] != '' ? (int)$_GET['tahun_selesai'] : max($list_tahun);
 
@@ -33,15 +33,16 @@ if ($filter_tipe === 'bulanan') {
         $where_bulanan .= " AND bulan_tagihan = $filter_bulan";
     }
 
+    // Query Ringkasan Bulanan (Sudah support status expired)
     $q_ringkasan = mysqli_query($koneksi, "
         SELECT
             COUNT(*) AS total_transaksi,
             SUM(jumlah_bayar) AS total_tagihan,
             SUM(CASE WHEN status_pembayaran='lunas' THEN jumlah_bayar ELSE 0 END) AS total_masuk,
-            SUM(CASE WHEN status_pembayaran='belum_bayar' THEN jumlah_bayar ELSE 0 END) AS total_belum,
+            SUM(CASE WHEN status_pembayaran IN ('belum_bayar', 'expired') THEN jumlah_bayar ELSE 0 END) AS total_belum,
             SUM(CASE WHEN status_pembayaran='menunggu_verifikasi' THEN jumlah_bayar ELSE 0 END) AS total_menunggu,
             COUNT(CASE WHEN status_pembayaran='lunas' THEN 1 END) AS jml_lunas,
-            COUNT(CASE WHEN status_pembayaran='belum_bayar' THEN 1 END) AS jml_belum,
+            COUNT(CASE WHEN status_pembayaran IN ('belum_bayar', 'expired') THEN 1 END) AS jml_belum,
             COUNT(CASE WHEN status_pembayaran='menunggu_verifikasi' THEN 1 END) AS jml_menunggu
         FROM tb_transaksi
         $where_bulanan
@@ -55,9 +56,9 @@ if ($filter_tipe === 'bulanan') {
             COUNT(*) AS total_transaksi,
             SUM(jumlah_bayar) AS total_tagihan,
             SUM(CASE WHEN status_pembayaran='lunas' THEN jumlah_bayar ELSE 0 END) AS pendapatan,
-            SUM(CASE WHEN status_pembayaran='belum_bayar' THEN jumlah_bayar ELSE 0 END) AS belum_bayar,
+            SUM(CASE WHEN status_pembayaran IN ('belum_bayar', 'expired') THEN jumlah_bayar ELSE 0 END) AS belum_bayar,
             COUNT(CASE WHEN status_pembayaran='lunas' THEN 1 END) AS jml_lunas,
-            COUNT(CASE WHEN status_pembayaran='belum_bayar' THEN 1 END) AS jml_belum,
+            COUNT(CASE WHEN status_pembayaran IN ('belum_bayar', 'expired') THEN 1 END) AS jml_belum,
             COUNT(CASE WHEN status_pembayaran='menunggu_verifikasi' THEN 1 END) AS jml_menunggu
         FROM tb_transaksi
         $where_bulanan
@@ -87,11 +88,7 @@ if ($filter_tipe === 'bulanan') {
         if (!$found) { $chart_masuk[] = 0; $chart_belum[] = 0; }
     }
 
-// ==========================================
-// LOGIKA JIKA PILIH VIEW TAHUNAN
-// ==========================================
 } else {
-    // Query Ringkasan Card Atas Berdasarkan Jangkauan Tahun
     $q_all = mysqli_fetch_assoc(mysqli_query($koneksi, "
         SELECT 
             COUNT(*) AS tot, 
@@ -101,16 +98,15 @@ if ($filter_tipe === 'bulanan') {
         WHERE tahun_tagihan BETWEEN $filter_tahun_mulai AND $filter_tahun_selesai
     "));
 
-    // Query Rincian Tabel Per Tahun
     $q_tahunan = mysqli_query($koneksi, "
         SELECT
             tahun_tagihan,
             COUNT(*) AS total_transaksi,
             SUM(jumlah_bayar) AS total_tagihan,
             SUM(CASE WHEN status_pembayaran='lunas' THEN jumlah_bayar ELSE 0 END) AS pendapatan,
-            SUM(CASE WHEN status_pembayaran='belum_bayar' THEN jumlah_bayar ELSE 0 END) AS belum_bayar,
+            SUM(CASE WHEN status_pembayaran IN ('belum_bayar', 'expired') THEN jumlah_bayar ELSE 0 END) AS belum_bayar,
             COUNT(CASE WHEN status_pembayaran='lunas' THEN 1 END) AS jml_lunas,
-            COUNT(CASE WHEN status_pembayaran='belum_bayar' THEN 1 END) AS jml_belum
+            COUNT(CASE WHEN status_pembayaran IN ('belum_bayar', 'expired') THEN 1 END) AS jml_belum
         FROM tb_transaksi
         WHERE tahun_tagihan BETWEEN $filter_tahun_mulai AND $filter_tahun_selesai
         GROUP BY tahun_tagihan
@@ -132,6 +128,16 @@ if ($filter_tipe === 'bulanan') {
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="../../assets/js/script.js" defer></script>
 <style>
+    /* 1. PROTEKSI UTAMA: Mengunci layar utama agar tidak bisa jebol ke kanan */
+    html, body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow-x: hidden; /* Memaksa scrollbar horizontal hanya muncul di tabel, bukan di page */
+    }
+    *, ::before, ::after { box-sizing: border-box; }
+
     .notif-badge {
         display: inline-flex; align-items: center; justify-content: center;
         width: 20px; height: 20px; border-radius: 50%;
@@ -163,8 +169,9 @@ if ($filter_tipe === 'bulanan') {
     }
     .lap-stat:hover { box-shadow: 0 6px 20px rgba(0,0,0,.08); transform: translateY(-2px); }
     .lap-stat-icon { width: 52px; height: 52px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
-    .lap-stat-body small { font-size: 12px; color: #a1a1aa; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; display: block; margin-bottom: 4px; }
-    .lap-stat-body strong { font-size: 20px; font-weight: 800; color: #18181b; display: block; line-height: 1.2; }
+    .lap-stat-body { min-width: 0; flex-grow: 1; }
+    .lap-stat-body small { font-size: 12px; color: #a1a1aa; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; display: block; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .lap-stat-body strong { font-size: 18px; font-weight: 800; color: #18181b; display: block; line-height: 1.2; }
     .lap-stat-body span   { font-size: 12px; color: #a1a1aa; }
 
     .icon-green  { background: #f0fdf4; color: #22c55e; }
@@ -173,12 +180,14 @@ if ($filter_tipe === 'bulanan') {
     .icon-blue   { background: #eff6ff; color: #3b82f6; }
     .icon-yellow { background: #fffbeb; color: #f59e0b; }
 
-    .lap-section { background: #fff; border-radius: 16px; border: 1px solid #e4e4e7; overflow: hidden; margin-bottom: 24px; }
+    .lap-section { background: #fff; border-radius: 16px; border: 1px solid #e4e4e7; overflow: hidden; margin-bottom: 24px; width: 100%; }
     .lap-section-header { padding: 18px 24px; border-bottom: 1px solid #e4e4e7; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
     .lap-section-header h3 { font-size: 16px; font-weight: 800; color: #18181b; margin: 0; }
-    .lap-section-body { padding: 24px; overflow-x: auto; }
+    
+    /* Memastikan pembungkus tabel responsive bekerja lokal di areanya sendiri */
+    .lap-section-body { padding: 24px; overflow-x: auto !important; width: 100%; }
 
-    .lap-table { width: 100%; border-collapse: collapse; min-width: 600px; }
+    .lap-table { width: 100%; border-collapse: collapse; min-width: 750px; }
     .lap-table thead tr { background: #fafafa; }
     .lap-table th { padding: 11px 16px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .6px; color: #a1a1aa; border-bottom: 1px solid #e4e4e7; text-align: left; }
     .lap-table td { padding: 13px 16px; font-size: 14px; color: #18181b; border-bottom: 1px solid #f4f4f5; }
@@ -191,7 +200,7 @@ if ($filter_tipe === 'bulanan') {
     .chip-red    { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
     .chip-yellow { background: #fffbeb; color: #d97706; border: 1px solid #fde68a; }
 
-    .chart-wrapper { height: 300px; position: relative; }
+    .chart-wrapper { height: 300px; position: relative; width: 100%; overflow: hidden; }
 
     .filter-bar { background: #fff; border-radius: 14px; border: 1px solid #e4e4e7; padding: 18px 22px; margin-bottom: 24px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
     .filter-bar label { font-size: 13px; font-weight: 700; color: #52525b; }
@@ -213,22 +222,82 @@ if ($filter_tipe === 'bulanan') {
     .progress-bar-fill { height: 100%; border-radius: 4px; background: #22c55e; }
 
     @media (max-width: 900px) { .lap-stat-grid { grid-template-columns: repeat(2,1fr); } }
-    @media (max-width: 560px) { .lap-stat-grid { grid-template-columns: 1fr; } }
-
-    .dashboard-layout { display: flex !important; width: 100%; min-height: 100vh; overflow-x: hidden; }
-    .sidebar { width: 260px !important; min-width: 260px !important; max-width: 260px !important; transition: all 0.3s ease !important; }
-    .dashboard-content { flex-grow: 1 !important; width: calc(100% - 260px) !important; transition: all 0.3s ease !important; padding: 24px; }
-
-    @media (min-width: 1025px) {
-        .sidebar.collapsed { width: 70px !important; min-width: 70px !important; max-width: 70px !important; padding: 24px 8px !important; }
-        .sidebar.collapsed + .dashboard-content { width: calc(100% - 70px) !important; }
-        .sidebar.collapsed .sidebar-logo h2, .sidebar.collapsed ul li a span, .sidebar.collapsed .notif-badge { display: none !important; }
-        .sidebar.collapsed ul li a { justify-content: center !important; }
+    @media (max-width: 600px) { 
+        .lap-stat-grid { grid-template-columns: 1fr; } 
+        .export-group { margin-left: 0; width: 100%; justify-content: space-between; }
+        .btn-export-pdf, .btn-export-excel { flex-grow: 1; justify-content: center; }
     }
+
+    /* ========================================================
+       2. PERBAIKAN STRUKTUR LAYOUT & KUNCI TOTAL SIDEBAR
+       ======================================================== */
+    .dashboard-layout { 
+        display: flex !important; 
+        width: 100%; 
+        min-height: 100vh; 
+    }
+    
+    /* Merubah posisi ke FIXED agar menempel mati di viewport browser */
+    .sidebar { 
+        position: fixed !important;        
+        top: 0 !important;                  
+        left: 0 !important;
+        width: 260px !important; 
+        min-width: 260px !important; 
+        max-width: 260px !important; 
+        height: 100vh !important;           
+        background: #fff !important;
+        z-index: 2000 !important;           /* Menjaga agar selalu di atas elemen lain */
+        overflow-y: auto !important;        
+        transition: all 0.3s ease !important;
+        box-shadow: 2px 0 10px rgba(0,0,0,0.05) !important;
+    }
+    
+    /* Memberi margin kiri pada konten agar tidak tertutup oleh sidebar yang di-fixed */
+    .dashboard-content { 
+        margin-left: 260px !important;     /* Harus sama dengan lebar sidebar */
+        width: calc(100% - 260px) !important; 
+        min-width: 0 !important; 
+        flex-grow: 1 !important;
+        transition: all 0.3s ease !important; 
+        padding: 24px; 
+    }
+
+    /* Kondisi ketika Sidebar dikecilkan (Collapsed) di Layar Desktop */
+    @media (min-width: 1025px) {
+        .sidebar.collapsed { 
+            width: 70px !important; 
+            min-width: 70px !important; 
+            max-width: 70px !important; 
+            padding: 24px 8px !important; 
+        }
+        /* Konten otomatis melebar ke kiri menyesuaikan sidebar yang mengecil */
+        .sidebar.collapsed + .dashboard-content { 
+            margin-left: 70px !important;
+            width: calc(100% - 70px) !important; 
+        }
+        .sidebar.collapsed .sidebar-logo h2, 
+        .sidebar.collapsed ul li a span, 
+        .sidebar.collapsed .notif-badge { 
+            display: none !important; 
+        }
+        .sidebar.collapsed ul li a { 
+            justify-content: center !important; 
+        }
+    }
+
+    /* Kondisi Responsif di Layar HP / Tablet */
     @media (max-width: 1024px) {
-        .sidebar { position: fixed !important; left: -260px !important; top: 0; bottom: 0; width: 260px !important; z-index: 9999; background: #fff; }
-        .sidebar.active { left: 0 !important; }
-        .dashboard-content { width: 100% !important; }
+        .sidebar { 
+            left: -260px !important;        /* Bersembunyi ke luar layar kiri */
+        }
+        .sidebar.active { 
+            left: 0 !important;             /* Muncul sebagai drawer/overlay menu */
+        }
+        .dashboard-content { 
+            margin-left: 0 !important;      /* Di HP konten memenuhi layar penuh */
+            width: 100% !important; 
+        }
     }
 </style>
 </head>
@@ -338,7 +407,7 @@ if ($filter_tipe === 'bulanan') {
             <div class="lap-stat-body">
                 <small>Pendapatan Masuk</small>
                 <strong><?= rp($ringkasan['total_masuk']) ?></strong>
-                <span><?= (int)$ringkasan['jml_lunas'] ?> transaksi lunas</span>
+                <span><?= (int)$ringkasan['jml_lunas'] ?> lunas</span>
             </div>
         </div>
         <div class="lap-stat">
@@ -375,7 +444,7 @@ if ($filter_tipe === 'bulanan') {
             <h3><i class="bi bi-table" style="color:#f4600c;margin-right:8px;"></i>Rincian Per Bulan — <?= $filter_tahun ?></h3>
             <span style="font-size:13px;color:#a1a1aa;"><?= count($data_bulanan) ?> bulan tercatat</span>
         </div>
-        <div class="lap-section-body" style="padding:0;">
+        <div class="lap-section-body" style="padding:0; overflow-x: auto; width: 100%;">
             <table class="lap-table">
                 <thead>
                     <tr>
@@ -484,7 +553,7 @@ if ($filter_tipe === 'bulanan') {
         <div class="lap-section-header">
             <h3><i class="bi bi-table" style="color:#f4600c;margin-right:8px;"></i>Rekap Per Tahun</h3>
         </div>
-        <div class="lap-section-body" style="padding:0;">
+        <div class="lap-section-body" style="padding:0; overflow-x: auto; width: 100%;">
             <table class="lap-table">
                 <thead>
                     <tr>

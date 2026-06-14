@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . '/../../auth/cek_login.php';
 require_once __DIR__ . '/../../koneksi.php';
-require_once __DIR__ . '/generate.php';
+
 
 if ($_SESSION['role'] != 'admin') {
     header("Location: ../../auth/login.php");
@@ -243,12 +243,24 @@ $total_notif = $total_notif_transaksi + $total_notif_pemasangan;
         }
 
         .pagination-container { display: flex; align-items: center; justify-content: space-between; margin-top: 20px; padding-top: 20px; border-top: 1px solid #e4e4e7; flex-wrap: wrap; gap: 10px; }
-        .pagination-info { font-size: 13px; color: #71717a; }
-        .pagination-list { display: flex; gap: 5px; list-style: none; padding: 0; margin: 0; }
-        .pagination-list a { display: inline-flex; align-items: center; justify-content: center; min-width: 32px; height: 32px; padding: 0 8px; font-size: 13px; font-weight: 600; text-decoration: none; border-radius: 8px; border: 1.5px solid #e4e4e7; background: #fff; color: #27272a; transition: all 0.2s; }
-        .pagination-list a:hover { background: #f4f4f5; }
-        .pagination-list .active-page a { background: #ff6600; color: #fff; border-color: #ff6600; pointer-events: none; }
-        .pagination-list .disabled-page a { color: #a1a1aa; background: #fafafa; border-color: #e4e4e7; pointer-events: none; }
+    .pagination-info { font-size: 13px; color: #71717a; }
+    
+    /* MODIFIKASI: Menambahkan fitur slide/scroll horizontal khusus di layar HP */
+    .pagination-list { 
+        display: flex; 
+        gap: 5px; 
+        list-style: none; 
+        padding: 0; 
+        margin: 0; 
+        overflow-x: auto;                  /* Membuat halaman bisa digeser kanan-kiri jika penuh */
+        white-space: nowrap;               /* Mencegah nomor halaman patah/turun ke bawah */
+        -webkit-overflow-scrolling: touch; /* Membuat scroll terasa smooth di iOS/Android */
+    }
+    
+    .pagination-list a { display: inline-flex; align-items: center; justify-content: center; min-width: 32px; height: 32px; padding: 0 8px; font-size: 13px; font-weight: 600; text-decoration: none; border-radius: 8px; border: 1.5px solid #e4e4e7; background: #fff; color: #27272a; transition: all 0.2s; }
+    .pagination-list a:hover { background: #f4f4f5; }
+    .pagination-list .active-page a { background: #ff6600; color: #fff; border-color: #ff6600; pointer-events: none; }
+    .pagination-list .disabled-page a { color: #a1a1aa; background: #fafafa; border-color: #e4e4e7; pointer-events: none; }
 
         @media (min-width: 992px) {
             .sidebar {
@@ -503,28 +515,51 @@ $total_notif = $total_notif_transaksi + $total_notif_pemasangan;
                 </table>
             </div>
 
-            <?php if ($total_halaman > 1): ?>
-            <div class="pagination-container">
-                <div class="pagination-info">
-                    Menampilkan data ke-<?= $halaman_awal + 1 ?> sampai <?= min($halaman_awal + $batas, $total_data) ?> dari total <strong><?= $total_data ?></strong> data
-                </div>
-                <ul class="pagination-list">
-                    <li class="<?= ($halaman <= 1) ? 'disabled-page' : '' ?>">
-                        <a href="?halaman=<?= $halaman - 1 ?><?= isset($_GET['periode']) ? '&periode='.$_GET['periode'] : '' ?><?= isset($_GET['status']) ? '&status='.$_GET['status'] : '' ?>"><i class="bi bi-chevron-left"></i></a>
-                    </li>
-                    
-                    <?php for($x=1; $x<=$total_halaman; $x++): ?>
-                        <li class="<?= ($halaman == $x) ? 'active-page' : '' ?>">
-                            <a href="?halaman=<?= $x ?><?= isset($_GET['periode']) ? '&periode='.$_GET['periode'] : '' ?><?= isset($_GET['status']) ? '&status='.$_GET['status'] : '' ?>"><?= $x ?></a>
-                        </li>
-                    <?php endfor; ?>
-
-                    <li class="<?= ($halaman >= $total_halaman) ? 'disabled-page' : '' ?>">
-                        <a href="?halaman=<?= $halaman + 1 ?><?= isset($_GET['periode']) ? '&periode='.$_GET['periode'] : '' ?><?= isset($_GET['status']) ? '&status='.$_GET['status'] : '' ?>"><i class="bi bi-chevron-right"></i></a>
-                    </li>
-                </ul>
+                <?php if ($total_halaman > 1): ?>
+        <?php 
+        // MODIFIKASI: Menyederhanakan parameter URL filter bawaan kamu agar kode tidak panjang
+        $url_filter = '';
+        if (isset($_GET['periode'])) { $url_filter .= '&periode=' . urlencode($_GET['periode']); }
+        if (isset($_GET['status'])) { $url_filter .= '&status=' . urlencode($_GET['status']); }
+        ?>
+        
+        <div class="pagination-container">
+            <div class="pagination-info">
+                Menampilkan data ke-<?= $halaman_awal + 1 ?> sampai <?= min($halaman_awal + $batas, $total_data) ?> dari total <strong><?= $total_data ?></strong> data
             </div>
-            <?php endif; ?>
+            <ul class="pagination-list">
+                <li class="<?= ($halaman <= 1) ? 'disabled-page' : '' ?>">
+                    <a href="?halaman=<?= $halaman - 1 ?><?= $url_filter ?>"><i class="bi bi-chevron-left"></i></a>
+                </li>
+                
+                <?php 
+                // MODIFIKASI: Logika Sakti untuk memotong halaman berlebih dengan titik-titik (...)
+                $dots = false; 
+                for ($x = 1; $x <= $total_halaman; $x++): 
+                    // Syarat halaman tampil: Halaman pertama, halaman terakhir, atau jaraknya maksimal 2 angka dari halaman aktif
+                    if ($x == 1 || $x == $total_halaman || ($x >= $halaman - 2 && $x <= $halaman + 2)): 
+                        $dots = false; // Reset status titik-titik
+                ?>
+                        <li class="<?= ($halaman == $x) ? 'active-page' : '' ?>">
+                            <a href="?halaman=<?= $x ?><?= $url_filter ?>"><?= $x ?></a>
+                        </li>
+                <?php 
+                    // Jika tidak memenuhi syarat tampil dan titik-titik belum pernah dibuat di bagian tersebut
+                    elseif (!$dots): 
+                        $dots = true; 
+                ?>
+                        <li class="disabled-page"><a>...</a></li>
+                <?php 
+                    endif; 
+                endfor; 
+                ?>
+
+                <li class="<?= ($halaman >= $total_halaman) ? 'disabled-page' : '' ?>">
+                    <a href="?halaman=<?= $halaman + 1 ?><?= $url_filter ?>"><i class="bi bi-chevron-right"></i></a>
+                </li>
+            </ul>
+        </div>
+    <?php endif; ?>
 
         </div>
     </div>
