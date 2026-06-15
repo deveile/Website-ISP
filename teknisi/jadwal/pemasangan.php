@@ -15,15 +15,18 @@ $sql_tek = "SELECT nama_teknisi FROM tb_teknisi WHERE id_teknisi = '$id_teknisi'
 $query_tek = mysqli_query($koneksi, $sql_tek);
 $data_tek = mysqli_fetch_assoc($query_tek);
 
-// QUERY UTAMA (SUDAH DIPERBAIKI): Menampilkan SEMUA tugas yang siap dikerjakan di lapangan oleh siapa saja
+// --- PERUBAHAN QUERY UTAMA ---
+// Menambahkan status 'terpasang' ke dalam IN(...)
+// Data tetap diurutkan berdasarkan tanggal_pasang DESC (paling baru berada paling atas)
 $sql_jadwal = "SELECT tp.*, tc.nama_customer, tc.telepon_customer, pk.nama_paket 
                FROM tb_pemasangan tp
                INNER JOIN tb_customer tc ON tp.id_customer = tc.id_customer
                INNER JOIN tb_paket pk ON tp.id_paket = pk.id_paket
-               WHERE tp.status_pemasangan IN ('proses', 'diproses')
-               ORDER BY tp.status_pemasangan ASC, tp.tanggal_pasang DESC";
+               WHERE tp.id_teknisi = '$id_teknisi' 
+                 AND tp.status_pemasangan IN ('proses', 'diproses', 'terpasang')
+               ORDER BY tp.tanggal_pasang ASC";
 
-// EKSEKUSI QUERY (Jangan sampai terhapus)
+// EKSEKUSI QUERY 
 $semua_tugas = mysqli_query($koneksi, $sql_jadwal);
 
 function tgl_indo($tgl) {
@@ -41,8 +44,11 @@ function tgl_indo($tgl) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jadwal Pemasangan - Teknisi</title>
-    <link rel="icon" type="image/png" href="../../assets/images/logo.png"> <link rel="stylesheet" href="../../assets/css/style.css"> <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <script src="../../assets/js/script.js" defer></script> <style>
+    <link rel="icon" type="image/png" href="../../assets/images/logo.png"> 
+    <link rel="stylesheet" href="../../assets/css/style.css"> 
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <script src="../../assets/js/script.js" defer></script> 
+    <style>
         html, body {
             height: 100%;
             margin: 0;
@@ -115,7 +121,7 @@ function tgl_indo($tgl) {
         }
 
         table th {
-            background: #ea580c !important; /* Tema Oranye */
+            background: #ea580c !important; 
             color: #ffffff !important;
             text-transform: uppercase !important;
             font-size: 12px !important;
@@ -131,9 +137,9 @@ function tgl_indo($tgl) {
         table td:last-child { border-right: none !important; }
         table tr:last-child td { border-bottom: none !important; }
 
-        /* Badge Status */
-        .status-active { background: #dcfce7; color: #15803d; padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: 600; }
-        .status-pending { background: #fef3c7; color: #b45309; padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: 600; }
+        /* Badge Status (Hijau untuk Terpasang, Kuning untuk Proses/Diproses) */
+        .status-terpasang { background: #dcfce7; color: #15803d; padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: 600; }
+        .status-diproses, .status-proses { background: #fef3c7; color: #b45309; padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: 600; }
 
         /* Modal Logout */
         .logout-modal {
@@ -173,7 +179,6 @@ function tgl_indo($tgl) {
         .btn-cancel { background: #f1f5f9; color: #475569; }
         .btn-confirm { background: #ea580c; color: #fff; }
 
-        /* Responsif Breakpoints */
         @media (min-width: 992px) {
             .sidebar {
                 position: fixed !important;
@@ -300,13 +305,13 @@ function tgl_indo($tgl) {
             </button>
             <div>
                 <h1 style="margin:0; font-size: 20px; color:#1e293b;">Data Jadwal Pemasangan</h1>
-                <p style="margin:0; font-size: 14px; color:#64748b;">Semua list tugas instalasi jaringan Anda</p>
+                <p style="margin:0; font-size: 14px; color:#64748b;">Halo <strong><?= htmlspecialchars($data_tek['nama_teknisi'] ?? 'Teknisi'); ?></strong>, berikut riwayat dan list tugas instalasi Anda</p>
             </div>
         </div>
         
         <div class="table-card">
             <div class="table-header">
-                <h3 style="margin:0; color:#1e293b;">Daftar Seluruh Tugas</h3>
+                <h3 style="margin:0; color:#1e293b;">Daftar Seluruh Tugas Saya</h3>
             </div>
             
             <div style="overflow-x:auto; width: 100%; border-radius: 8px;">
@@ -325,8 +330,15 @@ function tgl_indo($tgl) {
                     <?php if (mysqli_num_rows($semua_tugas) > 0) : ?>
                         <?php while ($r = mysqli_fetch_assoc($semua_tugas)) : 
                             $status_p = strtolower(trim($r['status_pemasangan']));
-                            $class = ($status_p == 'terpasang') ? 'active' : 'pending';
-                            $text  = ($status_p == 'terpasang') ? 'Terpasang' : 'Diproses';
+                            
+                            // Kondisional teks dan class badge status
+                            if ($status_p == 'terpasang') {
+                                $class = 'terpasang';
+                                $text  = 'Terpasang';
+                            } else {
+                                $class = 'diproses';
+                                $text  = 'Diproses';
+                            }
                         ?>
                         <tr>
                             <td style="font-weight: 600;"><?= tgl_indo($r['tanggal_pasang']); ?></td>
@@ -345,7 +357,7 @@ function tgl_indo($tgl) {
                         </tr>
                         <?php endwhile; ?>
                     <?php else : ?>
-                        <tr><td colspan="6" style="text-align:center; color:#a1a1aa; padding:40px;">Belum ada tugas pemasangan jaringan yang dimasukkan.</td></tr>
+                        <tr><td colspan="6" style="text-align:center; color:#a1a1aa; padding:40px;">Belum ada tugas pemasangan jaringan yang ditugaskan kepada Anda.</td></tr>
                     <?php endif; ?>
                     </tbody>
                 </table>
