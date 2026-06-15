@@ -136,6 +136,15 @@ if (isset($_GET['aksi']) && $_GET['aksi'] === 'reaktivasi') {
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
+    $jenis_aksi = $_POST['aksi'] ?? '';
+
+    if ($jenis_aksi === 'reaktivasi') {
+        // Jika ternyata ini reaktivasi, arahkan paksa ke penanganan GET reaktivasi di atas
+        header("Location: proses.php?aksi=reaktivasi&id_paket=" . (int)$_POST['id_paket'] . "&id_langganan=" . (int)$_POST['id_langganan']);
+        exit;
+    }
+
+    // --- Sisa kode bawaan kamu untuk pasang baru ---
     $id_paket = (int)($_POST['id_paket'] ?? 0);
     $alamat   = mysqli_real_escape_string($koneksi, trim($_POST['alamat']  ?? ''));
     $catatan  = mysqli_real_escape_string($koneksi, trim($_POST['catatan'] ?? ''));
@@ -167,4 +176,3 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     header("Location: berhasil.php");
     exit;
 }
-?>
