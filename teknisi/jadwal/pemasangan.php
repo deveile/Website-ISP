@@ -1,32 +1,41 @@
 <?php
-require_once __DIR__ . '/../../auth/cek_login.php'; 
-require_once __DIR__ . '/../../koneksi.php';       
+require_once __DIR__ . '/../../auth/cek_login.php';
+require_once __DIR__ . '/../../koneksi.php';
 
-// Proteksi halaman
 if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'teknisi') {
-    header("Location: ../../auth/login.php"); 
+    header("Location: ../../auth/login.php");
     exit;
 }
 
 $id_teknisi = $_SESSION['id_teknisi'];
 
-// Ambil data profil teknisi untuk nama di topbar
 $sql_tek = "SELECT nama_teknisi FROM tb_teknisi WHERE id_teknisi = '$id_teknisi' LIMIT 1";
 $query_tek = mysqli_query($koneksi, $sql_tek);
 $data_tek = mysqli_fetch_assoc($query_tek);
 
-// --- PERUBAHAN QUERY UTAMA ---
-// Menambahkan status 'terpasang' ke dalam IN(...)
-// Data tetap diurutkan berdasarkan tanggal_pasang DESC (paling baru berada paling atas)
+$limit = 10;
+$halaman = isset($_GET['halaman']) ? (int)$_GET['halaman'] : 1;
+if ($halaman < 1) { $halaman = 1; }
+$halaman_awal = ($halaman > 1) ? ($halaman * $limit) - $limit : 0;
+
+$sql_total = "SELECT COUNT(*) AS total 
+              FROM tb_pemasangan tp
+              WHERE tp.id_teknisi = '$id_teknisi' 
+                AND tp.status_pemasangan IN ('proses', 'diproses', 'terpasang')";
+$query_total = mysqli_query($koneksi, $sql_total);
+$row_total = mysqli_fetch_assoc($query_total);
+$total_data = $row_total['total'];
+$total_halaman = ceil($total_data / $limit);
+
 $sql_jadwal = "SELECT tp.*, tc.nama_customer, tc.telepon_customer, pk.nama_paket 
                FROM tb_pemasangan tp
                INNER JOIN tb_customer tc ON tp.id_customer = tc.id_customer
                INNER JOIN tb_paket pk ON tp.id_paket = pk.id_paket
                WHERE tp.id_teknisi = '$id_teknisi' 
                  AND tp.status_pemasangan IN ('proses', 'diproses', 'terpasang')
-               ORDER BY tp.tanggal_pasang ASC";
+               ORDER BY tp.tanggal_pasang ASC 
+               LIMIT $halaman_awal, $limit";
 
-// EKSEKUSI QUERY 
 $semua_tugas = mysqli_query($koneksi, $sql_jadwal);
 
 function tgl_indo($tgl) {
@@ -44,21 +53,24 @@ function tgl_indo($tgl) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jadwal Pemasangan - Teknisi</title>
-    <link rel="icon" type="image/png" href="../../assets/images/logo.png"> 
-    <link rel="stylesheet" href="../../assets/css/style.css"> 
+    <link class="router-link" rel="icon" type="image/png" href="../../assets/images/logo.png">
+    <link rel="stylesheet" href="../../assets/css/style.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <script src="../../assets/js/script.js" defer></script> 
+    <script src="../../assets/js/script.js" defer></script>
     <style>
         html, body {
-            height: 100%;
             margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow-x: hidden;
         }
+        *, ::before, ::after { box-sizing: border-box; }
 
         .dashboard-layout {
             display: flex !important;
             width: 100%;
             min-height: 100vh;
-            overflow-x: hidden;
         }
 
         .sidebar {
@@ -97,9 +109,11 @@ function tgl_indo($tgl) {
         .table-card {
             background: #ffffff !important;
             border-radius: 16px !important;
-            padding: 24px !important; 
+            padding: 24px !important;
             box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02) !important;
             margin-top: 10px;
+            width: 100%;
+            overflow: hidden;
         }
 
         .table-header {
@@ -111,37 +125,101 @@ function tgl_indo($tgl) {
             gap: 15px !important;
         }
 
+        .table-responsive-wrapper {
+            width: 100% !important;
+            overflow-x: auto !important;
+            -webkit-overflow-scrolling: touch;
+            border-radius: 8px !important;
+            border: 1px solid #e4e4e7 !important;
+            margin-bottom: 10px;
+        }
+
         table {
             width: 100% !important;
             border-collapse: separate !important;
             border-spacing: 0 !important;
-            border: 1px solid #e4e4e7 !important;
-            border-radius: 8px !important;
-            overflow: hidden !important;
+            border: none !important;
+            min-width: 850px;
         }
 
         table th {
-            background: #ea580c !important; 
+            background: #ea580c !important;
             color: #ffffff !important;
             text-transform: uppercase !important;
-            font-size: 12px !important;
+            font-size: 11px !important;
             font-weight: 700 !important;
-            padding: 14px 12px !important;
+            padding: 14px 16px !important;
+            white-space: nowrap !important;
         }
         
         table td {
-            padding: 12px 14px !important;
+            padding: 14px 16px !important;
             border-bottom: 1px solid #e4e4e7 !important;
             border-right: 1px solid #e4e4e7 !important;
+            font-size: 14px !important;
+            color: #1e293b !important;
+            vertical-align: middle !important;
+            white-space: nowrap !important;
         }
+        
+        table td.col-alamat {
+            white-space: normal !important;
+            min-width: 250px;
+            max-width: 350px;
+        }
+
         table td:last-child { border-right: none !important; }
         table tr:last-child td { border-bottom: none !important; }
+        table tbody tr:hover td { background: #fafafa !important; }
 
-        /* Badge Status (Hijau untuk Terpasang, Kuning untuk Proses/Diproses) */
-        .status-terpasang { background: #dcfce7; color: #15803d; padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: 600; }
-        .status-diproses, .status-proses { background: #fef3c7; color: #b45309; padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: 600; }
+        .status-terpasang { background: #dcfce7; color: #15803d; padding: 5px 10px; border-radius: 6px; font-size: 12px; font-weight: 700; display: inline-block; }
+        .status-diproses, .status-proses { background: #fef3c7; color: #b45309; padding: 5px 10px; border-radius: 6px; font-size: 12px; font-weight: 700; display: inline-block; }
 
-        /* Modal Logout */
+        .pagination-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .pagination-info {
+            font-size: 14px;
+            color: #64748b;
+        }
+        .pagination-list {
+            display: flex;
+            gap: 6px;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .pagination-list li a {
+            display: block;
+            padding: 8px 14px;
+            border: 1px solid #e4e4e7;
+            border-radius: 8px;
+            color: #475569;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+        .pagination-list li a:hover {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+        }
+        .pagination-list li.active a {
+            background: #ea580c;
+            color: #ffffff;
+            border-color: #ea580c;
+        }
+        .pagination-list li.disabled a {
+            opacity: 0.4;
+            pointer-events: none;
+            background: #f8fafc;
+        }
+
         .logout-modal {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -314,7 +392,7 @@ function tgl_indo($tgl) {
                 <h3 style="margin:0; color:#1e293b;">Daftar Seluruh Tugas Saya</h3>
             </div>
             
-            <div style="overflow-x:auto; width: 100%; border-radius: 8px;">
+            <div class="table-responsive-wrapper">
                 <table>
                     <thead>
                         <tr>
@@ -331,7 +409,6 @@ function tgl_indo($tgl) {
                         <?php while ($r = mysqli_fetch_assoc($semua_tugas)) : 
                             $status_p = strtolower(trim($r['status_pemasangan']));
                             
-                            // Kondisional teks dan class badge status
                             if ($status_p == 'terpasang') {
                                 $class = 'terpasang';
                                 $text  = 'Terpasang';
@@ -347,10 +424,10 @@ function tgl_indo($tgl) {
                                 <small style="color:#64748b;"><?= htmlspecialchars($r['telepon_customer']); ?></small>
                             </td>
                             <td><?= htmlspecialchars($r['nama_paket']); ?></td>
-                            <td><?= htmlspecialchars($r['alamat_pasang']); ?></td>
+                            <td class="col-alamat"><?= htmlspecialchars($r['alamat_pasang']); ?></td>
                             <td><span class="status-<?= $class; ?>"><?= $text; ?></span></td>
                             <td style="text-align:center;">
-                                <a href="detail.php?id=<?= $r['id_pemasangan']; ?>" class="btn-detail" style="background:#ea580c; color:#fff; padding:6px 12px; border-radius:6px; text-decoration:none; font-size:13px; font-weight:600; display: inline-block; white-space: nowrap;">
+                                <a href="detail.php?id=<?= $r['id_pemasangan']; ?>" class="btn-detail" style="background:#ea580c; color:#fff; padding:8px 14px; border-radius:6px; text-decoration:none; font-size:13px; font-weight:600; display: inline-block;">
                                     <i class="bi bi-eye-fill"></i> Detail / Upload
                                 </a>
                             </td>
@@ -362,6 +439,47 @@ function tgl_indo($tgl) {
                     </tbody>
                 </table>
             </div>
+
+            <?php if ($total_data > 0) : ?>
+            <div class="pagination-container">
+                <div class="pagination-info">
+                    Menampilkan <?= ($halaman_awal + 1); ?> - <?= min($halaman_awal + $limit, $total_data); ?> dari total <?= $total_data; ?> data
+                </div>
+                <ul class="pagination-list">
+                    <li class="<?= ($halaman <= 1) ? 'disabled' : ''; ?>">
+                        <a href="<?= ($halaman <= 1) ? '#' : '?halaman=' . ($halaman - 1); ?>"><i class="bi bi-chevron-left"></i></a>
+                    </li>
+                    <?php
+                    $jumlah_nomor = 2;
+                    $awal_nomor = ($halaman > $jumlah_nomor) ? $halaman - $jumlah_nomor : 1;
+                    $akhir_nomor = ($halaman < ($total_halaman - $jumlah_nomor)) ? $halaman + $jumlah_nomor : $total_halaman;
+
+                    if ($awal_nomor > 1) {
+                        echo '<li><a href="?halaman=1">1</a></li>';
+                        if ($awal_nomor > 2) {
+                            echo '<li class="disabled"><a href="#">...</a></li>';
+                        }
+                    }
+
+                    for ($i = $awal_nomor; $i <= $akhir_nomor; $i++) {
+                        $aktif = ($halaman == $i) ? 'active' : '';
+                        echo '<li class="' . $aktif . '"><a href="?halaman=' . $i . '">' . $i . '</a></li>';
+                    }
+
+                    if ($akhir_nomor < $total_halaman) {
+                        if ($akhir_nomor < $total_halaman - 1) {
+                            echo '<li class="disabled"><a href="#">...</a></li>';
+                        }
+                        echo '<li><a href="?halaman=' . $total_halaman . '">' . $total_halaman . '</a></li>';
+                    }
+                    ?>
+                    <li class="<?= ($halaman >= $total_halaman) ? 'disabled' : ''; ?>">
+                        <a href="<?= ($halaman >= $total_halaman) ? '#' : '?halaman=' . ($halaman + 1); ?>"><i class="bi bi-chevron-right"></i></a>
+                    </li>
+                </ul>
+            </div>
+            <?php endif; ?>
+
         </div>
     </div>
 </div>

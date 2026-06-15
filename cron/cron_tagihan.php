@@ -1,16 +1,13 @@
 <?php
-// 1. KONEKSI DATABASE
-require_once __DIR__ . '/../koneksi.php'; // Menyesuaikan path karena file ada di dalam folder 'admin'
+require_once __DIR__ . '/../koneksi.php';
 
-// 2. SET TIMEZONE INDONESIA
 date_default_timezone_set('Asia/Jakarta');
 
-$bulan = (int)date('n'); // Bulan berjalan (1-12)
-$tahun = (int)date('Y'); // Tahun berjalan (Format 4 digit)
+$bulan = (int)date('n'); 
+$tahun = (int)date('Y'); 
 
 echo "<h3>⏳ Memulai Proses Generate Tagihan Otomatis Bulanan...</h3>";
 
-// 3. SINGLE QUERY SAKTI (Mendukung Aktif & Suspend, Aman dari Error ENUM)
 $query_generate = "
     INSERT INTO tb_transaksi (
         id_langganan, kode_invoice, bulan_tagihan, tahun_tagihan, 
