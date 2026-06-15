@@ -1,6 +1,6 @@
 <?php
 // cron_update_status.php
-require_once 'koneksi.php';
+require_once __DIR__ . '/../koneksi.php';
 
 $today = date('Y-m-d');
 

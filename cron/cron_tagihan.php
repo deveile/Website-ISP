@@ -1,6 +1,6 @@
 <?php
 // 1. KONEKSI DATABASE
-require_once __DIR__ . '/koneksi.php'; // Menyesuaikan path karena file ada di dalam folder 'admin'
+require_once __DIR__ . '/../koneksi.php'; // Menyesuaikan path karena file ada di dalam folder 'admin'
 
 // 2. SET TIMEZONE INDONESIA
 date_default_timezone_set('Asia/Jakarta');
