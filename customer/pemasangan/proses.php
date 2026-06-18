@@ -11,7 +11,7 @@ $queryCustomer = mysqli_query($koneksi,
 $customer = mysqli_fetch_assoc($queryCustomer);
 $id_customer = $customer['id_customer'];
 
-function prosesReaktivasiPaket($koneksi, $id_paket_tujuan, $id_langganan) {
+function prosesReaktivasiPaket(mysqli $koneksi, int $id_paket_tujuan, int $id_langganan) {
     if (!$id_paket_tujuan || !$id_langganan) {
         header("Location: ../paket/index.php"); exit;
     }
