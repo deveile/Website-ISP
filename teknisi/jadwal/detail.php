@@ -46,7 +46,6 @@ $status = strtolower(trim($data['status_pemasangan']));
 if (isset($_POST['ubah_status'])) {
     $status_baru = mysqli_real_escape_string($koneksi, $_POST['status_pemasangan']);
     $tanggal_sekarang = date('Y-m-d');
-    $catatan_teknis = ''; // Tetap dikosongkan agar kolom 'catatan' di DB aman saat update
 
     if ($status_baru === 'dibatalkan') {
         $error_alert = true;
@@ -72,7 +71,6 @@ if (isset($_POST['ubah_status'])) {
                                             status_pemasangan = '$status_baru', 
                                             id_teknisi = '$id_teknisi_session', 
                                             tanggal_pasang = '$tanggal_sekarang',
-                                            catatan = '$catatan_teknis',
                                             bukti_foto = '$nama_file_baru'
                                          WHERE id_pemasangan = '$id_pemasangan' 
                                            AND (id_teknisi = '$id_teknisi_session' OR id_teknisi IS NULL OR id_teknisi = '' OR id_teknisi = 0)";
@@ -93,7 +91,6 @@ if (isset($_POST['ubah_status'])) {
             $query_update = "UPDATE tb_pemasangan SET 
                                 status_pemasangan = '$status_baru',
                                 id_teknisi = '$id_teknisi_session', 
-                                catatan = '$catatan_teknis'
                              WHERE id_pemasangan = '$id_pemasangan' 
                                AND (id_teknisi = '$id_teknisi_session' OR id_teknisi IS NULL OR id_teknisi = '' OR id_teknisi = 0)";
         }
@@ -296,7 +293,7 @@ function tgl_indo($tanggal) {
                             <?php if ($status == 'proses' || $status == 'diproses') : ?>
                                 <div style="background: #fff7ed; padding: 12px; border-radius: 8px; border: 1px solid #ffedd5; margin-bottom: 8px;">
                                     <label class="form-label" style="margin-top:0; color:#c2410c;"><i class="bi bi-camera-fill"></i> Upload Bukti Gambar (Wajib)</label>
-                                    <input type="file" name="bukti_foto" id="file_bukti" class="form-control" accept="image/png, image/jpeg, image/jpg">
+                                    <input type="file" name="bukti_foto" id="file_bukti" class="form-control" accept="ima   ge/png, image/jpeg, image/jpg">
                                 </div>
 
                                 <button type="button" class="btn-action btn-action-success" onclick="eksekusiTeknisi('terpasang')">

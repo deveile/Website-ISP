@@ -17,62 +17,51 @@ $customer = mysqli_fetch_assoc($data_customer);
 
 if (isset($_POST['submit'])) {
     $id_customer_cek = $customer['id_customer'];
+    $status_sekarang = $customer['status_layanan'] ?? ''; 
 
-    // === VALIDASI ANTI-DUPLIKASI (MENCEGAH DATA MENUMPUK) ===
-    $cek_pemasangan = mysqli_query($koneksi, "SELECT id_pemasangan FROM tb_pemasangan WHERE id_customer = '$id_customer_cek' AND status_pemasangan = 'menunggu' LIMIT 1");
-    $cek_langganan  = mysqli_query($koneksi, "SELECT id_langganan FROM tb_langganan WHERE id_customer = '$id_customer_cek' AND status_langganan = 'menunggu_verifikasi' LIMIT 1");
+    if ($status_sekarang != 'dicabut' && $status_sekarang != 'berhenti' && $status_sekarang != 'nonaktif') {
+        $cek_pemasangan = mysqli_query($koneksi, "SELECT id_pemasangan FROM tb_pemasangan WHERE id_customer = '$id_customer_cek' AND status_pemasangan = 'menunggu' LIMIT 1");
+        if (mysqli_num_rows($cek_pemasangan) > 0) {
+            echo "<script>
+                    alert('Anda sudah melakukan pengajuan pemasangan sebelumnya. Silakan selesaikan pembayaran atau tunggu verifikasi admin.');
+                    window.location.href = '../index.php';
+                  </script>";
+            exit;
+        }
+    }
 
-    if (mysqli_num_rows($cek_pemasangan) > 0 || mysqli_num_rows($cek_langganan) > 0) {
+    $cek_langganan = mysqli_query($koneksi, "SELECT id_langganan FROM tb_langganan WHERE id_customer = '$id_customer_cek' AND status_langganan = 'menunggu_verifikasi' LIMIT 1");
+    if (mysqli_num_rows($cek_langganan) > 0) {
         echo "<script>
-                alert('Anda sudah melakukan pengajuan pemasangan sebelumnya. Silakan selesaikan pembayaran atau tunggu verifikasi admin.');
+                alert('Anda memiliki pengajuan yang sedang menunggu verifikasi admin.');
                 window.location.href = '../index.php';
               </script>";
         exit;
     }
-    // ========================================================
 
     $alamat  = htmlspecialchars($_POST['alamat']);
     $catatan = htmlspecialchars($_POST['catatan']);
 
-    $query_insert = mysqli_query($koneksi, "
-        INSERT INTO tb_pemasangan (
-            id_customer, 
-            id_paket, 
-            tanggal_pengajuan, 
-            tanggal_pasang, 
-            alamat_pasang, 
-            status_pemasangan, 
-            catatan, 
-            created_at
-        ) VALUES (
-            '".$customer['id_customer']."', 
-            '$id_paket', 
-            CURDATE(), 
-            NULL, 
-            '$alamat', 
-            'menunggu', 
-            '$catatan',
-             NOW()
-        )
-    ");
+    if ($status_sekarang == 'dicabut' || $status_sekarang == 'berhenti' || $status_sekarang == 'nonaktif') {
+    } else {
+        $query_insert = mysqli_query($koneksi, "
+            INSERT INTO tb_pemasangan (
+                id_customer, id_paket, tanggal_pengajuan, tanggal_pasang, alamat_pasang, status_pemasangan, catatan, created_at
+            ) VALUES (
+                '".$customer['id_customer']."', '$id_paket', CURDATE(), NULL, '$alamat', 'menunggu', '$catatan', NOW()
+            )
+        ");
 
-    if (!$query_insert) {
-        die("Gagal menyimpan data pengajuan pemasangan: " . mysqli_error($koneksi));
+        if (!$query_insert) {
+            die("Gagal menyimpan data pengajuan pemasangan: " . mysqli_error($koneksi));
+        }
     }
 
     mysqli_query($koneksi, "
         INSERT INTO tb_langganan (
-            id_customer, 
-            id_paket, 
-            tanggal_mulai, 
-            tanggal_selesai, 
-            status_langganan
+            id_customer, id_paket, tanggal_mulai, tanggal_selesai, status_langganan
         ) VALUES (
-            '" . $customer['id_customer'] . "', 
-            '$id_paket', 
-            NULL, 
-            NULL, 
-            'menunggu_verifikasi'
+            '" . $customer['id_customer'] . "', '$id_paket', NULL, NULL, 'menunggu_verifikasi'
         )
     ");
 
@@ -84,20 +73,9 @@ if (isset($_POST['submit'])) {
 
     mysqli_query($koneksi, "
         INSERT INTO tb_transaksi (
-            id_langganan, 
-            kode_invoice, 
-            bulan_tagihan, 
-            tahun_tagihan, 
-            jumlah_bayar, 
-            status_pembayaran, 
-            created_at
+            id_langganan, kode_invoice, bulan_tagihan, tahun_tagihan, jumlah_bayar, status_pembayaran, created_at
         ) VALUES (
-            '$id_langganan', 
-            '$kode_invoice', 
-            '$bulan', 
-            '$tahun', 
-            '" . $paket['harga'] . "', 
-            'belum_bayar', NOW()
+            '$id_langganan', '$kode_invoice', '$bulan', '$tahun', '" . $paket['harga'] . "', 'belum_bayar', NOW()
         )
     ");
 
@@ -106,6 +84,7 @@ if (isset($_POST['submit'])) {
     header("Location: ../tagihan/bayar.php?id=$id_transaksi");
     exit;
 }
+
 ?>
 <!DOCTYPE html>
 <html lang="id">

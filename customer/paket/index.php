@@ -13,23 +13,20 @@ $queryCustomer = mysqli_query($koneksi, "SELECT * FROM tb_customer WHERE id_user
 $customer = mysqli_fetch_assoc($queryCustomer);
 $id_customer = $customer['id_customer'] ?? '';
 
-// MODIFIKASI LOGIKA: Kita pecah pencarian. 
-// 1. Cek dulu apakah ada langganan yang sedang berjalan (aktif/suspend) untuk fitur UPGRADE
 $cek_langganan = mysqli_query($koneksi, "
     SELECT l.*, p.harga
     FROM tb_langganan l
     JOIN tb_paket p ON l.id_paket = p.id_paket
     WHERE l.id_customer = '$id_customer'
-    AND l.status_langganan IN ('aktif','suspend')
+    AND LOWER(l.status_langganan) IN ('aktif','suspend')
     LIMIT 1
     ");
 $langganan = mysqli_fetch_assoc($cek_langganan);
 
-// 2. Cek apakah customer ini PERNAH punya langganan tapi sekarang statusnya nonaktif (untuk fitur REAKTIVASI)
 $cek_langganan_lama = mysqli_query($koneksi, "
     SELECT * FROM tb_langganan 
     WHERE id_customer = '$id_customer' 
-    AND status_langganan = 'nonaktif' 
+    AND LOWER(status_langganan) IN ('nonaktif', 'dicabut', 'berhenti') 
     ORDER BY id_langganan DESC LIMIT 1
 ");
 $langganan_lama = mysqli_fetch_assoc($cek_langganan_lama);
@@ -284,19 +281,16 @@ $data = mysqli_query($koneksi, "SELECT * FROM tb_paket WHERE status='aktif' ORDE
                         </button>
 
                         <?php elseif ($paket['harga'] <= $langganan['harga']) : ?>
-
                         <button class="btn-disabled" disabled>
                             Tidak Bisa Upgrade
                         </button>
 
                         <?php elseif ($is_pending) : ?>
-
                         <button class="btn-disabled" disabled>
                             Upgrade Menunggu Verifikasi
                         </button>
 
                         <?php else : ?>
-
                         <a href="../pemasangan/proses.php?id_paket=<?= $paket['id_paket']; ?>&id_langganan=<?= $langganan['id_langganan']; ?>&aksi=upgrade"
                         class="btn-orange">
                             Upgrade Paket
